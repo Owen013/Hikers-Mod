@@ -20,7 +20,7 @@ namespace MovementMod
             // Example of accessing game code.
             LoadManager.OnCompleteSceneLoad += (scene, loadScene) =>
             {
-                if (loadScene != OWScene.SolarSystem) return;
+                if (loadScene != OWScene.SolarSystem && loadScene != OWScene.EyeOfTheUniverse) return;
                 var playerController = FindObjectOfType<PlayerCharacterController>();
                 playerController._useChargeJump = false;
                 playerController._strafeSpeed = 6f;
