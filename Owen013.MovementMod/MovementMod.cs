@@ -49,14 +49,12 @@ namespace MovementMod
                             playerController._runSpeed = 9f;
                             playerController._strafeSpeed = 9f;
                             animController._animator.speed = 1.5f;
-                            ModHelper.Console.WriteLine($"Sprinting!", MessageType.Success);
                         };
                         if (stopSprint)
                         {
                             playerController._runSpeed = 6f;
                             playerController._strafeSpeed = 6f;
                             animController._animator.speed = 1f;
-                            ModHelper.Console.WriteLine($"Walking.", MessageType.Success);
                         }
                     }
                 }
