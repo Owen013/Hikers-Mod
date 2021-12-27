@@ -1,3 +1,8 @@
 {
-	"enabled": true
+	"enabled": true,
+	"settings": {
+		"Tap to Jump Enabled": true,
+		"Disable Strafe Slowdown": true,
+		"Enable Sprinting": true
+	}
 }

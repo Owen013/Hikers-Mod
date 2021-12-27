@@ -11,6 +11,10 @@ namespace MovementMod
         private PlayerCharacterController playerController;
         private PlayerAnimController animController;
 
+        public static bool enableTapJump;
+        public static bool disableStrafeSlow;
+        public static bool enableSprint;
+
         // To reference the mod from the patches we need a static reference to it
         public static MovementMod Instance;
 
@@ -39,10 +43,11 @@ namespace MovementMod
             {
                 if (loadScene != OWScene.SolarSystem && loadScene != OWScene.EyeOfTheUniverse) return;
                 playerController = FindObjectOfType<PlayerCharacterController>();
-                animController = FindObjectOfType<PlayerAnimController>();
-                playerController._useChargeJump = false;
-                playerController._strafeSpeed = 6f;                
+                ModHelper.Events.Unity.FireInNUpdates(() => animController = FindObjectOfType<PlayerAnimController>(), 60);
                 ModHelper.Console.WriteLine($"MovementMod loaded!", MessageType.Success);
+                playerController._useChargeJump = !enableTapJump;
+                playerController._strafeSpeed = 4f;
+                if (disableStrafeSlow) playerController._strafeSpeed = 6f;
             };
         }
         private void Update()
@@ -75,18 +80,33 @@ namespace MovementMod
         // I moved these to their own methods because there are two places were we might start sprinting from
         public void StartSprinting()
         {
+            if (enableSprint != true) return;
             IsDownThrustDisabled = true;
             playerController._runSpeed = 9f;
-            playerController._strafeSpeed = 9f;
+            playerController._strafeSpeed = 4f;
+            if (disableStrafeSlow) playerController._strafeSpeed = 9f;
             animController._animator.speed = 1.5f;
         }
 
         public void StopSprinting()
         {
+            if (enableSprint != true) return;
             IsDownThrustDisabled = false;
             playerController._runSpeed = 6f;
-            playerController._strafeSpeed = 6f;
+            playerController._strafeSpeed = 4f;
+            if (disableStrafeSlow) playerController._strafeSpeed = 6f;
             animController._animator.speed = 1f;
+        }
+
+        public override void Configure(IModConfig config)
+        {
+            enableTapJump = config.GetSettingsValue<bool>("Tap to Jump Enabled");
+            disableStrafeSlow = config.GetSettingsValue<bool>("Disable Strafe Slowdown");
+            enableSprint = config.GetSettingsValue<bool>("Enable Sprinting");
+            if (playerController == null) return;
+            playerController._useChargeJump = !enableTapJump;
+            playerController._strafeSpeed = 4f;
+            if (disableStrafeSlow) playerController._strafeSpeed = 6f;
         }
     }
 
