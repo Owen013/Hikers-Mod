@@ -29,7 +29,7 @@ namespace MovementMod
         private void Start()
         {
             // Starting here, you'll have access to OWML's mod helper.
-            ModHelper.Console.WriteLine($"{nameof(MovementMod)} is loaded!", MessageType.Success);
+            ModHelper.Console.WriteLine($"{nameof(MovementMod)} is ready to go!", MessageType.Success);
 
             // We have to tell it to apply the patches we made below
             // Postfix means it calls the patch method after the original one is called
@@ -46,13 +46,13 @@ namespace MovementMod
             LoadManager.OnCompleteSceneLoad += (scene, loadScene) =>
             {
                 Setup();
-                ModHelper.Console.WriteLine($"MovementMod is loaded and ready to go!", MessageType.Success);
             };
         }
 
         // This runs whenever config.json is changed.
         public override void Configure(IModConfig config)
         {
+            base.Configure(config);
             enableTapJump = config.GetSettingsValue<bool>("Tap to Jump Enabled");
             disableStrafeSlow = config.GetSettingsValue<bool>("Disable Strafe Slowdown");
             enableSprint = config.GetSettingsValue<bool>("Enable Sprinting");
