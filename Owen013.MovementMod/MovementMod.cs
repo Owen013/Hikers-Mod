@@ -33,26 +33,51 @@ namespace MovementMod
 
             // We have to tell it to apply the patches we made below
             // Postfix means it calls the patch method after the original one is called
-            ModHelper.HarmonyHelper.AddPostfix<JetpackThrusterController>("GetRawInput", typeof(Patches), nameof(Patches.JetpackThrusterControllerGetRawInput));
-            ModHelper.HarmonyHelper.AddPostfix<PlayerCharacterController>("Awake", typeof(Patches), nameof(Patches.PlayerCharacterControllerAwake));
+            ModHelper.HarmonyHelper.AddPostfix<JetpackThrusterController>
+                ("GetRawInput",
+                typeof(Patches),
+                nameof(Patches.JetpackThrusterControllerGetRawInput));
+            ModHelper.HarmonyHelper.AddPostfix<PlayerCharacterController>
+                ("Awake",
+                typeof(Patches),
+                nameof(Patches.PlayerCharacterControllerAwake));
+            ModHelper.Console.WriteLine($"Applied patches.");
 
-            ModHelper.Console.WriteLine($"Applied patches");
-
-            // Example of accessing game code.
             LoadManager.OnCompleteSceneLoad += (scene, loadScene) =>
             {
-                if (loadScene != OWScene.SolarSystem && loadScene != OWScene.EyeOfTheUniverse) return;
-                playerController = FindObjectOfType<PlayerCharacterController>();
-                ModHelper.Events.Unity.FireInNUpdates(() => animController = FindObjectOfType<PlayerAnimController>(), 60);
-                ModHelper.Console.WriteLine($"MovementMod loaded!", MessageType.Success);
-                playerController._useChargeJump = !enableTapJump;
-                playerController._strafeSpeed = 4f;
-                if (disableStrafeSlow) playerController._strafeSpeed = 6f;
+                Setup();
+                ModHelper.Console.WriteLine($"MovementMod is loaded and ready to go!", MessageType.Success);
             };
         }
+
+        // This runs whenever config.json is changed.
+        public override void Configure(IModConfig config)
+        {
+            enableTapJump = config.GetSettingsValue<bool>("Tap to Jump Enabled");
+            disableStrafeSlow = config.GetSettingsValue<bool>("Disable Strafe Slowdown");
+            enableSprint = config.GetSettingsValue<bool>("Enable Sprinting");
+            Setup();
+        }
+
+        // This is where MovementMod features are enabled or disabled.
+        public void Setup()
+        {
+            if (LoadManager.s_currentScene != OWScene.SolarSystem
+                && LoadManager.s_currentScene != OWScene.EyeOfTheUniverse
+                && playerController == null)
+                return;
+            playerController = FindObjectOfType<PlayerCharacterController>();
+            ModHelper.Events.Unity.FireInNUpdates(() => animController = FindObjectOfType<PlayerAnimController>(), 60);
+            playerController._useChargeJump = !enableTapJump;
+            playerController._strafeSpeed = 4f;
+            if (disableStrafeSlow) playerController._strafeSpeed = 6f;
+        }
+
         private void Update()
         {
-            if (LoadManager.s_currentScene != OWScene.SolarSystem && LoadManager.s_currentScene != OWScene.EyeOfTheUniverse) return;
+            if (LoadManager.s_currentScene != OWScene.SolarSystem
+                && LoadManager.s_currentScene != OWScene.EyeOfTheUniverse)
+                return;
             {
                 if (!OWInput.IsInputMode(InputMode.Menu))
                 {
@@ -64,15 +89,11 @@ namespace MovementMod
                     stopSprint = OWInput.IsNewlyReleased(InputLibrary.thrustDown);
 
                     // To sprint we have to be standing on the ground
-                    if (startSprint && Locator.GetPlayerController().IsGrounded())
-                    {
+                    if (startSprint
+                        && Locator.GetPlayerController().IsGrounded())
                         StartSprinting();
-                    }
-
                     if (stopSprint)
-                    {
                         StopSprinting();
-                    }
                 }
             }
         }
@@ -96,17 +117,6 @@ namespace MovementMod
             playerController._strafeSpeed = 4f;
             if (disableStrafeSlow) playerController._strafeSpeed = 6f;
             animController._animator.speed = 1f;
-        }
-
-        public override void Configure(IModConfig config)
-        {
-            enableTapJump = config.GetSettingsValue<bool>("Tap to Jump Enabled");
-            disableStrafeSlow = config.GetSettingsValue<bool>("Disable Strafe Slowdown");
-            enableSprint = config.GetSettingsValue<bool>("Enable Sprinting");
-            if (playerController == null) return;
-            playerController._useChargeJump = !enableTapJump;
-            playerController._strafeSpeed = 4f;
-            if (disableStrafeSlow) playerController._strafeSpeed = 6f;
         }
     }
 
