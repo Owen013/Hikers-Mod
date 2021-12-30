@@ -1,8 +1,6 @@
 ﻿using OWML.ModHelper;
 using OWML.Common;
-using UnityEngine.InputSystem;
 using UnityEngine;
-using Harmony;
 
 namespace MovementMod
 {
