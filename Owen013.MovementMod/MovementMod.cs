@@ -6,31 +6,30 @@ namespace MovementMod
 {
     public class MovementMod : ModBehaviour
     {
+        // Setup() vars
         private PlayerCharacterController playerController;
         private PlayerAnimController animController;
-
+        // Config options
         public static bool enableTapJump;
         public static bool disableStrafeSlow;
         public static bool enableSprint;
-
-        // To reference the mod from the patches we need a static reference to it
+        // Sprinting patch vars
         public static MovementMod Instance;
-
         public bool IsDownThrustDisabled;
 
         private void Awake()
         {
-            // This lets us use the mod in the patches
+            // Static reference to MovementMod so that it can be used in patches
             Instance = this;
         }
 
         private void Start()
         {
-            // Starting here, you'll have access to OWML's mod helper.
             ModHelper.Console.WriteLine($"{nameof(MovementMod)} is ready to go!", MessageType.Success);
 
-            // We have to tell it to apply the patches we made below
-            // Postfix means it calls the patch method after the original one is called
+            // xen magic stuff
+            // We have to tell it to apply the patches we made below - xen-42
+            // Postfix means it calls the patch method after the original one is called - xen
             ModHelper.HarmonyHelper.AddPostfix<JetpackThrusterController>
                 ("GetRawInput",
                 typeof(Patches),
@@ -50,7 +49,7 @@ namespace MovementMod
         // This runs whenever config.json is changed.
         public override void Configure(IModConfig config)
         {
-            base.Configure(config);
+            base.Configure(config); // Don't know what this does, but Configure() automatically creates it.
             enableTapJump = config.GetSettingsValue<bool>("Tap to Jump Enabled");
             disableStrafeSlow = config.GetSettingsValue<bool>("Disable Strafe Slowdown");
             enableSprint = config.GetSettingsValue<bool>("Enable Sprinting");
@@ -79,14 +78,12 @@ namespace MovementMod
             {
                 if (!OWInput.IsInputMode(InputMode.Menu))
                 {
-                    bool startSprint = false;
-                    bool stopSprint = false;
-
-                    // We use the same controls as the downward thrust input for the jetpack
+                    bool startSprint;
+                    bool stopSprint;
+                    // We use the same controls as the downward thrust input for the jetpack - xen
                     startSprint = OWInput.IsNewlyPressed(InputLibrary.thrustDown);
                     stopSprint = OWInput.IsNewlyReleased(InputLibrary.thrustDown);
-
-                    // To sprint we have to be standing on the ground
+                    // To sprint we have to be standing on the ground - xen
                     if (startSprint
                         && Locator.GetPlayerController().IsGrounded())
                         StartSprinting();
@@ -96,7 +93,6 @@ namespace MovementMod
             }
         }
 
-        // I moved these to their own methods because there are two places were we might start sprinting from
         public void StartSprinting()
         {
             if (enableSprint != true) return;
@@ -118,28 +114,27 @@ namespace MovementMod
         }
     }
 
-
     public static class Patches
     {
-        // To disable the jetpack downward thrust while on the ground we have to patch the GetRawInput method in the JetpackThrusterController class
+        // To disable the jetpack downward thrust while on the ground we have to patch the GetRawInput method in the JetpackThrusterController class - xen
         public static void JetpackThrusterControllerGetRawInput(ref Vector3 __result)
         {
-            // When grounded, don't let the input have any downward component in the y-direction
-            if(MovementMod.Instance.IsDownThrustDisabled)
+            // When grounded, don't let the input have any downward component in the y-direction - xen
+            if (MovementMod.Instance.IsDownThrustDisabled)
             {
                 if (__result.y < 0) __result.y = 0;
             }
         }
 
-        // When the player character controller is loaded we add to one of its events
+        // When the player character controller is loaded we add to one of its events - xen
         public static void PlayerCharacterControllerAwake(PlayerCharacterController __instance)
         {
-            // If we are flying and just became grounded and control is still held then we have to start running
+            // If we are flying and just became grounded and control is still held then we have to start running - xen
             __instance.OnBecomeGrounded += () =>
             {
                 if (OWInput.IsPressed(InputLibrary.thrustDown))
                 {
-                    // This is where the Instance variable we made comes in use
+                    // This is where the Instance variable we made comes in use - xen
                     MovementMod.Instance.StartSprinting();
                 }
             };
