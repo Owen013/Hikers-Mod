@@ -1,8 +1,11 @@
 {
 	"enabled": true,
 	"settings": {
-		"Tap to Jump Enabled": true,
-		"Disable Strafe Slowdown": true,
-		"Enable Sprinting": true
+		"Disable Charge-Jump": true,
+		"Disable Slower Strafing": true,
+		"Enable Sprinting": true,
+		"Default Movement Speed": 6,
+		"Sprint Speed": 9,
+		"Walk Speed": 3
 	}
 }

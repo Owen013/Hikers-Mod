@@ -1,8 +1,8 @@
 {
-  "filename": "MovementMod.dll",
+  "filename": "HikersMod.dll",
   "author": "Owen_013",
   "name": "Hiker's Mod",
   "uniqueName": "Owen013.MovementMod",
-  "version": "0.0.7",
-  "owmlVersion": "2.1.0"
+  "version": "0.0.8",
+  "owmlVersion": "2.3.1"
 }

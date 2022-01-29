@@ -3,8 +3,8 @@
     <ProjectGuid>{8A39F9E7-1A89-430C-9C3E-BDFB3B7E17DF}</ProjectGuid>
     <TargetFramework>net48</TargetFramework>
     <OutputPath>Build</OutputPath>
-    <AssemblyTitle>Owen013.MovementMod</AssemblyTitle>
-    <Product>Owen013.MovementMod</Product>
+    <AssemblyTitle>Owen013.HikersMod</AssemblyTitle>
+    <Product>Owen013.HikersMod</Product>
     <Copyright>Copyright ©  2020</Copyright>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
@@ -16,10 +16,6 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="OuterWildsGameLibs" Version="1.1.12.125" />
-    <PackageReference Include="OWML" Version="2.1.0" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="default-config.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -28,6 +24,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="MovementMod.csproj.user" />
+    <Content Include="HikersMod.csproj.user" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="OuterWildsGameLibs" Version="1.1.12.125" />
+    <PackageReference Include="OWML" Version="2.3.1" />
   </ItemGroup>
 </Project>
