@@ -4,8 +4,9 @@
 		"Disable Charge-Jump": true,
 		"Disable Slower Strafing": true,
 		"Enable Sprinting": true,
-		"Default Movement Speed": 6,
-		"Sprint Speed": 9,
-		"Walk Speed": 3
+		"Default Speed": 6,
+		"Sprint Speed": 10,
+		"Walk Speed": 3,
+		"Jump Power": 7
 	}
 }

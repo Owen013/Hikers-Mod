@@ -9,6 +9,7 @@ namespace MovementMod
         // Setup() vars
         private PlayerCharacterController playerController;
         private PlayerAnimController animController;
+        public DreamLanternController dreamLantern;
 
         // Config options
         public static bool disableChargeJump;
@@ -17,10 +18,13 @@ namespace MovementMod
         public static float defaultSpeed;
         public static float sprintSpeed;
         public static float walkSpeed;
+        public static float jumpPower;
 
         // Sprinting patch vars
         public static HikersMod Instance;
         public bool IsDownThrustDisabled;
+        public bool IsFocusingLantern;
+        public bool StoppedFocusingLantern;
 
         // Other vars
         public static float strafeSpeed;
@@ -46,6 +50,10 @@ namespace MovementMod
                 ("Awake",
                 typeof(Patches),
                 nameof(Patches.PlayerCharacterControllerAwake));
+            ModHelper.HarmonyHelper.AddPostfix<DreamLanternItem>
+                ("UpdateFocus",
+                typeof(Patches),
+                nameof(Patches.DreamLanternFocusChanged));
             ModHelper.Console.WriteLine($"Applied patches.");
 
             LoadManager.OnCompleteSceneLoad += (scene, loadScene) =>
@@ -62,9 +70,10 @@ namespace MovementMod
             disableChargeJump = config.GetSettingsValue<bool>("Disable Charge-Jump");
             disableSlowerStrafing = config.GetSettingsValue<bool>("Disable Slower Strafing");
             enableSprint = config.GetSettingsValue<bool>("Enable Sprinting");
-            defaultSpeed = config.GetSettingsValue<float>("Default Movement Speed");
+            defaultSpeed = config.GetSettingsValue<float>("Default Speed");
             sprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
             walkSpeed = config.GetSettingsValue<float>("Walk Speed");
+            jumpPower = config.GetSettingsValue<float>("Jump Power");
 
             // Update strafe speed
             if (disableSlowerStrafing) strafeSpeed = defaultSpeed;
@@ -85,10 +94,12 @@ namespace MovementMod
             playerController._runSpeed = defaultSpeed;
             playerController._strafeSpeed = strafeSpeed;
             playerController._walkSpeed = walkSpeed;
+            playerController._maxJumpSpeed = jumpPower;
             ModHelper.Events.Unity.FireInNUpdates(() =>
                 animController._animator.speed = Mathf.Max(defaultSpeed / 6, 1), 60);
         }
 
+        // Every frame
         private void Update()
         {
             if (LoadManager.s_currentScene != OWScene.SolarSystem
@@ -108,12 +119,16 @@ namespace MovementMod
                     stopWalking = OWInput.IsNewlyReleased(InputLibrary.rollMode);
                     // To sprint we have to be standing on the ground - xen
                     if ((startSprint && Locator.GetPlayerController().IsGrounded() && !OWInput.IsPressed(InputLibrary.rollMode))
-                        || stopWalking && OWInput.IsPressed(InputLibrary.thrustDown) && Locator.GetPlayerController().IsGrounded())
+                        || (stopWalking || StoppedFocusingLantern)
+                            && OWInput.IsPressed(InputLibrary.thrustDown)
+                            && Locator.GetPlayerController().IsGrounded())
                         StartSprinting();
                     if (stopSprint || startWalking)
                         StopSprinting();
                     if (startWalking)
                         animController._animator.speed = Mathf.Max(walkSpeed / 6, 1);
+                    if (IsFocusingLantern)
+                        animController._animator.speed = 1f;
                 }
             }
         }
@@ -162,6 +177,16 @@ namespace MovementMod
                     HikersMod.Instance.StartSprinting();
                 }
             };
+        }
+        
+        public static void DreamLanternFocusChanged(DreamLanternItem __instance)
+        {
+            HikersMod.Instance.StoppedFocusingLantern = true;
+            if (__instance._focusing == true)
+                HikersMod.Instance.IsFocusingLantern = true;
+            else if (HikersMod.Instance.IsFocusingLantern == true)
+                HikersMod.Instance.IsFocusingLantern = false;
+                HikersMod.Instance.StoppedFocusingLantern = true;
         }
     }
 }
