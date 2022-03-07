@@ -2,11 +2,15 @@
 	"enabled": true,
 	"settings": {
 		"Disable Charge-Jump": true,
-		"Disable Slower Strafing": true,
-		"Enable Sprinting": true,
-		"Default Speed": 6,
-		"Sprint Speed": 10,
+		"Disable Slow Strafing": true,
+		"Default Run Speed": 6,
 		"Walk Speed": 3,
-		"Jump Power": 7
+		"Jump Power": 7,
+		"Enable Sprinting": true,
+		"Sprint Speed": 10,
+		"Enable Climbing": false,
+		"Climb Jump Power": 7,
+		"Climb Jumps per Jump": 3,
+		"Climb Jump Cooldown Time": 0.2
 	}
 }
