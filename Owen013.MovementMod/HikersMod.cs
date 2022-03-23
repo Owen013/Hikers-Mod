@@ -1,4 +1,5 @@
-﻿using OWML.ModHelper;
+﻿using System.Collections;
+using OWML.ModHelper;
 using OWML.Common;
 using UnityEngine;
 
@@ -7,21 +8,22 @@ namespace MovementMod
     public class HikersMod : ModBehaviour
     {
         // Config vars
-        public bool chargeJumpDisabled, slowStrafeDisabled, sprintEnabled, climbEnabled;
-        public float runSpeed, walkSpeed, jumpPower, sprintSpeed, climbPower, lastClimbTime, climbsPerJump, climbCooldownTime;
+        public static bool chargeJumpDisabled, slowStrafeDisabled, sprintEnabled, climbEnabled;
+        public static float runSpeed, walkSpeed, jumpPower, sprintSpeed, climbPower, lastClimbTime, climbsPerJump, climbCooldownTime;
 
         // Mod vars
-        public OWScene scene;
-        public PlayerCharacterController characterController;
-        public PlayerCameraController cameraController;
-        public PlayerAnimController animController;
-        public PlayerMovementAudio movementAudio;
-        public PlayerImpactAudio impactAudio;
-        public float runAnimSpeed, sprintAnimSpeed, walkAnimSpeed, strafeSpeed, sprintStrafeSpeed, climbsLeft;
+        public static OWScene scene;
+        public static PlayerCharacterController characterController;
+        public static PlayerCameraController cameraController;
+        public static PlayerAnimController animController;
+        public static PlayerMovementAudio movementAudio;
+        public static PlayerImpactAudio impactAudio;
+        public static float runAnimSpeed, sprintAnimSpeed, walkAnimSpeed, strafeSpeed, sprintStrafeSpeed, climbsLeft;
+        public static bool sprinting, wavingArmsAnim;
 
         // Patch vars
         public static HikersMod Instance;
-        public bool disableDownThrust, focusingLantern, justUnfocusedLantern;
+        public static bool disableDownThrust, focusingLantern, justUnfocusedLantern;
 
         public override void Configure(IModConfig config)
         {
@@ -66,11 +68,15 @@ namespace MovementMod
             ModHelper.HarmonyHelper.AddPostfix<PlayerCharacterController>(
                 "Awake",
                 typeof(Patches),
-                nameof(Patches.PlayerCharacterControllerAwake));
+                nameof(Patches.CharacterAwake));
             ModHelper.HarmonyHelper.AddPostfix<DreamLanternItem>(
                 "UpdateFocus",
                 typeof(Patches),
                 nameof(Patches.DreamLanternFocusChanged));
+            ModHelper.HarmonyHelper.AddPostfix<PlayerAnimController>(
+                "LateUpdate",
+                typeof(Patches),
+                nameof(Patches.AnimControllerLateUpdate));
             LoadManager.OnCompleteSceneLoad += (scene, loadScene) => Setup();
             ModHelper.Console.WriteLine($"{nameof(HikersMod)} is ready to go!", MessageType.Success);
         }
@@ -93,27 +99,33 @@ namespace MovementMod
                     if (stopSprint || startWalk || focusingLantern) Sprint(false);
                     justUnfocusedLantern = false;
                 }
-                // Wall Jumping
+                // Climbing
                 if (climbEnabled)
                 {
                     characterController.UpdatePushable();
-                    bool wallJumping = OWInput.IsNewlyPressed(InputLibrary.jump);
+                    bool tryingToJump = OWInput.IsNewlyPressed(InputLibrary.jump);
                     bool isGrounded = state.IsGrounded();
                     bool isZeroG = state._isZeroGMovementEnabled;
                     bool jumpCooldown = Time.time - characterController._lastJumpTime < climbCooldownTime;
-                    bool wallJumpCooldown = Time.time - lastClimbTime < climbCooldownTime;
-                    bool canWallJump = state._isPushable
-                                    && climbsLeft > 0
-                                    && !isGrounded
-                                    && !isZeroG
-                                    && !jumpCooldown
-                                    && !wallJumpCooldown;
-                    if (wallJumping && canWallJump) Climb();
+                    bool climbCooldown = Time.time - lastClimbTime < climbCooldownTime;
+                    bool canClimb = state._isPushable
+                                 && climbsLeft > 0
+                                 && !isGrounded
+                                 && !isZeroG
+                                 && !jumpCooldown
+                                 && !climbCooldown;
+                    if (tryingToJump && canClimb) Climb();
+                }
+                if (wavingArmsAnim) animController._animator.speed = 2f;
+                else
+                {
+                    if (sprinting) animController._animator.speed = sprintAnimSpeed;
+                    else animController._animator.speed = runAnimSpeed;
                 }
             }
         }
 
-        private void Setup()
+        public static void Setup()
         {
             scene = LoadManager.s_currentScene;
             if (scene == OWScene.SolarSystem || scene == OWScene.EyeOfTheUniverse)
@@ -131,13 +143,13 @@ namespace MovementMod
                 runAnimSpeed = Mathf.Max(runSpeed / 6, 1);
                 sprintAnimSpeed = Mathf.Max(sprintSpeed / 6, 1);
                 walkAnimSpeed = Mathf.Max(walkSpeed / 6, 1);
-                if (characterController._isGrounded || climbsLeft > climbsPerJump)
-                    climbsLeft = climbsPerJump;
+                if (characterController._isGrounded || climbsLeft > climbsPerJump) climbsLeft = climbsPerJump;
             };
         }
 
         public void Sprint(bool sprinting)
         {
+            HikersMod.sprinting = sprinting;
             if (sprinting)
             {
                 characterController._runSpeed = sprintSpeed;
@@ -156,15 +168,23 @@ namespace MovementMod
 
         public void Climb()
         {
-            float thisClimbPower = (climbPower * 0.75f) * (climbsLeft / climbsPerJump) + climbPower * 0.25f;
+            float thisClimbPower = (climbPower * 0.5f) * (climbsLeft / climbsPerJump) + climbPower * 0.5f;
             Vector3 climbVelocity = new Vector3(0, thisClimbPower, 0);
             climbsLeft -= 1;
             lastClimbTime = Time.time;
             characterController._owRigidbody.SetVelocity(
                 characterController._pushableBody.GetPointVelocity(characterController._pushContactPt));
             characterController._owRigidbody.AddLocalVelocityChange(climbVelocity);
-            animController.OnPlayerJump();
             movementAudio.OnJump();
+            StopCoroutine(AnimateClimb());
+            StartCoroutine(AnimateClimb());
+        }
+
+        private IEnumerator AnimateClimb()
+        {
+            wavingArmsAnim = true;
+            yield return new WaitForSeconds(0.5f);
+            wavingArmsAnim = false;
         }
     }
 
@@ -172,14 +192,14 @@ namespace MovementMod
     {
         public static void GetJetpackInput(ref Vector3 __result)
         {
-            if (HikersMod.Instance.disableDownThrust && __result.y < 0) __result.y = 0;
+            if (HikersMod.disableDownThrust && __result.y < 0) __result.y = 0;
         }
 
-        public static void PlayerCharacterControllerAwake(PlayerCharacterController __instance)
+        public static void CharacterAwake(PlayerCharacterController __instance)
         {
             __instance.OnBecomeGrounded += () =>
             {
-                HikersMod.Instance.climbsLeft = HikersMod.Instance.climbsPerJump;
+                HikersMod.climbsLeft = HikersMod.climbsPerJump;
                 if (OWInput.IsPressed(InputLibrary.thrustDown) && !OWInput.IsPressed(InputLibrary.rollMode))
                     HikersMod.Instance.Sprint(true);
             };
@@ -189,12 +209,17 @@ namespace MovementMod
         {
             bool lanternIsFocused = __instance._focusing;
             // If the lantern was just unfocused...
-            if (!lanternIsFocused && HikersMod.Instance.focusingLantern)
+            if (!lanternIsFocused && HikersMod.focusingLantern)
             {
-                HikersMod.Instance.focusingLantern = false;
-                HikersMod.Instance.justUnfocusedLantern = true;
+                HikersMod.focusingLantern = false;
+                HikersMod.justUnfocusedLantern = true;
             }
-            else if (lanternIsFocused) HikersMod.Instance.focusingLantern = true;
+            else if (lanternIsFocused) HikersMod.focusingLantern = true;
+        }
+
+        public static void AnimControllerLateUpdate()
+        {
+            if (HikersMod.wavingArmsAnim) HikersMod.animController._animator.SetFloat("FreefallSpeed", 100f);
         }
     }
 }
