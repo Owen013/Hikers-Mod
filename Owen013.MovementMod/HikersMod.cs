@@ -61,14 +61,18 @@ namespace MovementMod
         private void Start()
         {
             // Apply patches.
-            ModHelper.HarmonyHelper.AddPostfix<JetpackThrusterController>(
-                "GetRawInput",
+            ModHelper.HarmonyHelper.AddPostfix<PlayerCharacterController>(
+                "Start",
                 typeof(Patches),
-                nameof(Patches.GetJetpackInput));
+                nameof(Patches.CharacterStart));
             ModHelper.HarmonyHelper.AddPostfix<PlayerCharacterController>(
                 "Awake",
                 typeof(Patches),
                 nameof(Patches.CharacterAwake));
+            ModHelper.HarmonyHelper.AddPostfix<JetpackThrusterController>(
+                "GetRawInput",
+                typeof(Patches),
+                nameof(Patches.GetJetpackInput));
             ModHelper.HarmonyHelper.AddPostfix<DreamLanternItem>(
                 "UpdateFocus",
                 typeof(Patches),
@@ -77,7 +81,7 @@ namespace MovementMod
                 "LateUpdate",
                 typeof(Patches),
                 nameof(Patches.AnimControllerLateUpdate));
-            LoadManager.OnCompleteSceneLoad += (scene, loadScene) => Setup();
+            // Ready!
             ModHelper.Console.WriteLine($"{nameof(HikersMod)} is ready to go!", MessageType.Success);
         }
 
@@ -190,9 +194,9 @@ namespace MovementMod
 
     public static class Patches
     {
-        public static void GetJetpackInput(ref Vector3 __result)
+        public static void CharacterStart(PlayerCharacterController __instance)
         {
-            if (HikersMod.disableDownThrust && __result.y < 0) __result.y = 0;
+            HikersMod.Setup();
         }
 
         public static void CharacterAwake(PlayerCharacterController __instance)
@@ -203,6 +207,11 @@ namespace MovementMod
                 if (OWInput.IsPressed(InputLibrary.thrustDown) && !OWInput.IsPressed(InputLibrary.rollMode))
                     HikersMod.Instance.Sprint(true);
             };
+        }
+
+        public static void GetJetpackInput(ref Vector3 __result)
+        {
+            if (HikersMod.disableDownThrust && __result.y < 0) __result.y = 0;
         }
 
         public static void DreamLanternFocusChanged(DreamLanternItem __instance)
