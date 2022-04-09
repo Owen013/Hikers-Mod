@@ -5,19 +5,24 @@ using UnityEngine;
 
 namespace MovementMod
 {
+    public interface ISmolHatchling
+    {
+        float GetAnimSpeed();
+    }
+
     public class HikersMod : ModBehaviour
     {
         // Config vars
-        public static bool chargeJumpDisabled, slowStrafeDisabled, sprintEnabled, climbEnabled;
+        bool chargeJumpDisabled, slowStrafeDisabled, sprintEnabled, climbEnabled;
         public static float runSpeed, walkSpeed, jumpPower, sprintSpeed, climbPower, lastClimbTime, climbsPerJump, climbCooldownTime;
 
         // Mod vars
-        public static OWScene scene;
-        public static PlayerCharacterController characterController;
-        public static PlayerCameraController cameraController;
+        OWScene scene;
+        PlayerCharacterController characterController;
+        PlayerCameraController cameraController;
         public static PlayerAnimController animController;
-        public static PlayerMovementAudio movementAudio;
-        public static PlayerImpactAudio impactAudio;
+        PlayerMovementAudio movementAudio;
+        PlayerImpactAudio impactAudio;
         public static float runAnimSpeed, sprintAnimSpeed, walkAnimSpeed, strafeSpeed, sprintStrafeSpeed, climbsLeft;
         public static bool sprinting, wavingArmsAnim;
 
@@ -65,24 +70,31 @@ namespace MovementMod
                 "Start",
                 typeof(Patches),
                 nameof(Patches.CharacterStart));
+
             ModHelper.HarmonyHelper.AddPostfix<PlayerCharacterController>(
                 "Awake",
                 typeof(Patches),
                 nameof(Patches.CharacterAwake));
+
             ModHelper.HarmonyHelper.AddPostfix<JetpackThrusterController>(
                 "GetRawInput",
                 typeof(Patches),
                 nameof(Patches.GetJetpackInput));
+
             ModHelper.HarmonyHelper.AddPostfix<DreamLanternItem>(
                 "UpdateFocus",
                 typeof(Patches),
                 nameof(Patches.DreamLanternFocusChanged));
+
             ModHelper.HarmonyHelper.AddPostfix<PlayerAnimController>(
                 "LateUpdate",
                 typeof(Patches),
                 nameof(Patches.AnimControllerLateUpdate));
+
             // Ready!
             ModHelper.Console.WriteLine($"{nameof(HikersMod)} is ready to go!", MessageType.Success);
+
+            LoadManager.OnCompleteSceneLoad += (scene, loadScene) => Setup();
         }
 
         private void Update()
@@ -129,9 +141,17 @@ namespace MovementMod
             }
         }
 
-        public static void Setup()
+        public void Setup()
         {
             scene = LoadManager.s_currentScene;
+            float animSpeed;
+            // Get Smol Hatchling
+            if (ModHelper.Interaction.ModExists("Owen013.TeenyHatchling"))
+            {
+                ISmolHatchling smolHatchlingAPI = ModHelper.Interaction.GetModApi<ISmolHatchling>("Owen013.TeenyHatchling");
+                animSpeed = smolHatchlingAPI.GetAnimSpeed();
+            }
+            else animSpeed = 1;
             if (scene == OWScene.SolarSystem || scene == OWScene.EyeOfTheUniverse)
             {
                 characterController = FindObjectOfType<PlayerCharacterController>();
@@ -144,9 +164,9 @@ namespace MovementMod
                 characterController._strafeSpeed = strafeSpeed;
                 characterController._walkSpeed = walkSpeed;
                 characterController._maxJumpSpeed = jumpPower;
-                runAnimSpeed = Mathf.Max(runSpeed / 6, 1);
-                sprintAnimSpeed = Mathf.Max(sprintSpeed / 6, 1);
-                walkAnimSpeed = Mathf.Max(walkSpeed / 6, 1);
+                runAnimSpeed = Mathf.Max(runSpeed / 6 * animSpeed, animSpeed);
+                sprintAnimSpeed = Mathf.Max(sprintSpeed / 6 * animSpeed, animSpeed);
+                walkAnimSpeed = Mathf.Max(walkSpeed / 6 * animSpeed, animSpeed);
                 if (characterController._isGrounded || climbsLeft > climbsPerJump) climbsLeft = climbsPerJump;
             };
         }
@@ -196,7 +216,7 @@ namespace MovementMod
     {
         public static void CharacterStart(PlayerCharacterController __instance)
         {
-            HikersMod.Setup();
+            HikersMod.Instance.Setup();
         }
 
         public static void CharacterAwake(PlayerCharacterController __instance)
