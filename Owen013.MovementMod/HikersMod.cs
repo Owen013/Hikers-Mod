@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using OWML.ModHelper;
+﻿using OWML.ModHelper;
 using OWML.Common;
 using UnityEngine;
 
@@ -13,16 +12,21 @@ namespace MovementMod
     public class HikersMod : ModBehaviour
     {
         // Config vars
-        private bool chargeJumpDisabled, slowStrafeDisabled, sprintEnabled;
-        private float runSpeed, walkSpeed, jumpPower, sprintSpeed;
+        private bool chargeJumpDisabled, slowStrafeDisabled, sprintEnabled, climbEnabled;
+        public float runSpeed, walkSpeed, jumpPower, sprintSpeed, jumpsPerClimb;
 
         // Mod vars
         private PlayerCharacterController characterController;
         private PlayerCameraController cameraController;
         private PlayerAnimController animController;
-        private float runAnimSpeed, sprintAnimSpeed, walkAnimSpeed, strafeSpeed, sprintStrafeSpeed;
-        private string moveState;
+        private PlayerImpactAudio impactAudio;
         private bool allLoaded;
+        public float runAnimSpeed, sprintAnimSpeed, walkAnimSpeed, strafeSpeed, sprintStrafeSpeed, wallJumpsLeft,
+                     lastClimbTime, lastClimbRefill;
+        private string moveState;
+
+        // Climb vars
+
 
         // Patch vars
         public static HikersMod Instance;
@@ -38,6 +42,8 @@ namespace MovementMod
             jumpPower = config.GetSettingsValue<float>("Jump Power");
             sprintEnabled = config.GetSettingsValue<bool>("Enable Sprinting");
             sprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
+            climbEnabled = config.GetSettingsValue<bool>("Enable Climbing");
+            jumpsPerClimb = config.GetSettingsValue<float>("Wall Jumps per Climb");
             Setup();
         }
 
@@ -92,12 +98,11 @@ namespace MovementMod
             characterController = Locator.GetPlayerController();
             cameraController = Locator.GetPlayerCameraController();
             animController = FindObjectOfType<PlayerAnimController>();
+            impactAudio = FindObjectOfType<PlayerImpactAudio>();
 
-            characterController._useChargeJump = !chargeJumpDisabled;
-            characterController._runSpeed = runSpeed;
-            characterController._strafeSpeed = strafeSpeed;
-            characterController._walkSpeed = walkSpeed;
-            characterController._maxJumpSpeed = jumpPower;
+            runAnimSpeed = Mathf.Max(runSpeed / 6 * animSpeed, animSpeed);
+            sprintAnimSpeed = Mathf.Max(sprintSpeed / 6 * animSpeed, animSpeed);
+            walkAnimSpeed = Mathf.Max(walkSpeed / 6 * animSpeed, animSpeed);
 
             if (slowStrafeDisabled)
             {
@@ -110,12 +115,17 @@ namespace MovementMod
                 sprintStrafeSpeed = (2f / 3f) * sprintSpeed;
             }
 
-            runAnimSpeed = Mathf.Max(runSpeed / 6 * animSpeed, animSpeed);
-            sprintAnimSpeed = Mathf.Max(sprintSpeed / 6 * animSpeed, animSpeed);
-            walkAnimSpeed = Mathf.Max(walkSpeed / 6 * animSpeed, animSpeed);
-
             // The Update() code won't run until after Setup() has at least once
             allLoaded = true;
+
+            // Change built-in character attributes
+            characterController._useChargeJump = !chargeJumpDisabled;
+            characterController._runSpeed = runSpeed;
+            characterController._strafeSpeed = strafeSpeed;
+            characterController._walkSpeed = walkSpeed;
+            characterController._maxJumpSpeed = jumpPower;
+            // Set moveState to normal
+            SetMoveState("Normal");
         }
 
         private void Update()
@@ -129,13 +139,26 @@ namespace MovementMod
             bool walking = (OWInput.IsPressed(InputLibrary.rollMode) && !holdingLantern) || dreamLanternFocused;
             bool canSprint = sprintEnabled && !walking;
             bool sprintKeyHeld = OWInput.IsPressed(InputLibrary.thrustDown);
+            if (moveState != "Sprinting" && canSprint && grounded && sprintKeyHeld) SetMoveState("Sprinting");
+            else if (moveState != "Walking" && walking) SetMoveState("Walking");
+            else if (moveState != "Normal" && !sprintKeyHeld && !walking) SetMoveState("Normal");
 
-            if (moveState != "Sprinting" && canSprint && grounded && sprintKeyHeld) ChangeState("Sprinting");
-            else if (moveState != "Walking" && walking) ChangeState("Walking");
-            else if (moveState != "Normal" && !sprintKeyHeld && !walking) ChangeState("Normal");
+            // Climbing
+            characterController.UpdatePushable();
+            bool canClimb = characterController._isPushable && !characterController._isZeroGMovementEnabled && !grounded;
+            bool jumpKeyPressed = OWInput.IsNewlyPressed(InputLibrary.jump);
+            if (climbEnabled && canClimb && jumpKeyPressed && wallJumpsLeft > 0) Climb();
+            // Replenish 1 wall jump if the player hasn't done one for five seconds
+            if (Time.time - lastClimbRefill > 5 && wallJumpsLeft < jumpsPerClimb)
+            {
+                wallJumpsLeft += 1;
+                lastClimbRefill = Time.time;
+            }
+            // Make player play fast freefall animation for one second after each wall jump
+            if (Time.time - lastClimbTime < 1) animController._animator.SetFloat("FreefallSpeed", 100);
         }
 
-        public void ChangeState(string state)
+        public void SetMoveState(string state)
         {
             moveState = state;
             switch (state)
@@ -162,6 +185,20 @@ namespace MovementMod
             }
         }
 
+        private void Climb()
+        {
+            OWRigidbody pushBody = characterController._pushableBody;
+            Vector3 pushPoint = characterController._pushContactPt;
+            Vector3 pointVelocity = pushBody.GetPointVelocity(pushPoint);
+            Vector3 climbVelocity = new Vector3(0, jumpPower * (wallJumpsLeft / jumpsPerClimb), 0);
+
+            characterController._owRigidbody.SetVelocity(pointVelocity);
+            characterController._owRigidbody.AddLocalVelocityChange(climbVelocity);
+            wallJumpsLeft -= 1;
+            impactAudio._impactAudioSrc.PlayOneShot(AudioType.ImpactLowSpeed);
+            lastClimbTime = lastClimbRefill = Time.time;
+        }
+
         private bool WrongScene()
         {
             OWScene scene = LoadManager.s_currentScene;
@@ -181,7 +218,9 @@ namespace MovementMod
             __instance.OnBecomeGrounded += () =>
             {
                 if (OWInput.IsPressed(InputLibrary.thrustDown) && !OWInput.IsPressed(InputLibrary.rollMode))
-                    HikersMod.Instance.ChangeState("Sprinting");
+                    HikersMod.Instance.SetMoveState("Sprinting");
+
+                HikersMod.Instance.wallJumpsLeft = HikersMod.Instance.jumpsPerClimb;
             };
         }
 

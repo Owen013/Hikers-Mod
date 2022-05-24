@@ -9,8 +9,6 @@
 		"Enable Sprinting": true,
 		"Sprint Speed": 10,
 		"Enable Climbing": false,
-		"Climb Jump Power": 7,
-		"Climb Jumps per Jump": 2,
-		"Climb Jump Cooldown Time": 0.2
+		"Wall Jumps per Climb": 3
 	}
 }
