@@ -12,8 +12,8 @@ namespace MovementMod
     public class HikersMod : ModBehaviour
     {
         // Config vars
-        private bool chargeJumpDisabled, slowStrafeDisabled, sprintEnabled, climbEnabled;
-        public float runSpeed, walkSpeed, jumpPower, sprintSpeed, jumpsPerClimb;
+        private bool chargeJumpDisabled, slowStrafeDisabled, sprintEnabled, wallJumpEnabled;
+        public float runSpeed, walkSpeed, jumpPower, sprintSpeed, wallJumpsPerClimb;
 
         // Mod vars
         private PlayerCharacterController characterController;
@@ -22,11 +22,8 @@ namespace MovementMod
         private PlayerImpactAudio impactAudio;
         private bool allLoaded;
         public float runAnimSpeed, sprintAnimSpeed, walkAnimSpeed, strafeSpeed, sprintStrafeSpeed, wallJumpsLeft,
-                     lastClimbTime, lastClimbRefill;
+                     lastWallJumpTime, lastWallJumpRefill;
         private string moveState;
-
-        // Climb vars
-
 
         // Patch vars
         public static HikersMod Instance;
@@ -42,8 +39,8 @@ namespace MovementMod
             jumpPower = config.GetSettingsValue<float>("Jump Power");
             sprintEnabled = config.GetSettingsValue<bool>("Enable Sprinting");
             sprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
-            climbEnabled = config.GetSettingsValue<bool>("Enable Climbing");
-            jumpsPerClimb = config.GetSettingsValue<float>("Wall Jumps per Climb");
+            wallJumpEnabled = config.GetSettingsValue<bool>("Enable Climbing");
+            wallJumpsPerClimb = config.GetSettingsValue<float>("Wall Jumps per Climb");
             Setup();
         }
 
@@ -100,6 +97,11 @@ namespace MovementMod
             animController = FindObjectOfType<PlayerAnimController>();
             impactAudio = FindObjectOfType<PlayerImpactAudio>();
 
+            //button_enableSprint = GameObject.Find("Enable Sprinting").gameObject.GetComponent<MenuOption>();
+            //button_sprintSpeed = GameObject.Find("Sprint Speed").gameObject.GetComponent<MenuOption>();
+            //button_enableClimb = GameObject.Find("Enable Climbing").gameObject.GetComponent<MenuOption>();
+            //button_jumpsPerClimb = GameObject.Find("Climb Jumps per Jump").gameObject.GetComponent<MenuOption>();
+
             runAnimSpeed = Mathf.Max(runSpeed / 6 * animSpeed, animSpeed);
             sprintAnimSpeed = Mathf.Max(sprintSpeed / 6 * animSpeed, animSpeed);
             walkAnimSpeed = Mathf.Max(walkSpeed / 6 * animSpeed, animSpeed);
@@ -147,15 +149,15 @@ namespace MovementMod
             characterController.UpdatePushable();
             bool canClimb = characterController._isPushable && !characterController._isZeroGMovementEnabled && !grounded;
             bool jumpKeyPressed = OWInput.IsNewlyPressed(InputLibrary.jump);
-            if (climbEnabled && canClimb && jumpKeyPressed && wallJumpsLeft > 0) Climb();
+            if (wallJumpEnabled && canClimb && jumpKeyPressed && wallJumpsLeft > 0) Climb();
             // Replenish 1 wall jump if the player hasn't done one for five seconds
-            if (Time.time - lastClimbRefill > 5 && wallJumpsLeft < jumpsPerClimb)
+            if (Time.time - lastWallJumpRefill > 5 && wallJumpsLeft < wallJumpsPerClimb)
             {
                 wallJumpsLeft += 1;
-                lastClimbRefill = Time.time;
+                lastWallJumpRefill = Time.time;
             }
             // Make player play fast freefall animation for one second after each wall jump
-            if (Time.time - lastClimbTime < 1) animController._animator.SetFloat("FreefallSpeed", 100);
+            if (Time.time - lastWallJumpTime < 1) animController._animator.SetFloat("FreefallSpeed", 100);
         }
 
         public void SetMoveState(string state)
@@ -164,19 +166,16 @@ namespace MovementMod
             switch (state)
             {
                 case "Normal":
-                    ModHelper.Console.WriteLine($"State: Normal");
                     characterController._runSpeed = runSpeed;
                     characterController._strafeSpeed = strafeSpeed;
                     animController._animator.speed = runAnimSpeed;
                     disableDownThrust = false;
                     break;
                 case "Walking":
-                    ModHelper.Console.WriteLine($"State: Walking");
                     animController._animator.speed = walkAnimSpeed;
                     disableDownThrust = false;
                     break;
                 case "Sprinting":
-                    ModHelper.Console.WriteLine($"State: Sprinting");
                     characterController._runSpeed = sprintSpeed;
                     characterController._strafeSpeed = sprintStrafeSpeed;
                     animController._animator.speed = sprintAnimSpeed;
@@ -190,13 +189,15 @@ namespace MovementMod
             OWRigidbody pushBody = characterController._pushableBody;
             Vector3 pushPoint = characterController._pushContactPt;
             Vector3 pointVelocity = pushBody.GetPointVelocity(pushPoint);
-            Vector3 climbVelocity = new Vector3(0, jumpPower * (wallJumpsLeft / jumpsPerClimb), 0);
+            Vector3 climbVelocity = new Vector3(0, jumpPower * (wallJumpsLeft / wallJumpsPerClimb), 0);
+
+            if ((pointVelocity - characterController._owRigidbody.GetVelocity()).magnitude > 20) return;
 
             characterController._owRigidbody.SetVelocity(pointVelocity);
             characterController._owRigidbody.AddLocalVelocityChange(climbVelocity);
             wallJumpsLeft -= 1;
             impactAudio._impactAudioSrc.PlayOneShot(AudioType.ImpactLowSpeed);
-            lastClimbTime = lastClimbRefill = Time.time;
+            lastWallJumpTime = lastWallJumpRefill = Time.time;
         }
 
         private bool WrongScene()
@@ -220,7 +221,7 @@ namespace MovementMod
                 if (OWInput.IsPressed(InputLibrary.thrustDown) && !OWInput.IsPressed(InputLibrary.rollMode))
                     HikersMod.Instance.SetMoveState("Sprinting");
 
-                HikersMod.Instance.wallJumpsLeft = HikersMod.Instance.jumpsPerClimb;
+                HikersMod.Instance.wallJumpsLeft = HikersMod.Instance.wallJumpsPerClimb;
             };
         }
 
