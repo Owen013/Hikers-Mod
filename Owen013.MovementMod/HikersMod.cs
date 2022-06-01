@@ -147,7 +147,7 @@ namespace MovementMod
 
             // Climbing
             characterController.UpdatePushable();
-            bool canClimb = characterController._isPushable && !characterController._isZeroGMovementEnabled && !grounded;
+            bool canClimb = characterController._isPushable && !PlayerState.InZeroG() && !grounded;
             bool jumpKeyPressed = OWInput.IsNewlyPressed(InputLibrary.jump);
             if (wallJumpEnabled && canClimb && jumpKeyPressed && wallJumpsLeft > 0) Climb();
             // Replenish 1 wall jump if the player hasn't done one for five seconds
