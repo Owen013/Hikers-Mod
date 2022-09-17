@@ -12,7 +12,7 @@ namespace MovementMod
     public class HikersMod : ModBehaviour
     {
         // Config vars
-        private bool chargeJumpDisabled, slowStrafeDisabled, sprintEnabled, wallJumpEnabled;
+        public bool chargeJumpDisabled, slowStrafeDisabled, sprintEnabled, wallJumpEnabled;
         public float runSpeed, walkSpeed, jumpPower, sprintSpeed, wallJumpsPerClimb;
 
         // Mod vars
@@ -218,7 +218,7 @@ namespace MovementMod
         {
             __instance.OnBecomeGrounded += () =>
             {
-                if (OWInput.IsPressed(InputLibrary.thrustDown) && !OWInput.IsPressed(InputLibrary.rollMode))
+                if (OWInput.IsPressed(InputLibrary.thrustDown) && !OWInput.IsPressed(InputLibrary.rollMode) && HikersMod.Instance.sprintEnabled)
                     HikersMod.Instance.SetMoveState("Sprinting");
 
                 HikersMod.Instance.wallJumpsLeft = HikersMod.Instance.wallJumpsPerClimb;
