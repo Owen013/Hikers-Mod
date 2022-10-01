@@ -8,7 +8,7 @@
 		"Jump Power": 7,
 		"Enable Sprinting": true,
 		"Sprint Speed": 10,
-		"Enable Climbing": true,
+		"Enable Climbing": false,
 		"Wall Jumps per Climb": 5
 	}
 }

@@ -2,11 +2,12 @@
 using OWML.Common;
 using UnityEngine;
 
-namespace MovementMod
+namespace HikersMod
 {
     public interface ISmolHatchling
     {
         float GetAnimSpeed();
+        void SetHikersModEnabled();
     }
 
     public class HikersMod : ModBehaviour
@@ -24,6 +25,7 @@ namespace MovementMod
         public float runAnimSpeed, sprintAnimSpeed, walkAnimSpeed, strafeSpeed, sprintStrafeSpeed, wallJumpsLeft,
                      lastWallJumpTime, lastWallJumpRefill;
         private string moveState;
+        ISmolHatchling smolHatchlingAPI;
 
         // Patch vars
         public static HikersMod Instance;
@@ -53,43 +55,97 @@ namespace MovementMod
         private void Start()
         {
             // Apply patches.
-            ModHelper.HarmonyHelper.AddPostfix<PlayerCharacterController>(
-                "Start",
-                typeof(Patches),
-                nameof(Patches.CharacterStart));
-
-            ModHelper.HarmonyHelper.AddPostfix<PlayerCharacterController>(
-                "Awake",
-                typeof(Patches),
-                nameof(Patches.CharacterAwake));
-
-            ModHelper.HarmonyHelper.AddPostfix<JetpackThrusterController>(
-                "GetRawInput",
-                typeof(Patches),
-                nameof(Patches.GetJetpackInput));
-
-            ModHelper.HarmonyHelper.AddPostfix<DreamLanternItem>(
-                "UpdateFocus",
-                typeof(Patches),
-                nameof(Patches.DreamLanternFocusChanged));
-
+            ModHelper.HarmonyHelper.AddPostfix<PlayerCharacterController>("Start", typeof(Patches), nameof(Patches.CharacterStart));
+            ModHelper.HarmonyHelper.AddPostfix<PlayerCharacterController>("Awake", typeof(Patches), nameof(Patches.CharacterAwake));
+            ModHelper.HarmonyHelper.AddPostfix<JetpackThrusterController>("GetRawInput", typeof(Patches), nameof(Patches.GetJetpackInput));
+            ModHelper.HarmonyHelper.AddPostfix<DreamLanternItem>("UpdateFocus", typeof(Patches), nameof(Patches.DreamLanternFocusChanged));
             // Ready!
             ModHelper.Console.WriteLine($"{nameof(HikersMod)} is ready to go!", MessageType.Success);
         }
 
+        private void UpdateSprinting()
+        {
+            bool grounded = characterController._isGrounded;
+            bool holdingLantern = characterController._heldLanternItem != null;
+            bool walking = (OWInput.IsPressed(InputLibrary.rollMode) && !holdingLantern) || dreamLanternFocused;
+            bool canSprint = sprintEnabled && !walking;
+            bool sprintKeyHeld = OWInput.IsPressed(InputLibrary.thrustDown);
+            if (moveState != "Sprinting" && canSprint && grounded && sprintKeyHeld) SetMoveState("Sprinting");
+            else if (moveState != "Walking" && walking) SetMoveState("Walking");
+            else if (moveState != "Normal" && !sprintKeyHeld && !walking) SetMoveState("Normal");
+        }
+
+        public void SetMoveState(string state)
+        {
+            moveState = state;
+            switch (state)
+            {
+                case "Normal":
+                    characterController._runSpeed = runSpeed;
+                    characterController._strafeSpeed = strafeSpeed;
+                    animController._animator.speed = runAnimSpeed;
+                    disableDownThrust = false;
+                    break;
+                case "Walking":
+                    animController._animator.speed = walkAnimSpeed;
+                    disableDownThrust = false;
+                    break;
+                case "Sprinting":
+                    characterController._runSpeed = sprintSpeed;
+                    characterController._strafeSpeed = sprintStrafeSpeed;
+                    animController._animator.speed = sprintAnimSpeed;
+                    disableDownThrust = true;
+                    break;
+            }
+        }
+
+        public void UpdateAnimSpeed()
+        {
+            float sizeMultiplier;
+            if (smolHatchlingAPI != null) sizeMultiplier = smolHatchlingAPI.GetAnimSpeed();
+            else sizeMultiplier = 1;
+            switch (moveState)
+            {
+                case "Normal":
+                    animController._animator.speed = Mathf.Max(runSpeed / 6 * sizeMultiplier, sizeMultiplier);
+                    break;
+                case "Walking":
+                    animController._animator.speed = Mathf.Max(walkSpeed / 6 * sizeMultiplier, sizeMultiplier);
+                    break;
+                case "Sprinting":
+                    animController._animator.speed = Mathf.Max(sprintSpeed / 6 * sizeMultiplier, sizeMultiplier);
+                    break;
+            }
+        }
+
+        private void UpdateClimbing()
+        {
+            bool grounded = characterController._isGrounded;
+            characterController.UpdatePushable();
+            bool canClimb = characterController._isPushable && !PlayerState.InZeroG() && !grounded;
+            bool jumpKeyPressed = OWInput.IsNewlyPressed(InputLibrary.jump);
+            if (wallJumpEnabled && canClimb && jumpKeyPressed && wallJumpsLeft > 0) Climb();
+            // Replenish 1 wall jump if the player hasn't done one for five seconds
+            if (Time.time - lastWallJumpRefill > 5 && wallJumpsLeft < wallJumpsPerClimb)
+            {
+                wallJumpsLeft += 1;
+                lastWallJumpRefill = Time.time;
+            }
+            // Make player play fast freefall animation for one second after each wall jump
+            if (Time.time - lastWallJumpTime < 1) animController._animator.SetFloat("FreefallSpeed", 100);
+        }
+
         public void Setup()
         {
-            float animSpeed;
+            // Make sure that the scene is the SS or Eye
+            if (WrongScene()) return;
+            
             // Get Smol Hatchling
             if (ModHelper.Interaction.ModExists("Owen013.TeenyHatchling"))
             {
-                ISmolHatchling smolHatchlingAPI = ModHelper.Interaction.GetModApi<ISmolHatchling>("Owen013.TeenyHatchling");
-                animSpeed = smolHatchlingAPI.GetAnimSpeed();
+                smolHatchlingAPI = ModHelper.Interaction.GetModApi<ISmolHatchling>("Owen013.TeenyHatchling");
+                smolHatchlingAPI.SetHikersModEnabled();
             }
-            else animSpeed = 1;
-
-            // Make sure that the scene is the SS or Eye
-            if (WrongScene()) return;
 
             // Get vars
             characterController = Locator.GetPlayerController();
@@ -101,10 +157,6 @@ namespace MovementMod
             //button_sprintSpeed = GameObject.Find("Sprint Speed").gameObject.GetComponent<MenuOption>();
             //button_enableClimb = GameObject.Find("Enable Climbing").gameObject.GetComponent<MenuOption>();
             //button_jumpsPerClimb = GameObject.Find("Climb Jumps per Jump").gameObject.GetComponent<MenuOption>();
-
-            runAnimSpeed = Mathf.Max(runSpeed / 6 * animSpeed, animSpeed);
-            sprintAnimSpeed = Mathf.Max(sprintSpeed / 6 * animSpeed, animSpeed);
-            walkAnimSpeed = Mathf.Max(walkSpeed / 6 * animSpeed, animSpeed);
 
             if (slowStrafeDisabled)
             {
@@ -130,58 +182,13 @@ namespace MovementMod
             SetMoveState("Normal");
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
             // Make sure that the scene is the SS or Eye and that everything is loaded
             if (WrongScene() || !allLoaded) return;
-
-            // Sprinting
-            bool grounded = characterController._isGrounded;
-            bool holdingLantern = characterController._heldLanternItem != null;
-            bool walking = (OWInput.IsPressed(InputLibrary.rollMode) && !holdingLantern) || dreamLanternFocused;
-            bool canSprint = sprintEnabled && !walking;
-            bool sprintKeyHeld = OWInput.IsPressed(InputLibrary.thrustDown);
-            if (moveState != "Sprinting" && canSprint && grounded && sprintKeyHeld) SetMoveState("Sprinting");
-            else if (moveState != "Walking" && walking) SetMoveState("Walking");
-            else if (moveState != "Normal" && !sprintKeyHeld && !walking) SetMoveState("Normal");
-
-            // Climbing
-            characterController.UpdatePushable();
-            bool canClimb = characterController._isPushable && !PlayerState.InZeroG() && !grounded;
-            bool jumpKeyPressed = OWInput.IsNewlyPressed(InputLibrary.jump);
-            if (wallJumpEnabled && canClimb && jumpKeyPressed && wallJumpsLeft > 0) Climb();
-            // Replenish 1 wall jump if the player hasn't done one for five seconds
-            if (Time.time - lastWallJumpRefill > 5 && wallJumpsLeft < wallJumpsPerClimb)
-            {
-                wallJumpsLeft += 1;
-                lastWallJumpRefill = Time.time;
-            }
-            // Make player play fast freefall animation for one second after each wall jump
-            if (Time.time - lastWallJumpTime < 1) animController._animator.SetFloat("FreefallSpeed", 100);
-        }
-
-        public void SetMoveState(string state)
-        {
-            moveState = state;
-            switch (state)
-            {
-                case "Normal":
-                    characterController._runSpeed = runSpeed;
-                    characterController._strafeSpeed = strafeSpeed;
-                    animController._animator.speed = runAnimSpeed;
-                    disableDownThrust = false;
-                    break;
-                case "Walking":
-                    animController._animator.speed = walkAnimSpeed;
-                    disableDownThrust = false;
-                    break;
-                case "Sprinting":
-                    characterController._runSpeed = sprintSpeed;
-                    characterController._strafeSpeed = sprintStrafeSpeed;
-                    animController._animator.speed = sprintAnimSpeed;
-                    disableDownThrust = true;
-                    break;
-            }
+            UpdateSprinting();
+            UpdateClimbing();
+            UpdateAnimSpeed();
         }
 
         private void Climb()
