@@ -141,9 +141,9 @@ namespace HikersMod
             if (WrongScene()) return;
             
             // Get Smol Hatchling
-            if (ModHelper.Interaction.ModExists("Owen013.TeenyHatchling"))
+            smolHatchlingAPI = ModHelper.Interaction.TryGetModApi<ISmolHatchling>("Owen013.TeenyHatchling");
+            if (smolHatchlingAPI != null)
             {
-                smolHatchlingAPI = ModHelper.Interaction.GetModApi<ISmolHatchling>("Owen013.TeenyHatchling");
                 smolHatchlingAPI.SetHikersModEnabled();
             }
 
@@ -182,7 +182,7 @@ namespace HikersMod
             SetMoveState("Normal");
         }
 
-        private void FixedUpdate()
+        private void Update()
         {
             // Make sure that the scene is the SS or Eye and that everything is loaded
             if (WrongScene() || !allLoaded) return;
