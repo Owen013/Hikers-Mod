@@ -9,6 +9,12 @@ Normally in Outer Wilds, you have to hold space to charge a jump and then releas
 ## No Strafing-Slowdown
 In vanilla Outer Wilds, the player walks slightly slower if they aren't walking directly forward. The "no strafe-slowdown" feature, which is also enabled by default, removes this slowdown so that you can move full-speed ahead even to the right, left, or behind!
 
+## More Air Control
+
+Are you regretting that jump you just made? Did you forget your jetpack? Well, Outer Wilds lets you speed up your character in mid-air a little bit, but it doesn't allow you to slow down after you've reached a certain speed. The "more air control" feature allows you to slow down in mid-air and change direction to an extent!
+
+![HikersMod04](https://user-images.githubusercontent.com/96493201/193693118-bb18cf4a-33eb-4bb3-98ad-d148117f4967.png)
+
 ## Sprinting
 The sprinting feature (which is enabled by default) allows you to run faster if you hold the thrust-down button while moving!
 
