@@ -12,6 +12,8 @@ In vanilla Outer Wilds, the player walks slightly slower if they aren't walking 
 ## Sprinting
 The sprinting feature (which is enabled by default) allows you to run faster if you hold the thrust-down button while moving!
 
+![HikersMod03](https://user-images.githubusercontent.com/96493201/193676392-6a03cf77-e81e-4925-bd69-b085b2c804e2.png)
+
 ## Modify your movement speed, jump height, and more
 Hiker's Mod allows you to change your character's running, walking, and sprinting speeds, your jump height, and your acceleration so that you can make the hatchling as acrobatic as you please!
 
@@ -19,6 +21,8 @@ Hiker's Mod allows you to change your character's running, walking, and sprintin
 The following features are **disabled** by default, but they can be enabled in the config menu.
 ## Climbing
 This feature allows you to climb up walls by pressing the jump button while facing a wall.
+
+![HikersMod02](https://user-images.githubusercontent.com/96493201/193676452-5ba0c660-e569-4705-a012-886bed7fb375.png)
 
 ## Floaty Physics
 This feature makes the player's movement floatier on low-gravity bodies! The lower the gravity is, the lower your acceleration is, which means you'll take longer to reach your top speed.
