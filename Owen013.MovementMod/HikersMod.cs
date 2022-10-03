@@ -1,6 +1,7 @@
 ﻿using OWML.ModHelper;
 using OWML.Common;
 using UnityEngine;
+using System.Net.Security;
 
 namespace HikersMod
 {
@@ -13,17 +14,17 @@ namespace HikersMod
     public class HikersMod : ModBehaviour
     {
         // Config vars
-        public bool chargeJumpDisabled, slowStrafeDisabled, sprintEnabled, wallJumpEnabled;
-        public float runSpeed, walkSpeed, jumpPower, sprintSpeed, wallJumpsPerClimb;
+        public bool chargeJumpDisabled, slowStrafeDisabled, floatyPhysicsEnabled, sprintEnabled, wallJumpEnabled;
+        public float runSpeed, walkSpeed, jumpPower, groundAccel, airAccel, floatyPhysicsPower, sprintSpeed, wallJumpsPerClimb;
 
         // Mod vars
+        private OWRigidbody playerBody;
         private PlayerCharacterController characterController;
         private PlayerCameraController cameraController;
         private PlayerAnimController animController;
         private PlayerImpactAudio impactAudio;
         private bool allLoaded;
-        public float runAnimSpeed, sprintAnimSpeed, walkAnimSpeed, strafeSpeed, sprintStrafeSpeed, wallJumpsLeft,
-                     lastWallJumpTime, lastWallJumpRefill;
+        public float runAnimSpeed, sprintAnimSpeed, walkAnimSpeed, strafeSpeed, sprintStrafeSpeed, wallJumpsLeft, lastWallJumpTime, lastWallJumpRefill;
         private string moveState;
         ISmolHatchling smolHatchlingAPI;
 
@@ -36,9 +37,13 @@ namespace HikersMod
             base.Configure(config);
             chargeJumpDisabled = config.GetSettingsValue<bool>("Disable Charge-Jump");
             slowStrafeDisabled = config.GetSettingsValue<bool>("Disable Slow Strafing");
-            runSpeed = config.GetSettingsValue<float>("Default Run Speed");
-            walkSpeed = config.GetSettingsValue<float>("Walk Speed");
-            jumpPower = config.GetSettingsValue<float>("Jump Power");
+            runSpeed = config.GetSettingsValue<float>("Normal Speed (Default 6)");
+            walkSpeed = config.GetSettingsValue<float>("Walk Speed (Default 3)");
+            jumpPower = config.GetSettingsValue<float>("Jump Power (Default 7)");
+            groundAccel = config.GetSettingsValue<float>("Ground Acceleration (Default 0.5)");
+            airAccel = config.GetSettingsValue<float>("Air Acceleration (Default 0.09)");
+            floatyPhysicsEnabled = config.GetSettingsValue<bool>("Floaty Physics in Low-Gravity");
+            floatyPhysicsPower = config.GetSettingsValue<float>("Floaty Physics Power");
             sprintEnabled = config.GetSettingsValue<bool>("Enable Sprinting");
             sprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
             wallJumpEnabled = config.GetSettingsValue<bool>("Enable Climbing");
@@ -61,6 +66,16 @@ namespace HikersMod
             ModHelper.HarmonyHelper.AddPostfix<DreamLanternItem>("UpdateFocus", typeof(Patches), nameof(Patches.DreamLanternFocusChanged));
             // Ready!
             ModHelper.Console.WriteLine($"{nameof(HikersMod)} is ready to go!", MessageType.Success);
+        }
+
+        private void Update()
+        {
+            // Make sure that the scene is the SS or Eye and that everything is loaded
+            if (WrongScene() || !allLoaded) return;
+            UpdateSprinting();
+            UpdateClimbing();
+            UpdateAnimSpeed();
+            if (floatyPhysicsEnabled) UpdateAcceleration();
         }
 
         private void UpdateSprinting()
@@ -104,18 +119,28 @@ namespace HikersMod
             float sizeMultiplier;
             if (smolHatchlingAPI != null) sizeMultiplier = smolHatchlingAPI.GetAnimSpeed();
             else sizeMultiplier = 1;
+            float gravMultiplier = characterController._acceleration / groundAccel;
+            float multiplier = sizeMultiplier * gravMultiplier;
             switch (moveState)
             {
                 case "Normal":
-                    animController._animator.speed = Mathf.Max(runSpeed / 6 * sizeMultiplier, sizeMultiplier);
+                    animController._animator.speed = Mathf.Max(runSpeed / 6 * multiplier, multiplier);
                     break;
                 case "Walking":
-                    animController._animator.speed = Mathf.Max(walkSpeed / 6 * sizeMultiplier, sizeMultiplier);
+                    animController._animator.speed = Mathf.Max(walkSpeed / 6 * multiplier, multiplier);
                     break;
                 case "Sprinting":
-                    animController._animator.speed = Mathf.Max(sprintSpeed / 6 * sizeMultiplier, sizeMultiplier);
+                    animController._animator.speed = Mathf.Max(sprintSpeed / 6 * multiplier, multiplier);
                     break;
             }
+        }
+
+        public void UpdateAcceleration()
+        {
+            float gravMultiplier;
+            if (characterController.IsGrounded()) gravMultiplier = Mathf.Min(Mathf.Pow(characterController.GetNormalAccelerationScalar() / 12, floatyPhysicsPower), 1);
+            else gravMultiplier = 1;
+            characterController._acceleration = groundAccel * gravMultiplier;
         }
 
         private void UpdateClimbing()
@@ -148,6 +173,7 @@ namespace HikersMod
             }
 
             // Get vars
+            playerBody = Locator.GetPlayerBody();
             characterController = Locator.GetPlayerController();
             cameraController = Locator.GetPlayerCameraController();
             animController = FindObjectOfType<PlayerAnimController>();
@@ -178,17 +204,10 @@ namespace HikersMod
             characterController._strafeSpeed = strafeSpeed;
             characterController._walkSpeed = walkSpeed;
             characterController._maxJumpSpeed = jumpPower;
+            if (!floatyPhysicsEnabled) characterController._acceleration = groundAccel;
+            characterController._airAcceleration = airAccel;
             // Set moveState to normal
             SetMoveState("Normal");
-        }
-
-        private void Update()
-        {
-            // Make sure that the scene is the SS or Eye and that everything is loaded
-            if (WrongScene() || !allLoaded) return;
-            UpdateSprinting();
-            UpdateClimbing();
-            UpdateAnimSpeed();
         }
 
         private void Climb()
