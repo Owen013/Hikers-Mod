@@ -1,7 +1,6 @@
 ﻿using OWML.ModHelper;
 using OWML.Common;
 using UnityEngine;
-using System.Net.Security;
 
 namespace HikersMod
 {
@@ -14,12 +13,12 @@ namespace HikersMod
     public class HikersMod : ModBehaviour
     {
         // Config vars
-        public bool chargeJumpDisabled, slowStrafeDisabled, floatyPhysicsEnabled, sprintEnabled, wallJumpEnabled;
-        public float runSpeed, walkSpeed, jumpPower, groundAccel, airAccel, floatyPhysicsPower, sprintSpeed, wallJumpsPerClimb;
+        public bool chargeJumpDisabled, slowStrafeDisabled, moreAirControlEnabled, sprintEnabled, floatyPhysicsEnabled, climbingEnabled;
+        public float runSpeed, walkSpeed, groundAccel, airSpeed, airAccel, jumpPower, sprintSpeed, wallJumpsPerClimb, floatyPhysicsPower;
 
         // Mod vars
         private OWRigidbody playerBody;
-        private PlayerCharacterController characterController;
+        public PlayerCharacterController characterController;
         private PlayerCameraController cameraController;
         private PlayerAnimController animController;
         private PlayerImpactAudio impactAudio;
@@ -35,19 +34,21 @@ namespace HikersMod
         public override void Configure(IModConfig config)
         {
             base.Configure(config);
-            chargeJumpDisabled = config.GetSettingsValue<bool>("Disable Charge-Jump");
-            slowStrafeDisabled = config.GetSettingsValue<bool>("Disable Slow Strafing");
             runSpeed = config.GetSettingsValue<float>("Normal Speed (Default 6)");
             walkSpeed = config.GetSettingsValue<float>("Walk Speed (Default 3)");
-            jumpPower = config.GetSettingsValue<float>("Jump Power (Default 7)");
             groundAccel = config.GetSettingsValue<float>("Ground Acceleration (Default 0.5)");
+            airSpeed = config.GetSettingsValue<float>("Air Speed (Default 3)");
             airAccel = config.GetSettingsValue<float>("Air Acceleration (Default 0.09)");
-            floatyPhysicsEnabled = config.GetSettingsValue<bool>("Floaty Physics in Low-Gravity");
-            floatyPhysicsPower = config.GetSettingsValue<float>("Floaty Physics Power");
+            jumpPower = config.GetSettingsValue<float>("Jump Power (Default 7)");
+            chargeJumpDisabled = config.GetSettingsValue<bool>("Disable Charge-Jump");
+            slowStrafeDisabled = config.GetSettingsValue<bool>("Disable-Slow Strafing");
+            moreAirControlEnabled = config.GetSettingsValue<bool>("More Air Control");
             sprintEnabled = config.GetSettingsValue<bool>("Enable Sprinting");
             sprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
-            wallJumpEnabled = config.GetSettingsValue<bool>("Enable Climbing");
+            climbingEnabled = config.GetSettingsValue<bool>("Enable Climbing");
             wallJumpsPerClimb = config.GetSettingsValue<float>("Wall Jumps per Climb");
+            floatyPhysicsEnabled = config.GetSettingsValue<bool>("Floaty Physics in Low-Gravity");
+            floatyPhysicsPower = config.GetSettingsValue<float>("Floaty Physics Power");
             Setup();
         }
 
@@ -64,6 +65,7 @@ namespace HikersMod
             ModHelper.HarmonyHelper.AddPostfix<PlayerCharacterController>("Awake", typeof(Patches), nameof(Patches.CharacterAwake));
             ModHelper.HarmonyHelper.AddPostfix<JetpackThrusterController>("GetRawInput", typeof(Patches), nameof(Patches.GetJetpackInput));
             ModHelper.HarmonyHelper.AddPostfix<DreamLanternItem>("UpdateFocus", typeof(Patches), nameof(Patches.DreamLanternFocusChanged));
+            ModHelper.HarmonyHelper.AddPrefix<PlayerCharacterController>("UpdateAirControl", typeof(Patches), nameof(Patches.CharacterUpdateAirControl));
             // Ready!
             ModHelper.Console.WriteLine($"{nameof(HikersMod)} is ready to go!", MessageType.Success);
         }
@@ -149,7 +151,7 @@ namespace HikersMod
             characterController.UpdatePushable();
             bool canClimb = characterController._isPushable && !PlayerState.InZeroG() && !grounded;
             bool jumpKeyPressed = OWInput.IsNewlyPressed(InputLibrary.jump);
-            if (wallJumpEnabled && canClimb && jumpKeyPressed && wallJumpsLeft > 0) Climb();
+            if (climbingEnabled && canClimb && jumpKeyPressed && wallJumpsLeft > 0) Climb();
             // Replenish 1 wall jump if the player hasn't done one for five seconds
             if (Time.time - lastWallJumpRefill > 5 && wallJumpsLeft < wallJumpsPerClimb)
             {
@@ -179,11 +181,6 @@ namespace HikersMod
             animController = FindObjectOfType<PlayerAnimController>();
             impactAudio = FindObjectOfType<PlayerImpactAudio>();
 
-            //button_enableSprint = GameObject.Find("Enable Sprinting").gameObject.GetComponent<MenuOption>();
-            //button_sprintSpeed = GameObject.Find("Sprint Speed").gameObject.GetComponent<MenuOption>();
-            //button_enableClimb = GameObject.Find("Enable Climbing").gameObject.GetComponent<MenuOption>();
-            //button_jumpsPerClimb = GameObject.Find("Climb Jumps per Jump").gameObject.GetComponent<MenuOption>();
-
             if (slowStrafeDisabled)
             {
                 strafeSpeed = runSpeed;
@@ -203,9 +200,10 @@ namespace HikersMod
             characterController._runSpeed = runSpeed;
             characterController._strafeSpeed = strafeSpeed;
             characterController._walkSpeed = walkSpeed;
-            characterController._maxJumpSpeed = jumpPower;
             if (!floatyPhysicsEnabled) characterController._acceleration = groundAccel;
+            characterController._airSpeed = airSpeed;
             characterController._airAcceleration = airAccel;
+            characterController._maxJumpSpeed = jumpPower;
             // Set moveState to normal
             SetMoveState("Normal");
         }
@@ -259,6 +257,28 @@ namespace HikersMod
         public static void DreamLanternFocusChanged(DreamLanternItem __instance)
         {
             HikersMod.dreamLanternFocused = __instance._focusing;
+        }
+
+        public static bool CharacterUpdateAirControl()
+        {
+            if (!HikersMod.Instance.moreAirControlEnabled) return true;
+            PlayerCharacterController characterController = HikersMod.Instance.characterController;
+            if (characterController == null) return true;
+            if (characterController._lastGroundBody != null)
+            {
+                Vector3 b = characterController._transform.InverseTransformDirection(characterController._lastGroundBody.GetPointVelocity(characterController._transform.position));
+                Vector3 vector = characterController._transform.InverseTransformDirection(characterController._owRigidbody.GetVelocity()) - b;
+                vector.y = 0f;
+                float num = Time.fixedDeltaTime * 60f;
+                float num2 = characterController._airAcceleration * num;
+                Vector2 axisValue = OWInput.GetAxisValue(InputLibrary.moveXZ, InputMode.Character | InputMode.NomaiRemoteCam);
+                Vector3 localVelocityChange = new Vector3(num2 * axisValue.x, 0f, num2 * axisValue.y);
+                if (vector.magnitude < characterController._airSpeed || (vector + localVelocityChange).magnitude < vector.magnitude)
+                {
+                    characterController._owRigidbody.AddLocalVelocityChange(localVelocityChange);
+                }
+            }
+            return false;
         }
     }
 }

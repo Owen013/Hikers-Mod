@@ -1,18 +1,20 @@
 {
 	"enabled": true,
 	"settings": {
-		"Disable Charge-Jump": true,
-		"Disable Slow Strafing": true,
 		"Normal Speed (Default 6)": 6,
 		"Walk Speed (Default 3)": 3,
-		"Jump Power (Default 7)": 7,
 		"Ground Acceleration (Default 0.5)": 0.5,
+		"Air Speed (Default 3)": 3,
 		"Air Acceleration (Default 0.09)": 0.09,
-		"Floaty Physics in Low-Gravity": false,
-		"Floaty Physics Power": 1,
+		"Jump Power (Default 7)": 7,
+		"Disable Charge-Jump": true,
+		"Disable Slow-Strafing": true,
+		"More Air Control": true,
 		"Enable Sprinting": true,
 		"Sprint Speed": 10,
 		"Enable Climbing": false,
-		"Wall Jumps per Climb": 5
+		"Wall Jumps per Climb": 5,
+		"Floaty Physics in Low-Gravity": false,
+		"Floaty Physics Power": 1
 	}
 }
