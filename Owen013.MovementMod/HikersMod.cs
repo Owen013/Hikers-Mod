@@ -13,7 +13,7 @@ namespace HikersMod
     public class HikersMod : ModBehaviour
     {
         // Config vars
-        public bool chargeJumpDisabled, slowStrafeDisabled, moreAirControlEnabled, sprintEnabled, floatyPhysicsEnabled, climbingEnabled;
+        public bool instantJumpEnabled, slowStrafeDisabled, moreAirControlEnabled, sprintEnabled, floatyPhysicsEnabled, climbingEnabled;
         public float runSpeed, walkSpeed, groundAccel, airSpeed, airAccel, jumpPower, sprintSpeed, wallJumpsPerClimb, floatyPhysicsPower;
 
         // Mod vars
@@ -40,8 +40,8 @@ namespace HikersMod
             airSpeed = config.GetSettingsValue<float>("Air Speed (Default 3)");
             airAccel = config.GetSettingsValue<float>("Air Acceleration (Default 0.09)");
             jumpPower = config.GetSettingsValue<float>("Jump Power (Default 7)");
-            chargeJumpDisabled = config.GetSettingsValue<bool>("Disable Charge-Jump");
-            slowStrafeDisabled = config.GetSettingsValue<bool>("Disable-Slow Strafing");
+            instantJumpEnabled = config.GetSettingsValue<bool>("Instant Jump");
+            slowStrafeDisabled = config.GetSettingsValue<bool>("Disable Strafing Slowdown");
             moreAirControlEnabled = config.GetSettingsValue<bool>("More Air Control");
             sprintEnabled = config.GetSettingsValue<bool>("Enable Sprinting");
             sprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
@@ -196,7 +196,7 @@ namespace HikersMod
             allLoaded = true;
 
             // Change built-in character attributes
-            characterController._useChargeJump = !chargeJumpDisabled;
+            characterController._useChargeJump = !instantJumpEnabled;
             characterController._runSpeed = runSpeed;
             characterController._strafeSpeed = strafeSpeed;
             characterController._walkSpeed = walkSpeed;
