@@ -3,11 +3,11 @@ The aim of this mod is to make the player move around more intuitively. All feat
 
 ![movementmod](https://user-images.githubusercontent.com/96493201/147374247-7a5c972e-b115-493d-8ca1-55e84ca97a97.png)
 
-## Tap-to-Jump
-Normally in Outer Wilds, you have to hold space to charge a jump and then release space to perform the jump. The tap-to-jump feature, which is enabled by default, removes having to charge your jump so that the player will jump immediately once you press space. In my experience, this makes the player feel much more responsive!
+## Instant Jump
+Normally in Outer Wilds, you have to hold space to charge a jump and then release space to perform the jump. The instant jump feature, which is enabled by default, removes having to charge your jump so that the player will jump immediately once you press space. In my experience, this makes the player feel much more responsive!
 
-## No Strafing-Slowdown
-In vanilla Outer Wilds, the player walks slightly slower if they aren't walking directly forward. The "no strafe-slowdown" feature, which is also enabled by default, removes this slowdown so that you can move full-speed ahead even to the right, left, or behind!
+## No Strafing Slowdown
+In vanilla Outer Wilds, the player walks slightly slower if they aren't walking directly forward. The "no strafing slowdown" feature, which is also enabled by default, removes this slowdown so that you can move full-speed ahead even to the right, left, or behind!
 
 ## More Air Control
 
