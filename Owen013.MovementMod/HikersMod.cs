@@ -119,8 +119,7 @@ namespace HikersMod
             };
 
             // Create superboost audio source
-            superBoostAudio = Instantiate(FindObjectOfType<ShipAudioController>()._loudShipSource.gameObject).GetComponent<OWAudioSource>();
-            superBoostAudio.name = "HikersMod_SuperBoostAudioSrc";
+            superBoostAudio = new GameObject("HikersMod_SuperBoostAudioSrc").AddComponent<OWAudioSource>();
             superBoostAudio.transform.parent = audioController.transform;
             superBoostAudio.transform.localPosition = new Vector3(0, 0, 1);
 
@@ -181,6 +180,8 @@ namespace HikersMod
                 animController._animator.speed = runAnimSpeed;
                 disableDownThrust = false;
             }
+
+            PrintLog("Just updated movement speed");
         }
 
         public void UpdateAcceleration()
@@ -291,6 +292,11 @@ namespace HikersMod
         public void PrintLog(string text)
         {
             ModHelper.Console.WriteLine(text);
+        }
+
+        public void PrintLog(string text, MessageType type)
+        {
+            ModHelper.Console.WriteLine(text, type);
         }
     }
 }

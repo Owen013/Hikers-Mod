@@ -23,8 +23,10 @@ namespace HikersMod
         [HarmonyPatch(typeof(DreamLanternItem), nameof(DreamLanternItem.UpdateFocus))]
         public static void DreamLanternFocusChanged(DreamLanternItem __instance)
         {
+            if (__instance._wasFocusing == __instance._focusing) return;
             HikersMod.dreamLanternFocused = __instance._focusing;
             HikersMod.dreamLanternFocusChanged = true;
+            HikersMod.Instance.PrintLog("Dream lantern focus changed");
         }
 
         [HarmonyPrefix]
