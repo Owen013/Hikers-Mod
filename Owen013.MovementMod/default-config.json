@@ -7,14 +7,24 @@
 		"Air Speed (Default 3)": 3,
 		"Air Acceleration (Default 0.09)": 0.09,
 		"Jump Power (Default 7)": 7,
+		"Jetpack Acceleration (Default 6)": 6,
+		"Jetpack Boost Acceleration (Default 23)": 23,
+		"Jetpack Boost Seconds until Depletion (Default 1)": 1,
 		"Instant Jump": true,
 		"Disable Strafing Slowdown": true,
 		"More Air Control": true,
-		"Enable Sprinting": true,
+		"Enable Sprinting": {
+			"type": "selector",
+			"value": "Real World Only",
+			"options": [ "No", "Real World Only", "Everywhere" ],
+			"title": "Enable Sprinting"
+		},
 		"Sprint Speed": 10,
 		"Enable Climbing": false,
 		"Wall Jumps per Climb": 5,
 		"Floaty Physics in Low-Gravity": false,
-		"Floaty Physics Power": 1
+		"Floaty Physics Power": 1,
+		"Enable Jetpack Super-Boost": false,
+		"Super-Boost Power": 25
 	}
 }
