@@ -22,7 +22,7 @@ namespace HikersMod
         private OWAudioSource superBoostAudio;
         private ThrusterFlameController downThrustFlame;
         public bool allLoaded, superBoosting, isDreaming;
-        public float runAnimSpeed, sprintAnimSpeed, walkAnimSpeed, strafeSpeed, sprintStrafeSpeed, wallJumpsLeft, lastWallJumpTime, lastWallJumpRefill, lastBoostInputTime, lastBoostTime;
+        public float strafeSpeed, sprintStrafeSpeed, wallJumpsLeft, lastWallJumpTime, lastWallJumpRefill, lastBoostInputTime, lastBoostTime;
         private MoveSpeed moveSpeed;
         ISmolHatchling smolHatchlingAPI;
 
@@ -56,9 +56,8 @@ namespace HikersMod
             // If the input changes for rollmode or thrustdown, or if the dream lantern focus just changed, then call UpdateMoveSpeed()
             if (OWInput.IsNewlyPressed(InputLibrary.rollMode) || OWInput.IsNewlyPressed(InputLibrary.thrustDown) || OWInput.IsNewlyReleased(InputLibrary.rollMode) || OWInput.IsNewlyReleased(InputLibrary.thrustDown) || dreamLanternFocusChanged) UpdateMoveSpeed();
             UpdateClimbing();
-            UpdateAnimSpeed();
-            UpdateSuperBoost();
             if (floatyPhysicsEnabled) UpdateAcceleration();
+            UpdateSuperBoost();
             dreamLanternFocusChanged = false;
         }
 
@@ -162,14 +161,12 @@ namespace HikersMod
                 moveSpeed = MoveSpeed.Sprinting;
                 characterController._runSpeed = sprintSpeed;
                 characterController._strafeSpeed = sprintStrafeSpeed;
-                animController._animator.speed = sprintAnimSpeed;
                 disableDownThrust = true;
             }
             else if (walking)
             {
                 moveSpeed = MoveSpeed.Walking;
                 if (dreamLanternFocused) animController._animator.speed = 1;
-                else animController._animator.speed = walkAnimSpeed;
                 disableDownThrust = false;
             }
             else
@@ -177,10 +174,9 @@ namespace HikersMod
                 moveSpeed = MoveSpeed.Normal;
                 characterController._runSpeed = runSpeed;
                 characterController._strafeSpeed = strafeSpeed;
-                animController._animator.speed = runAnimSpeed;
                 disableDownThrust = false;
             }
-
+            UpdateAnimSpeed();
             PrintLog("Just updated movement speed");
         }
 
@@ -190,6 +186,7 @@ namespace HikersMod
             if (characterController.IsGrounded()) gravMultiplier = Mathf.Min(Mathf.Pow(characterController.GetNormalAccelerationScalar() / 12, floatyPhysicsPower), 1);
             else gravMultiplier = 1;
             characterController._acceleration = groundAccel * gravMultiplier;
+            UpdateAnimSpeed();
         }
 
         public void UpdateAnimSpeed()
@@ -249,15 +246,17 @@ namespace HikersMod
 
         public void UpdateSuperBoost()
         {
-            if (characterController.IsGrounded() || !characterController._isWearingSuit || PlayerState.InZeroG() || PlayerState.IsInsideShip()) superBoosting = false;
-            else if (OWInput.IsNewlyPressed(InputLibrary.jump) && Time.time - lastBoostInputTime < 0.25f && superBoostEnabled && !superBoosting)
+            bool isInputting = OWInput.IsNewlyPressed(InputLibrary.jump) && !OWInput.IsPressed(InputLibrary.thrustUp);
+            bool meetsCriteria = characterController._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
+            if (!meetsCriteria) superBoosting = false;
+            else if (isInputting && meetsCriteria && Time.time - lastBoostInputTime < 0.25f && superBoostEnabled && !superBoosting)
             {
                 lastBoostTime = Time.time;
                 superBoosting = true;
                 jetpackModel._boostChargeFraction = 1f;
                 superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, 1f);
             }
-            if (OWInput.IsNewlyPressed(InputLibrary.jump) && !characterController.IsGrounded()) lastBoostInputTime = Time.time;
+            if (isInputting && meetsCriteria) lastBoostInputTime = Time.time;
             if (superBoosting)
             {
                 if (jetpackModel._boostChargeFraction > 0)

@@ -45,7 +45,7 @@ namespace HikersMod
                 float num2 = characterController._airAcceleration * num;
                 Vector2 axisValue = OWInput.GetAxisValue(InputLibrary.moveXZ, InputMode.Character | InputMode.NomaiRemoteCam);
                 Vector3 localVelocityChange = new Vector3(num2 * axisValue.x, 0f, num2 * axisValue.y);
-                if (vector.magnitude < characterController._airSpeed || (vector + localVelocityChange).magnitude < vector.magnitude)
+                if (vector.magnitude < characterController._airSpeed || (vector + localVelocityChange).magnitude <= vector.magnitude)
                 {
                     characterController._owRigidbody.AddLocalVelocityChange(localVelocityChange);
                 }
