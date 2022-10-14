@@ -10,8 +10,7 @@ Normally in Outer Wilds, you have to hold space to charge a jump and then releas
 In vanilla Outer Wilds, the player walks slightly slower if they aren't walking directly forward. The "no strafing slowdown" feature, which is also enabled by default, removes this slowdown so that you can move full-speed ahead even to the right, left, or behind!
 
 ## More Air Control
-
-Are you regretting that jump you just made? Did you forget your jetpack? Well, Outer Wilds lets you speed up your character in mid-air a little bit, but it doesn't allow you to slow down after you've reached a certain speed. The "more air control" feature allows you to slow down in mid-air and change direction to an extent!
+Are you regretting that jump you just made, but forgot your jetpack? Well, Outer Wilds lets you speed up your character in mid-air a little bit, but it doesn't allow you to slow down after you've reached a certain speed. The "more air control" feature allows you to slow down and change direction in mid-air! This only affects unsuited movement.
 
 ![HikersMod04](https://user-images.githubusercontent.com/96493201/193693118-bb18cf4a-33eb-4bb3-98ad-d148117f4967.png)
 
@@ -36,6 +35,6 @@ This feature makes the player's movement floatier on low-gravity bodies! The low
 ![Outer Wilds Screenshot 2022 10 02 - 22 59 33 32](https://user-images.githubusercontent.com/96493201/193494262-f4876e32-4eaf-408e-92c4-683be745f23b.png)
 
 ## Jetpack Super-Boost
-This feature basically causes your jetpack to shoot you upward when you double-tap space while you're in the air. The downside to this is that you won't be able to use your jetpack's boost until you touch the ground again.
+This feature allows you to shoot upward with your jetpack when you double-tap the jump button. The downside to this is that you won't be able to use your jetpack's boost until you touch the ground again. Note: you can't boost while holding the thrust-up button.
 
 ![HikersMod05](https://user-images.githubusercontent.com/96493201/194721393-f0a0af40-a7b3-4285-b468-a535d2d1f09f.png)
