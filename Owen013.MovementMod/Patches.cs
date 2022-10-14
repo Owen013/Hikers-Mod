@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using OWML.Common;
 using UnityEngine;
 
 namespace HikersMod
@@ -16,7 +17,7 @@ namespace HikersMod
         [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
         public static void GetJetpackInput(ref Vector3 __result)
         {
-            if (HikersMod.disableDownThrust && __result.y < 0) __result.y = 0;
+            if (HikersMod.Instance.disableDownThrust && __result.y < 0) __result.y = 0;
         }
 
         [HarmonyPostfix]
@@ -24,30 +25,30 @@ namespace HikersMod
         public static void DreamLanternFocusChanged(DreamLanternItem __instance)
         {
             if (__instance._wasFocusing == __instance._focusing) return;
-            HikersMod.dreamLanternFocused = __instance._focusing;
-            HikersMod.dreamLanternFocusChanged = true;
-            HikersMod.Instance.PrintLog("Dream lantern focus changed");
+            HikersMod.Instance.dreamLanternFocused = __instance._focusing;
+            HikersMod.Instance.dreamLanternFocusChanged = true;
+            if (__instance._focusing) HikersMod.Instance.PrintLog("Focused Dream Lantern", MessageType.Info);
+            else HikersMod.Instance.PrintLog("Unfocused Dream Lantern", MessageType.Info);
         }
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.UpdateAirControl))]
-        public static bool CharacterUpdateAirControl()
+        public static bool CharacterUpdateAirControl(PlayerCharacterController __instance)
         {
             if (!HikersMod.Instance.moreAirControlEnabled) return true;
-            PlayerCharacterController characterController = HikersMod.Instance.characterController;
-            if (characterController == null) return true;
-            if (characterController._lastGroundBody != null)
+            if (__instance == null) return true;
+            if (__instance._lastGroundBody != null)
             {
-                Vector3 b = characterController._transform.InverseTransformDirection(characterController._lastGroundBody.GetPointVelocity(characterController._transform.position));
-                Vector3 vector = characterController._transform.InverseTransformDirection(characterController._owRigidbody.GetVelocity()) - b;
+                Vector3 b = __instance._transform.InverseTransformDirection(__instance._lastGroundBody.GetPointVelocity(__instance._transform.position));
+                Vector3 vector = __instance._transform.InverseTransformDirection(__instance._owRigidbody.GetVelocity()) - b;
                 vector.y = 0f;
                 float num = Time.fixedDeltaTime * 60f;
-                float num2 = characterController._airAcceleration * num;
+                float num2 = __instance._airAcceleration * num;
                 Vector2 axisValue = OWInput.GetAxisValue(InputLibrary.moveXZ, InputMode.Character | InputMode.NomaiRemoteCam);
                 Vector3 localVelocityChange = new Vector3(num2 * axisValue.x, 0f, num2 * axisValue.y);
-                if (vector.magnitude < characterController._airSpeed || (vector + localVelocityChange).magnitude <= vector.magnitude)
+                if (vector.magnitude < __instance._airSpeed || (vector + localVelocityChange).magnitude <= vector.magnitude)
                 {
-                    characterController._owRigidbody.AddLocalVelocityChange(localVelocityChange);
+                    __instance._owRigidbody.AddLocalVelocityChange(localVelocityChange);
                 }
             }
             return false;
@@ -59,6 +60,7 @@ namespace HikersMod
         {
             HikersMod.Instance.isDreaming = true;
             HikersMod.Instance.UpdateMoveSpeed();
+            HikersMod.Instance.PrintLog("Entered Dream World", MessageType.Info);
         }
 
         [HarmonyPostfix]
@@ -67,6 +69,7 @@ namespace HikersMod
         {
             HikersMod.Instance.isDreaming = false;
             HikersMod.Instance.UpdateMoveSpeed();
+            HikersMod.Instance.PrintLog("Left Dream World", MessageType.Info);
         }
     }
 }

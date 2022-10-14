@@ -1,6 +1,7 @@
 {
 	"enabled": true,
 	"settings": {
+		"Enable Debug Log": false,
 		"Normal Speed (Default 6)": 6,
 		"Walk Speed (Default 3)": 3,
 		"Ground Acceleration (Default 0.5)": 0.5,
