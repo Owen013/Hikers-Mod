@@ -13,7 +13,7 @@
 		"Jetpack Boost Seconds until Depletion (Default 1)": 1,
 		"Instant Jump": true,
 		"Disable Strafing Slowdown": true,
-		"More Air Control": true,
+		"Enhanced Air Control": true,
 		"Enable Sprinting": {
 			"type": "selector",
 			"value": "Real World Only",
@@ -21,7 +21,12 @@
 			"title": "Enable Sprinting"
 		},
 		"Sprint Speed": 10,
-		"Enable Climbing": false,
+		"Enable Climbing": {
+			"type": "selector",
+			"value": "No",
+			"options": [ "No", "When Unsuited", "Always" ],
+			"title": "Enable Climbing"
+		},
 		"Wall Jumps per Climb": 5,
 		"Floaty Physics in Low-Gravity": false,
 		"Floaty Physics Power": 1,

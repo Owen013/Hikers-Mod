@@ -35,21 +35,24 @@ namespace HikersMod
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.UpdateAirControl))]
         public static bool CharacterUpdateAirControl(PlayerCharacterController __instance)
         {
-            if (!HikersMod.Instance.moreAirControlEnabled) return true;
+            if (!HikersMod.Instance.enhancedAirControlEnabled) return true;
             if (__instance == null) return true;
             if (__instance._lastGroundBody != null)
             {
-                Vector3 b = __instance._transform.InverseTransformDirection(__instance._lastGroundBody.GetPointVelocity(__instance._transform.position));
-                Vector3 vector = __instance._transform.InverseTransformDirection(__instance._owRigidbody.GetVelocity()) - b;
-                vector.y = 0f;
-                float num = Time.fixedDeltaTime * 60f;
-                float num2 = __instance._airAcceleration * num;
+                Vector3 pointVelocity = __instance._transform.InverseTransformDirection(__instance._lastGroundBody.GetPointVelocity(__instance._transform.position));
+                Vector3 localVelocity = __instance._transform.InverseTransformDirection(__instance._owRigidbody.GetVelocity()) - pointVelocity;
+                localVelocity.y = 0f;
+                float physicsTime = Time.fixedDeltaTime * 60f;
+                float maxChange = __instance._airAcceleration * physicsTime;
                 Vector2 axisValue = OWInput.GetAxisValue(InputLibrary.moveXZ, InputMode.Character | InputMode.NomaiRemoteCam);
-                Vector3 localVelocityChange = new Vector3(num2 * axisValue.x, 0f, num2 * axisValue.y);
-                if (vector.magnitude < __instance._airSpeed || (vector + localVelocityChange).magnitude <= vector.magnitude)
+                Vector3 localVelocityChange = new Vector3(maxChange * axisValue.x, 0f, maxChange * axisValue.y);
+                Vector3 newLocalVelocity = localVelocity + localVelocityChange;
+                if (newLocalVelocity.magnitude > __instance._airSpeed && newLocalVelocity.magnitude > localVelocity.magnitude)
                 {
-                    __instance._owRigidbody.AddLocalVelocityChange(localVelocityChange);
+                    __instance._owRigidbody.AddLocalVelocityChange(-localVelocity);
+                    __instance._owRigidbody.AddLocalVelocityChange(Vector3.ClampMagnitude(newLocalVelocity, localVelocity.magnitude));
                 }
+                else __instance._owRigidbody.AddLocalVelocityChange(localVelocityChange);
             }
             return false;
         }

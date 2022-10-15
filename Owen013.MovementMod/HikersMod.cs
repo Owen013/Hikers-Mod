@@ -2,15 +2,16 @@
 using OWML.ModHelper;
 using OWML.Common;
 using UnityEngine;
+using System.Linq;
 
 namespace HikersMod
 {
     public class HikersMod : ModBehaviour
     {
         // Config vars
-        public bool debugLogEnabled, instantJumpEnabled, slowStrafeDisabled, moreAirControlEnabled, floatyPhysicsEnabled, climbingEnabled, superBoostEnabled;
+        public bool debugLogEnabled, instantJumpEnabled, slowStrafeDisabled, enhancedAirControlEnabled, floatyPhysicsEnabled, superBoostEnabled;
         private float runSpeed, walkSpeed, groundAccel, airSpeed, airAccel, jumpPower, jetpackAccel, jetpackBoostAccel, jetpackBoostTime, sprintSpeed, wallJumpsPerClimb, floatyPhysicsPower, superBoostPower;
-        private string sprintEnabled;
+        private string sprintingEnabled, climbingEnabled;
 
         // Mod vars
         public static HikersMod Instance;
@@ -79,10 +80,10 @@ namespace HikersMod
             jetpackBoostAccel = config.GetSettingsValue<float>("Jetpack Boost Acceleration (Default 23)");
             jetpackBoostTime = config.GetSettingsValue<float>("Jetpack Boost Seconds until Depletion (Default 1)");
             slowStrafeDisabled = config.GetSettingsValue<bool>("Disable Strafing Slowdown");
-            moreAirControlEnabled = config.GetSettingsValue<bool>("More Air Control");
-            sprintEnabled = config.GetSettingsValue<string>("Enable Sprinting");
+            enhancedAirControlEnabled = config.GetSettingsValue<bool>("Enhanced Air Control");
+            sprintingEnabled = config.GetSettingsValue<string>("Enable Sprinting");
             sprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
-            climbingEnabled = config.GetSettingsValue<bool>("Enable Climbing");
+            climbingEnabled = config.GetSettingsValue<string>("Enable Climbing");
             wallJumpsPerClimb = config.GetSettingsValue<float>("Wall Jumps per Climb");
             floatyPhysicsEnabled = config.GetSettingsValue<bool>("Floaty Physics in Low-Gravity");
             floatyPhysicsPower = config.GetSettingsValue<float>("Floaty Physics Power");
@@ -162,7 +163,7 @@ namespace HikersMod
             bool grounded = characterController._isGrounded;
             bool holdingLantern = characterController._heldLanternItem != null;
             bool walking = (OWInput.IsPressed(InputLibrary.rollMode) && !holdingLantern) || dreamLanternFocused;
-            bool canSprint = ((sprintEnabled == "Everywhere") || sprintEnabled == "Real World Only" && !isDreaming) && !walking;
+            bool canSprint = ((sprintingEnabled == "Everywhere") || sprintingEnabled == "Real World Only" && !isDreaming) && !walking;
             bool sprintKeyHeld = OWInput.IsPressed(InputLibrary.thrustDown);
             MoveSpeed oldSpeed = moveSpeed;
             if (canSprint && grounded && sprintKeyHeld)
@@ -226,7 +227,7 @@ namespace HikersMod
             characterController.UpdatePushable();
             bool canClimb = characterController._isPushable && !PlayerState.InZeroG() && !grounded;
             bool jumpKeyPressed = OWInput.IsNewlyPressed(InputLibrary.jump);
-            if (climbingEnabled && canClimb && jumpKeyPressed && wallJumpsLeft > 0) DoWallJump();
+            if (((climbingEnabled == "When Unsuited" && !PlayerState.IsWearingSuit()) || climbingEnabled == "Always") && canClimb && jumpKeyPressed && wallJumpsLeft > 0) DoWallJump();
 
             // Replenish 1 wall jump if the player hasn't done one for five seconds
             if (Time.time - lastWallJumpRefill > 5 && wallJumpsLeft < wallJumpsPerClimb)
