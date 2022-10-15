@@ -20,6 +20,12 @@
 			"options": [ "No", "Real World Only", "Everywhere" ],
 			"title": "Enable Sprinting"
 		},
+		"Sprint Button": {
+			"type": "selector",
+			"value": "Down Thrust",
+			"options": [ "Down Thrust", "Up Thrust" ],
+			"title": "Sprint Button"
+		},
 		"Sprint Speed": 10,
 		"Enable Climbing": {
 			"type": "selector",

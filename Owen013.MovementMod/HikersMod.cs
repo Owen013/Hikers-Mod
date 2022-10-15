@@ -2,7 +2,6 @@
 using OWML.ModHelper;
 using OWML.Common;
 using UnityEngine;
-using System.Linq;
 
 namespace HikersMod
 {
@@ -11,7 +10,7 @@ namespace HikersMod
         // Config vars
         public bool debugLogEnabled, instantJumpEnabled, slowStrafeDisabled, enhancedAirControlEnabled, floatyPhysicsEnabled, superBoostEnabled;
         private float runSpeed, walkSpeed, groundAccel, airSpeed, airAccel, jumpPower, jetpackAccel, jetpackBoostAccel, jetpackBoostTime, sprintSpeed, wallJumpsPerClimb, floatyPhysicsPower, superBoostPower;
-        private string sprintingEnabled, climbingEnabled;
+        public string sprintEnabled, sprintButton, climbingEnabled;
 
         // Mod vars
         public static HikersMod Instance;
@@ -20,10 +19,10 @@ namespace HikersMod
         private PlayerAudioController audioController;
         private PlayerImpactAudio impactAudio;
         private JetpackThrusterController jetpackController;
-        private JetpackThrusterModel jetpackModel;
+        public JetpackThrusterModel jetpackModel;
         private OWAudioSource superBoostAudio;
         private ThrusterFlameController downThrustFlame;
-        public bool characterLoaded, disableDownThrust, dreamLanternFocused, dreamLanternFocusChanged, superBoosting, isDreaming;
+        public bool characterLoaded, disableUpDownThrust, dreamLanternFocused, dreamLanternFocusChanged, superBoosting, isDreaming;
         private float strafeSpeed, sprintStrafeSpeed, wallJumpsLeft, lastWallJumpTime, lastWallJumpRefill, lastBoostInputTime, lastBoostTime;
         private MoveSpeed moveSpeed;
         private ISmolHatchling smolHatchlingAPI;
@@ -54,7 +53,7 @@ namespace HikersMod
             if (!IsCorrectScene() || !characterLoaded) return;
 
             // If the input changes for rollmode or thrustdown, or if the dream lantern focus just changed, then call UpdateMoveSpeed()
-            if (OWInput.IsNewlyPressed(InputLibrary.rollMode) || OWInput.IsNewlyPressed(InputLibrary.thrustDown) || OWInput.IsNewlyReleased(InputLibrary.rollMode) || OWInput.IsNewlyReleased(InputLibrary.thrustDown) || dreamLanternFocusChanged) UpdateMoveSpeed();
+            if (InputChanged(InputLibrary.rollMode) || InputChanged(InputLibrary.thrustDown) || InputChanged(InputLibrary.thrustUp) || OWInput.IsNewlyPressed(InputLibrary.boost) || (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 && characterController.IsGrounded()) || dreamLanternFocusChanged) UpdateMoveSpeed();
             
             // Update everthing else
             UpdateClimbing();
@@ -81,7 +80,8 @@ namespace HikersMod
             jetpackBoostTime = config.GetSettingsValue<float>("Jetpack Boost Seconds until Depletion (Default 1)");
             slowStrafeDisabled = config.GetSettingsValue<bool>("Disable Strafing Slowdown");
             enhancedAirControlEnabled = config.GetSettingsValue<bool>("Enhanced Air Control");
-            sprintingEnabled = config.GetSettingsValue<string>("Enable Sprinting");
+            sprintEnabled = config.GetSettingsValue<string>("Enable Sprinting");
+            sprintButton = config.GetSettingsValue<string>("Sprint Button");
             sprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
             climbingEnabled = config.GetSettingsValue<string>("Enable Climbing");
             wallJumpsPerClimb = config.GetSettingsValue<float>("Wall Jumps per Climb");
@@ -163,28 +163,28 @@ namespace HikersMod
             bool grounded = characterController._isGrounded;
             bool holdingLantern = characterController._heldLanternItem != null;
             bool walking = (OWInput.IsPressed(InputLibrary.rollMode) && !holdingLantern) || dreamLanternFocused;
-            bool canSprint = ((sprintingEnabled == "Everywhere") || sprintingEnabled == "Real World Only" && !isDreaming) && !walking;
-            bool sprintKeyHeld = OWInput.IsPressed(InputLibrary.thrustDown);
+            bool canSprint = ((sprintEnabled == "Everywhere") || sprintEnabled == "Real World Only" && !isDreaming) && OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 && !walking;
+            bool inputtingSprint = (sprintButton == "Down Thrust" && OWInput.IsPressed(InputLibrary.thrustDown)) || (sprintButton == "Up Thrust" && OWInput.IsPressed(InputLibrary.thrustUp));
             MoveSpeed oldSpeed = moveSpeed;
-            if (canSprint && grounded && sprintKeyHeld)
+            if (canSprint && grounded && inputtingSprint)
             {
                 moveSpeed = MoveSpeed.Sprinting;
                 characterController._runSpeed = sprintSpeed;
                 characterController._strafeSpeed = sprintStrafeSpeed;
-                disableDownThrust = true;
+                disableUpDownThrust = true;
             }
             else if (walking)
             {
                 moveSpeed = MoveSpeed.Walking;
                 if (dreamLanternFocused) animController._animator.speed = 1;
-                disableDownThrust = false;
+                disableUpDownThrust = false;
             }
             else
             {
                 moveSpeed = MoveSpeed.Normal;
                 characterController._runSpeed = runSpeed;
                 characterController._strafeSpeed = strafeSpeed;
-                disableDownThrust = false;
+                disableUpDownThrust = false;
             }
             UpdateAnimSpeed();
             if (moveSpeed != oldSpeed) PrintLog("Changed movement speed");
@@ -261,7 +261,7 @@ namespace HikersMod
 
         public void UpdateSuperBoost()
         {
-            bool isInputting = OWInput.IsNewlyPressed(InputLibrary.jump) && !OWInput.IsPressed(InputLibrary.thrustUp);
+            bool isInputting = OWInput.IsNewlyPressed(InputLibrary.jump) && (!OWInput.IsPressed(InputLibrary.thrustUp));
             bool meetsCriteria = characterController._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
             if (!meetsCriteria) superBoosting = false;
             else if (isInputting && meetsCriteria && Time.time - lastBoostInputTime < 0.25f && superBoostEnabled && !superBoosting)
@@ -302,6 +302,11 @@ namespace HikersMod
         {
             OWScene scene = LoadManager.s_currentScene;
             return (scene == OWScene.SolarSystem || scene == OWScene.EyeOfTheUniverse);
+        }
+
+        public bool InputChanged(IInputCommands input)
+        {
+            return OWInput.IsNewlyPressed(input) || OWInput.IsNewlyReleased(input);
         }
 
         public void PrintLog(string text)

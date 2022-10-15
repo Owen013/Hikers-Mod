@@ -15,9 +15,42 @@ namespace HikersMod
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
-        public static void GetJetpackInput(ref Vector3 __result)
+        public static void GetJetpackInput(ref Vector3 __result, JetpackThrusterController __instance)
         {
-            if (HikersMod.Instance.disableDownThrust && __result.y < 0) __result.y = 0;
+            if ((HikersMod.Instance.sprintButton == "Down Thrust" && HikersMod.Instance.disableUpDownThrust && __result.y < 0) || (HikersMod.Instance.sprintButton == "Up Thrust" && HikersMod.Instance.disableUpDownThrust && __result.y > 0)) __result.y = 0;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Update))]
+        public static bool CharacterControllerUpdate(PlayerCharacterController __instance)
+        {
+            if (!__instance._isAlignedToForce && !__instance._isZeroGMovementEnabled)
+            {
+                return false;
+            }
+            if ((OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f) || (HikersMod.Instance.sprintButton == "Up Thrust" && HikersMod.Instance.disableUpDownThrust))
+            {
+                __instance.UpdateJumpInput();
+            }
+            else
+            {
+                __instance._jumpChargeTime = 0f;
+                __instance._jumpNextFixedUpdate = false;
+                __instance._jumpPressedInOtherMode = false;
+            }
+            if (__instance._isZeroGMovementEnabled)
+            {
+                __instance._pushPrompt.SetVisibility(OWInput.IsInputMode(InputMode.Character | InputMode.NomaiRemoteCam) && __instance._isPushable);
+            }
+            return false;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
+        public static bool IsBoosterAllowed(ref bool __result, PlayerResources __instance)
+        {
+            __result = !PlayerState.InZeroG() && !Locator.GetPlayerSuit().IsTrainingSuit() && !__instance._cameraFluidDetector.InFluidType(FluidVolume.Type.WATER) && __instance._currentFuel > 0f && !(HikersMod.Instance.sprintButton == "Up Thrust" && HikersMod.Instance.disableUpDownThrust);
+            return false;
         }
 
         [HarmonyPostfix]
@@ -48,10 +81,7 @@ namespace HikersMod
                 Vector3 localVelocityChange = new Vector3(maxChange * axisValue.x, 0f, maxChange * axisValue.y);
                 Vector3 newLocalVelocity = localVelocity + localVelocityChange;
                 if (newLocalVelocity.magnitude > __instance._airSpeed && newLocalVelocity.magnitude > localVelocity.magnitude)
-                {
-                    __instance._owRigidbody.AddLocalVelocityChange(-localVelocity);
-                    __instance._owRigidbody.AddLocalVelocityChange(Vector3.ClampMagnitude(newLocalVelocity, localVelocity.magnitude));
-                }
+                    __instance._owRigidbody.AddLocalVelocityChange(-localVelocity + Vector3.ClampMagnitude(newLocalVelocity, localVelocity.magnitude));
                 else __instance._owRigidbody.AddLocalVelocityChange(localVelocityChange);
             }
             return false;
