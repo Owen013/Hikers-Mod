@@ -22,11 +22,11 @@
 		},
 		"Sprint Button": {
 			"type": "selector",
-			"value": "Down Thrust",
-			"options": [ "Down Thrust", "Up Thrust" ],
+			"value": "Up Thrust",
+			"options": [ "Up Thrust", "Down Thrust" ],
 			"title": "Sprint Button"
 		},
-		"Sprint Speed": 10,
+		"Sprint Speed": 11,
 		"Enable Climbing": {
 			"type": "selector",
 			"value": "No",
