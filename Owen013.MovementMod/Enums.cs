@@ -2,8 +2,8 @@
 {
     public enum MoveSpeed
     {
-        Normal,
         Walking,
+        Normal,
         Sprinting
     }
 }

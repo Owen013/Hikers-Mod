@@ -53,7 +53,15 @@ namespace HikersMod
             if (!IsCorrectScene() || !characterLoaded) return;
 
             // If the input changes for rollmode or thrustdown, or if the dream lantern focus just changed, then call UpdateMoveSpeed()
-            if (InputChanged(InputLibrary.rollMode) || InputChanged(InputLibrary.thrustDown) || InputChanged(InputLibrary.thrustUp) || (OWInput.IsNewlyPressed(InputLibrary.boost) && !characterController.IsGrounded()) || (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 && characterController.IsGrounded()) || dreamLanternFocusChanged) UpdateMoveSpeed();
+            if (InputChanged(InputLibrary.rollMode) ||
+                InputChanged(InputLibrary.thrustDown) ||
+                InputChanged(InputLibrary.thrustUp) ||
+                (OWInput.IsNewlyPressed(InputLibrary.boost) && !characterController.IsGrounded()) ||
+                (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 && characterController.IsGrounded()) ||
+                dreamLanternFocusChanged)
+            {
+                UpdateMoveSpeed();
+            }
             
             // Update everthing else
             UpdateClimbing();
@@ -154,7 +162,7 @@ namespace HikersMod
             jetpackModel._maxTranslationalThrust = jetpackAccel;
             jetpackModel._boostThrust = jetpackBoostAccel;
             jetpackModel._boostSeconds = jetpackBoostTime;
-            // Set moveState to normal
+
             UpdateMoveSpeed();
         }
 
@@ -163,12 +171,13 @@ namespace HikersMod
             bool holdingLantern = characterController._heldLanternItem != null;
             bool walking = (OWInput.IsPressed(InputLibrary.rollMode) && !holdingLantern) || dreamLanternFocused;
             MoveSpeed oldSpeed = moveSpeed;
+
             if (characterController._isGrounded &&
                 !characterController.IsSlidingOnIce() &&
                 !walking &&
                 ((sprintEnabled == "Everywhere") || sprintEnabled == "Real World Only" && !isDreaming) &&
                 ((sprintButton == "Down Thrust" && OWInput.IsPressed(InputLibrary.thrustDown)) || (sprintButton == "Up Thrust" && OWInput.IsPressed(InputLibrary.thrustUp))) &&
-                (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 || moveSpeed == MoveSpeed.Sprinting))
+                (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 || !characterController._isWearingSuit || moveSpeed == MoveSpeed.Sprinting))
             {
                 moveSpeed = MoveSpeed.Sprinting;
                 characterController._runSpeed = sprintSpeed;
@@ -188,8 +197,9 @@ namespace HikersMod
                 characterController._strafeSpeed = strafeSpeed;
                 disableUpDownThrust = false;
             }
+
             UpdateAnimSpeed();
-            if (moveSpeed != oldSpeed) PrintLog("Changed movement speed");
+            if (moveSpeed != oldSpeed) PrintLog($"Changed movement speed to {moveSpeed}");
         }
 
         public void UpdateAcceleration()

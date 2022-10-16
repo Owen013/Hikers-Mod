@@ -17,8 +17,8 @@ namespace HikersMod
         [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
         public static void GetJetpackInput(ref Vector3 __result, JetpackThrusterController __instance)
         {
-            if (HikersMod.Instance.sprintButton == "Down Thrust" && HikersMod.Instance.disableUpDownThrust && __result.y < 0) __result.y = 0;
-            else if (HikersMod.Instance.sprintButton == "Up Thrust" && HikersMod.Instance.disableUpDownThrust && __result.y > 0)
+            if (HikersMod.Instance.sprintButton == "Down Thrust" && HikersMod.Instance.disableUpDownThrust && __result.y < 0 ||
+            HikersMod.Instance.sprintButton == "Up Thrust" && HikersMod.Instance.disableUpDownThrust && __result.y > 0)
             {
                 __result.y = 0;
                 HikersMod.Instance.jetpackModel._boostActivated = false;
