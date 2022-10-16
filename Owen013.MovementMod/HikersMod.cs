@@ -53,7 +53,7 @@ namespace HikersMod
             if (!IsCorrectScene() || !characterLoaded) return;
 
             // If the input changes for rollmode or thrustdown, or if the dream lantern focus just changed, then call UpdateMoveSpeed()
-            if (InputChanged(InputLibrary.rollMode) || InputChanged(InputLibrary.thrustDown) || InputChanged(InputLibrary.thrustUp) || OWInput.IsNewlyPressed(InputLibrary.boost) || (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 && characterController.IsGrounded()) || dreamLanternFocusChanged) UpdateMoveSpeed();
+            if (InputChanged(InputLibrary.rollMode) || InputChanged(InputLibrary.thrustDown) || InputChanged(InputLibrary.thrustUp) || (OWInput.IsNewlyPressed(InputLibrary.boost) && !characterController.IsGrounded()) || (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 && characterController.IsGrounded()) || dreamLanternFocusChanged) UpdateMoveSpeed();
             
             // Update everthing else
             UpdateClimbing();
@@ -160,13 +160,15 @@ namespace HikersMod
 
         public void UpdateMoveSpeed()
         {
-            bool grounded = characterController._isGrounded;
             bool holdingLantern = characterController._heldLanternItem != null;
             bool walking = (OWInput.IsPressed(InputLibrary.rollMode) && !holdingLantern) || dreamLanternFocused;
-            bool canSprint = ((sprintEnabled == "Everywhere") || sprintEnabled == "Real World Only" && !isDreaming) && OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 && !walking;
-            bool inputtingSprint = (sprintButton == "Down Thrust" && OWInput.IsPressed(InputLibrary.thrustDown)) || (sprintButton == "Up Thrust" && OWInput.IsPressed(InputLibrary.thrustUp));
             MoveSpeed oldSpeed = moveSpeed;
-            if (canSprint && grounded && inputtingSprint)
+            if (characterController._isGrounded &&
+                !characterController.IsSlidingOnIce() &&
+                !walking &&
+                ((sprintEnabled == "Everywhere") || sprintEnabled == "Real World Only" && !isDreaming) &&
+                ((sprintButton == "Down Thrust" && OWInput.IsPressed(InputLibrary.thrustDown)) || (sprintButton == "Up Thrust" && OWInput.IsPressed(InputLibrary.thrustUp))) &&
+                (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 || moveSpeed == MoveSpeed.Sprinting))
             {
                 moveSpeed = MoveSpeed.Sprinting;
                 characterController._runSpeed = sprintSpeed;
@@ -193,7 +195,7 @@ namespace HikersMod
         public void UpdateAcceleration()
         {
             float gravMultiplier;
-            if (characterController.IsGrounded()) gravMultiplier = Mathf.Min(Mathf.Pow(characterController.GetNormalAccelerationScalar() / 12, floatyPhysicsPower), 1);
+            if (characterController.IsGrounded() && !characterController.IsSlidingOnIce()) gravMultiplier = Mathf.Min(Mathf.Pow(characterController.GetNormalAccelerationScalar() / 12, floatyPhysicsPower), 1);
             else gravMultiplier = 1;
             characterController._acceleration = groundAccel * gravMultiplier;
             UpdateAnimSpeed();
