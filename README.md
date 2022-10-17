@@ -15,9 +15,9 @@ Are you regretting that jump you just made, but forgot your jetpack? Well, Outer
 ![HikersMod04](https://user-images.githubusercontent.com/96493201/193693118-bb18cf4a-33eb-4bb3-98ad-d148117f4967.png)
 
 ## Sprinting
-The sprinting feature (which is enabled by default, unless you're dreaming) allows you to run faster if you hold the thrust-down button while moving! Sprinting can be disabled entirely, enabled only in the real world, or enabled everywhere.
+The sprinting feature (which is enabled by default, unless you're dreaming) allows you to run faster! This feature is carefully designed to work with the jetpack controls! Your sprinting speed, which button you use to sprint, and more can be changed in the config menu.
 
-![HikersMod03](https://user-images.githubusercontent.com/96493201/193676392-6a03cf77-e81e-4925-bd69-b085b2c804e2.png)
+![HikersMod06](https://user-images.githubusercontent.com/96493201/196058535-4e94b981-e861-4ac6-9daa-559e2df545a1.png)
 
 ## Modify your movement speed, jump height, and more
 Hiker's Mod allows you to change your character's running, walking, and sprinting speeds, your jump height, and your acceleration so that you can make the hatchling as acrobatic as you please!
