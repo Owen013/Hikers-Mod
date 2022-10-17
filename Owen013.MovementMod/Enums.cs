@@ -2,8 +2,9 @@
 {
     public enum MoveSpeed
     {
-        Walking,
         Normal,
+        Walking,
+        DreamLantern,
         Sprinting
     }
 }

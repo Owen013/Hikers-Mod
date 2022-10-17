@@ -4,6 +4,7 @@
 		"Enable Debug Log": false,
 		"Normal Speed (Default 6)": 6,
 		"Walk Speed (Default 3)": 3,
+		"Focused Lantern Speed (Default 2)": 2,
 		"Ground Acceleration (Default 0.5)": 0.5,
 		"Air Speed (Default 3)": 3,
 		"Air Acceleration (Default 0.09)": 0.09,
@@ -26,6 +27,7 @@
 			"options": [ "Up Thrust", "Down Thrust" ],
 			"title": "Sprint Button"
 		},
+		"Allow Thrusting on Ground with Sprinting Enabled": true,
 		"Sprint Speed": 11,
 		"Enable Climbing": {
 			"type": "selector",

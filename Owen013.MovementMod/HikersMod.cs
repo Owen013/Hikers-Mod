@@ -8,12 +8,13 @@ namespace HikersMod
     public class HikersMod : ModBehaviour
     {
         // Config vars
-        public bool debugLogEnabled, instantJumpEnabled, slowStrafeDisabled, enhancedAirControlEnabled, floatyPhysicsEnabled, superBoostEnabled;
-        private float runSpeed, walkSpeed, groundAccel, airSpeed, airAccel, jumpPower, jetpackAccel, jetpackBoostAccel, jetpackBoostTime, sprintSpeed, wallJumpsPerClimb, floatyPhysicsPower, superBoostPower;
-        public string sprintEnabled, sprintButton, climbingEnabled;
+        public bool debugLogEnabled, instantJumpEnabled, slowStrafeDisabled, enhancedAirControlEnabled, allowGroundThrustWithSprint, floatyPhysicsEnabled, superBoostEnabled;
+        public float runSpeed, walkSpeed, dreamLanternSpeed, groundAccel, airSpeed, airAccel, jumpPower, jetpackAccel, jetpackBoostAccel, jetpackBoostTime, sprintSpeed, wallJumpsPerClimb, floatyPhysicsPower, superBoostPower;
+        public string sprintEnabled, sprintButtonName, climbingEnabled;
 
         // Mod vars
         public static HikersMod Instance;
+        public AssetBundle textAssets;
         private PlayerCharacterController characterController;
         private PlayerAnimController animController;
         private PlayerAudioController audioController;
@@ -22,10 +23,12 @@ namespace HikersMod
         public JetpackThrusterModel jetpackModel;
         private OWAudioSource superBoostAudio;
         private ThrusterFlameController downThrustFlame;
+        public GameObject superBoostNote;
+        private ISmolHatchling smolHatchlingAPI;
+        private MoveSpeed moveSpeed;
+        public IInputCommands sprintButton;
         public bool characterLoaded, disableUpDownThrust, dreamLanternFocused, dreamLanternFocusChanged, superBoosting, isDreaming;
         private float strafeSpeed, sprintStrafeSpeed, wallJumpsLeft, lastWallJumpTime, lastWallJumpRefill, lastBoostInputTime, lastBoostTime;
-        private MoveSpeed moveSpeed;
-        private ISmolHatchling smolHatchlingAPI;
 
         public void Awake()
         {
@@ -40,8 +43,11 @@ namespace HikersMod
             smolHatchlingAPI = ModHelper.Interaction.TryGetModApi<ISmolHatchling>("Owen013.TeenyHatchling");
             if (smolHatchlingAPI != null) smolHatchlingAPI.SetHikersModEnabled();
 
+            textAssets = ModHelper.Assets.LoadBundle("Assets/textassets");
+
             // Set characterLoaded to false whenever a new scene begins loading
             LoadManager.OnStartSceneLoad += (scene, loadScene) => characterLoaded = false;
+            LoadManager.OnCompleteSceneLoad += (scene, loadScene) => PlaceSuperBoostNote();
 
             // Ready!
             ModHelper.Console.WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
@@ -57,7 +63,6 @@ namespace HikersMod
                 InputChanged(InputLibrary.thrustDown) ||
                 InputChanged(InputLibrary.thrustUp) ||
                 (OWInput.IsNewlyPressed(InputLibrary.boost) && !characterController.IsGrounded()) ||
-                (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 && characterController.IsGrounded()) ||
                 dreamLanternFocusChanged)
             {
                 UpdateMoveSpeed();
@@ -78,6 +83,7 @@ namespace HikersMod
             debugLogEnabled = config.GetSettingsValue<bool>("Enable Debug Log");
             runSpeed = config.GetSettingsValue<float>("Normal Speed (Default 6)");
             walkSpeed = config.GetSettingsValue<float>("Walk Speed (Default 3)");
+            dreamLanternSpeed = config.GetSettingsValue<float>("Focused Lantern Speed (Default 2)");
             groundAccel = config.GetSettingsValue<float>("Ground Acceleration (Default 0.5)");
             airSpeed = config.GetSettingsValue<float>("Air Speed (Default 3)");
             airAccel = config.GetSettingsValue<float>("Air Acceleration (Default 0.09)");
@@ -89,7 +95,8 @@ namespace HikersMod
             slowStrafeDisabled = config.GetSettingsValue<bool>("Disable Strafing Slowdown");
             enhancedAirControlEnabled = config.GetSettingsValue<bool>("Enhanced Air Control");
             sprintEnabled = config.GetSettingsValue<string>("Enable Sprinting");
-            sprintButton = config.GetSettingsValue<string>("Sprint Button");
+            sprintButtonName = config.GetSettingsValue<string>("Sprint Button");
+            allowGroundThrustWithSprint = config.GetSettingsValue<bool>("Allow Thrusting on Ground with Sprinting Enabled");
             sprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
             climbingEnabled = config.GetSettingsValue<string>("Enable Climbing");
             wallJumpsPerClimb = config.GetSettingsValue<float>("Wall Jumps per Climb");
@@ -163,21 +170,27 @@ namespace HikersMod
             jetpackModel._boostThrust = jetpackBoostAccel;
             jetpackModel._boostSeconds = jetpackBoostTime;
 
+            if (sprintButtonName == "Down Thrust") sprintButton = InputLibrary.thrustDown;
+            else sprintButton = InputLibrary.thrustUp;
+
+            if (superBoostNote != null) superBoostNote.SetActive(superBoostEnabled);
+
             UpdateMoveSpeed();
         }
 
         public void UpdateMoveSpeed()
         {
             bool holdingLantern = characterController._heldLanternItem != null;
-            bool walking = (OWInput.IsPressed(InputLibrary.rollMode) && !holdingLantern) || dreamLanternFocused;
+            bool walking = (OWInput.IsPressed(InputLibrary.rollMode) && !holdingLantern);
             MoveSpeed oldSpeed = moveSpeed;
 
-            if (characterController._isGrounded &&
+            if (OWInput.IsPressed(sprintButton) &&
+                characterController._isGrounded &&
                 !characterController.IsSlidingOnIce() &&
                 !walking &&
+                !dreamLanternFocused &&
                 ((sprintEnabled == "Everywhere") || sprintEnabled == "Real World Only" && !isDreaming) &&
-                ((sprintButton == "Down Thrust" && OWInput.IsPressed(InputLibrary.thrustDown)) || (sprintButton == "Up Thrust" && OWInput.IsPressed(InputLibrary.thrustUp))) &&
-                (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 || !characterController._isWearingSuit || moveSpeed == MoveSpeed.Sprinting))
+                (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 || !characterController._isWearingSuit || !allowGroundThrustWithSprint || moveSpeed == MoveSpeed.Sprinting))
             {
                 moveSpeed = MoveSpeed.Sprinting;
                 characterController._runSpeed = sprintSpeed;
@@ -187,7 +200,11 @@ namespace HikersMod
             else if (walking)
             {
                 moveSpeed = MoveSpeed.Walking;
-                if (dreamLanternFocused) animController._animator.speed = 1;
+                disableUpDownThrust = false;
+            }
+            else if (dreamLanternFocused)
+            {
+                moveSpeed = MoveSpeed.DreamLantern;
                 disableUpDownThrust = false;
             }
             else
@@ -224,8 +241,10 @@ namespace HikersMod
                     animController._animator.speed = Mathf.Max(runSpeed / 6 * multiplier, multiplier);
                     break;
                 case MoveSpeed.Walking:
-                    if (dreamLanternFocused) animController._animator.speed = multiplier;
-                    else animController._animator.speed = Mathf.Max(walkSpeed / 6 * multiplier, multiplier);
+                    animController._animator.speed = Mathf.Max(walkSpeed / 6 * multiplier, multiplier);
+                    break;
+                case MoveSpeed.DreamLantern:
+                    animController._animator.speed = Mathf.Max(dreamLanternSpeed / 6 * multiplier, multiplier);
                     break;
                 case MoveSpeed.Sprinting:
                     animController._animator.speed = Mathf.Max(sprintSpeed / 6 * multiplier, multiplier);
@@ -276,7 +295,7 @@ namespace HikersMod
             bool isInputting = OWInput.IsNewlyPressed(InputLibrary.jump) && (!OWInput.IsPressed(InputLibrary.thrustUp));
             bool meetsCriteria = characterController._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
             if (!meetsCriteria) superBoosting = false;
-            else if (isInputting && meetsCriteria && Time.time - lastBoostInputTime < 0.25f && superBoostEnabled && !superBoosting)
+            else if (isInputting && meetsCriteria && jetpackController._resources.GetFuel() > 0 && Time.time - lastBoostInputTime < 0.25f && superBoostEnabled && !superBoosting)
             {
                 lastBoostTime = Time.time;
                 superBoosting = true;
@@ -319,6 +338,13 @@ namespace HikersMod
         public bool InputChanged(IInputCommands input)
         {
             return OWInput.IsNewlyPressed(input) || OWInput.IsNewlyReleased(input);
+        }
+
+        public void PlaceSuperBoostNote()
+        {
+            if (GameObject.Find("Ship_Body") == null) return;
+            GameObject notesObject = Instantiate(GameObject.Find("DeepFieldNotes_2"));
+            notesObject.AddComponent<SuperBoostNote>();
         }
 
         public void PrintLog(string text)

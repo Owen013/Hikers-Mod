@@ -15,10 +15,10 @@ namespace HikersMod
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
-        public static void GetJetpackInput(ref Vector3 __result, JetpackThrusterController __instance)
+        public static void GetJetpackInput(ref Vector3 __result)
         {
-            if (HikersMod.Instance.sprintButton == "Down Thrust" && HikersMod.Instance.disableUpDownThrust && __result.y < 0 ||
-            HikersMod.Instance.sprintButton == "Up Thrust" && HikersMod.Instance.disableUpDownThrust && __result.y > 0)
+            if (HikersMod.Instance.sprintButton == InputLibrary.thrustDown && HikersMod.Instance.disableUpDownThrust && __result.y < 0 ||
+            HikersMod.Instance.sprintButton == InputLibrary.thrustUp && HikersMod.Instance.disableUpDownThrust && __result.y > 0)
             {
                 __result.y = 0;
                 HikersMod.Instance.jetpackModel._boostActivated = false;
@@ -33,7 +33,7 @@ namespace HikersMod
             {
                 return false;
             }
-            if ((OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f) || (HikersMod.Instance.sprintButton == "Up Thrust" && HikersMod.Instance.disableUpDownThrust))
+            if ((OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f) || (HikersMod.Instance.sprintButton == InputLibrary.thrustUp && HikersMod.Instance.disableUpDownThrust))
             {
                 __instance.UpdateJumpInput();
             }
@@ -54,7 +54,7 @@ namespace HikersMod
         [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
         public static bool IsBoosterAllowed(ref bool __result, PlayerResources __instance)
         {
-            __result = !PlayerState.InZeroG() && !Locator.GetPlayerSuit().IsTrainingSuit() && !__instance._cameraFluidDetector.InFluidType(FluidVolume.Type.WATER) && __instance._currentFuel > 0f && !(HikersMod.Instance.sprintButton == "Up Thrust" && HikersMod.Instance.disableUpDownThrust);
+            __result = !PlayerState.InZeroG() && !Locator.GetPlayerSuit().IsTrainingSuit() && !__instance._cameraFluidDetector.InFluidType(FluidVolume.Type.WATER) && __instance._currentFuel > 0f && !HikersMod.Instance.disableUpDownThrust;
             return false;
         }
 
@@ -108,6 +108,17 @@ namespace HikersMod
             HikersMod.Instance.isDreaming = false;
             HikersMod.Instance.UpdateMoveSpeed();
             HikersMod.Instance.PrintLog("Left Dream World", MessageType.Info);
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(DreamLanternItem), nameof(DreamLanternItem.OverrideMaxRunSpeed))]
+        public static bool OverrideMaxRunSpeed(ref float maxSpeedX, ref float maxSpeedZ, DreamLanternItem __instance)
+        {
+            float num = 1f - __instance._lanternController.GetFocus();
+            num *= num;
+            maxSpeedX = Mathf.Lerp(HikersMod.Instance.dreamLanternSpeed, maxSpeedX, num);
+            maxSpeedZ = Mathf.Lerp(HikersMod.Instance.dreamLanternSpeed, maxSpeedZ, num);
+            return false;
         }
     }
 }
