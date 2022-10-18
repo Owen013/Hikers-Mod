@@ -24,8 +24,9 @@ Hiker's Mod allows you to change your character's running, walking, and sprintin
 
 # More features:
 The following features are **disabled** by default, but they can be enabled in the config menu.
-## Climbing
-This feature allows you to climb up walls by pressing the jump button while facing a wall.
+
+## Wall-Jumping
+This feature allows you to climb up walls to an extent by pressing the jump button while facing a wall.
 
 ![HikersMod02](https://user-images.githubusercontent.com/96493201/193676452-5ba0c660-e569-4705-a012-886bed7fb375.png)
 
