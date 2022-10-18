@@ -9,8 +9,8 @@ namespace HikersMod
     {
         // Config vars
         public bool debugLogEnabled, instantJumpEnabled, slowStrafeDisabled, enhancedAirControlEnabled, allowGroundThrustWithSprint, floatyPhysicsEnabled, superBoostEnabled;
-        public float runSpeed, walkSpeed, dreamLanternSpeed, groundAccel, airSpeed, airAccel, jumpPower, jetpackAccel, jetpackBoostAccel, jetpackBoostTime, sprintSpeed, wallJumpsPerClimb, floatyPhysicsPower, superBoostPower;
-        public string sprintEnabled, sprintButtonName, climbingEnabled;
+        public float runSpeed, walkSpeed, dreamLanternSpeed, groundAccel, airSpeed, airAccel, jumpPower, jetpackAccel, jetpackBoostAccel, jetpackBoostTime, sprintSpeed, wallJumpsPerJump, floatyPhysicsPower, superBoostPower;
+        public string sprintEnabled, sprintButtonName, wallJumpingEnabled;
 
         // Mod vars
         public static HikersMod Instance;
@@ -25,7 +25,7 @@ namespace HikersMod
         private ThrusterFlameController downThrustFlame;
         public GameObject superBoostNote;
         private ISmolHatchling smolHatchlingAPI;
-        private MoveSpeed moveSpeed;
+        public MoveSpeed moveSpeed;
         public IInputCommands sprintButton;
         public bool characterLoaded, disableUpDownThrust, dreamLanternFocused, dreamLanternFocusChanged, superBoosting, isDreaming;
         private float strafeSpeed, sprintStrafeSpeed, wallJumpsLeft, lastWallJumpTime, lastWallJumpRefill, lastBoostInputTime, lastBoostTime;
@@ -47,7 +47,7 @@ namespace HikersMod
 
             // Set characterLoaded to false whenever a new scene begins loading
             LoadManager.OnStartSceneLoad += (scene, loadScene) => characterLoaded = false;
-            LoadManager.OnCompleteSceneLoad += (scene, loadScene) => PlaceSuperBoostNote();
+            //LoadManager.OnCompleteSceneLoad += (scene, loadScene) => PlaceSuperBoostNote();
 
             // Ready!
             ModHelper.Console.WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
@@ -69,7 +69,7 @@ namespace HikersMod
             }
             
             // Update everthing else
-            UpdateClimbing();
+            UpdateWallJumping();
             UpdateSuperBoost();
             if (floatyPhysicsEnabled) UpdateAcceleration();
             dreamLanternFocusChanged = false;
@@ -98,8 +98,8 @@ namespace HikersMod
             sprintButtonName = config.GetSettingsValue<string>("Sprint Button");
             allowGroundThrustWithSprint = config.GetSettingsValue<bool>("Allow Thrusting on Ground with Sprinting Enabled");
             sprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
-            climbingEnabled = config.GetSettingsValue<string>("Enable Climbing");
-            wallJumpsPerClimb = config.GetSettingsValue<float>("Wall Jumps per Climb");
+            wallJumpingEnabled = config.GetSettingsValue<string>("Enable Wall Jumping");
+            wallJumpsPerJump = config.GetSettingsValue<float>("Wall Jumps per Jump");
             floatyPhysicsEnabled = config.GetSettingsValue<bool>("Floaty Physics in Low-Gravity");
             floatyPhysicsPower = config.GetSettingsValue<float>("Floaty Physics Power");
             superBoostEnabled = config.GetSettingsValue<bool>("Enable Jetpack Super-Boost");
@@ -135,7 +135,7 @@ namespace HikersMod
             characterController.OnBecomeGrounded += () =>
             {
                 UpdateMoveSpeed();
-                wallJumpsLeft = wallJumpsPerClimb;
+                wallJumpsLeft = wallJumpsPerJump;
                 superBoosting = false;
             };
 
@@ -181,7 +181,7 @@ namespace HikersMod
         public void UpdateMoveSpeed()
         {
             bool holdingLantern = characterController._heldLanternItem != null;
-            bool walking = (OWInput.IsPressed(InputLibrary.rollMode) && !holdingLantern);
+            bool walking = OWInput.IsPressed(InputLibrary.rollMode) && !holdingLantern;
             MoveSpeed oldSpeed = moveSpeed;
 
             if (OWInput.IsPressed(sprintButton) &&
@@ -252,16 +252,16 @@ namespace HikersMod
             }
         }
 
-        public void UpdateClimbing()
+        public void UpdateWallJumping()
         {
             bool grounded = characterController._isGrounded;
             characterController.UpdatePushable();
             bool canClimb = characterController._isPushable && !PlayerState.InZeroG() && !grounded;
-            bool jumpKeyPressed = OWInput.IsNewlyPressed(InputLibrary.jump);
-            if (((climbingEnabled == "When Unsuited" && !PlayerState.IsWearingSuit()) || climbingEnabled == "Always") && canClimb && jumpKeyPressed && wallJumpsLeft > 0) DoWallJump();
+            bool jumpKeyPressed = OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character);
+            if (((wallJumpingEnabled == "When Unsuited" && !PlayerState.IsWearingSuit()) || wallJumpingEnabled == "Always") && canClimb && jumpKeyPressed && wallJumpsLeft > 0) DoWallJump();
 
             // Replenish 1 wall jump if the player hasn't done one for five seconds
-            if (Time.time - lastWallJumpRefill > 5 && wallJumpsLeft < wallJumpsPerClimb)
+            if (Time.time - lastWallJumpRefill > 5 && wallJumpsLeft < wallJumpsPerJump)
             {
                 wallJumpsLeft += 1;
                 lastWallJumpRefill = Time.time;
@@ -276,7 +276,7 @@ namespace HikersMod
             OWRigidbody pushBody = characterController._pushableBody;
             Vector3 pushPoint = characterController._pushContactPt;
             Vector3 pointVelocity = pushBody.GetPointVelocity(pushPoint);
-            Vector3 climbVelocity = new Vector3(0, jumpPower * (wallJumpsLeft / wallJumpsPerClimb), 0);
+            Vector3 climbVelocity = new Vector3(0, jumpPower * (wallJumpsLeft / wallJumpsPerJump), 0);
 
             if ((pointVelocity - characterController._owRigidbody.GetVelocity()).magnitude > 20) PrintLog("Can't Wall-Jump; going too fast");
             else
@@ -292,7 +292,7 @@ namespace HikersMod
 
         public void UpdateSuperBoost()
         {
-            bool isInputting = OWInput.IsNewlyPressed(InputLibrary.jump) && (!OWInput.IsPressed(InputLibrary.thrustUp));
+            bool isInputting = OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && (!OWInput.IsPressed(InputLibrary.thrustUp, InputMode.Character));
             bool meetsCriteria = characterController._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
             if (!meetsCriteria) superBoosting = false;
             else if (isInputting && meetsCriteria && jetpackController._resources.GetFuel() > 0 && Time.time - lastBoostInputTime < 0.25f && superBoostEnabled && !superBoosting)

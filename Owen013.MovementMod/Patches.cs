@@ -25,6 +25,35 @@ namespace HikersMod
             }
         }
 
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(DreamLanternItem), nameof(DreamLanternItem.UpdateFocus))]
+        public static void DreamLanternFocusChanged(DreamLanternItem __instance)
+        {
+            if (__instance._wasFocusing == __instance._focusing) return;
+            HikersMod.Instance.dreamLanternFocused = __instance._focusing;
+            HikersMod.Instance.dreamLanternFocusChanged = true;
+            if (__instance._focusing) HikersMod.Instance.PrintLog("Focused Dream Lantern", MessageType.Info);
+            else HikersMod.Instance.PrintLog("Unfocused Dream Lantern", MessageType.Info);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.OnEnterDreamWorld))]
+        public static void EnteredDreamWorld()
+        {
+            HikersMod.Instance.isDreaming = true;
+            HikersMod.Instance.UpdateMoveSpeed();
+            HikersMod.Instance.PrintLog("Entered Dream World", MessageType.Info);
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.OnExitDreamWorld))]
+        public static void ExitedDreamWorld()
+        {
+            HikersMod.Instance.isDreaming = false;
+            HikersMod.Instance.UpdateMoveSpeed();
+            HikersMod.Instance.PrintLog("Left Dream World", MessageType.Info);
+        }
+
         [HarmonyPrefix]
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Update))]
         public static bool CharacterControllerUpdate(PlayerCharacterController __instance)
@@ -58,15 +87,18 @@ namespace HikersMod
             return false;
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(DreamLanternItem), nameof(DreamLanternItem.UpdateFocus))]
-        public static void DreamLanternFocusChanged(DreamLanternItem __instance)
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(PlayerMovementAudio), nameof(PlayerMovementAudio.PlayFootstep))]
+        public static bool PlayFootstep(PlayerMovementAudio __instance)
         {
-            if (__instance._wasFocusing == __instance._focusing) return;
-            HikersMod.Instance.dreamLanternFocused = __instance._focusing;
-            HikersMod.Instance.dreamLanternFocusChanged = true;
-            if (__instance._focusing) HikersMod.Instance.PrintLog("Focused Dream Lantern", MessageType.Info);
-            else HikersMod.Instance.PrintLog("Unfocused Dream Lantern", MessageType.Info);
+            AudioType audioType = (!PlayerState.IsCameraUnderwater() && __instance._fluidDetector.InFluidType(FluidVolume.Type.WATER)) ? AudioType.MovementShallowWaterFootstep : PlayerMovementAudio.GetFootstepAudioType(__instance._playerController.GetGroundSurface());
+            if (audioType != AudioType.None)
+            {
+                __instance._footstepAudio.pitch = Random.Range(0.9f, 1.1f);
+                if (HikersMod.Instance.moveSpeed == MoveSpeed.Sprinting) __instance._footstepAudio.PlayOneShot(audioType, 1.4f);
+                else __instance._footstepAudio.PlayOneShot(audioType, 0.7f);
+            }
+            return false;
         }
 
         [HarmonyPrefix]
@@ -90,24 +122,6 @@ namespace HikersMod
                 else __instance._owRigidbody.AddLocalVelocityChange(localVelocityChange);
             }
             return false;
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.OnEnterDreamWorld))]
-        public static void EnteredDreamWorld()
-        {
-            HikersMod.Instance.isDreaming = true;
-            HikersMod.Instance.UpdateMoveSpeed();
-            HikersMod.Instance.PrintLog("Entered Dream World", MessageType.Info);
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.OnExitDreamWorld))]
-        public static void ExitedDreamWorld()
-        {
-            HikersMod.Instance.isDreaming = false;
-            HikersMod.Instance.UpdateMoveSpeed();
-            HikersMod.Instance.PrintLog("Left Dream World", MessageType.Info);
         }
 
         [HarmonyPrefix]

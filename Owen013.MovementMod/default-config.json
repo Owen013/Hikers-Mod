@@ -29,13 +29,13 @@
 		},
 		"Allow Thrusting on Ground with Sprinting Enabled": true,
 		"Sprint Speed": 11,
-		"Enable Climbing": {
+		"Enable Wall Jumping": {
 			"type": "selector",
 			"value": "No",
 			"options": [ "No", "When Unsuited", "Always" ],
-			"title": "Enable Climbing"
+			"title": "Enable Wall Jumping"
 		},
-		"Wall Jumps per Climb": 5,
+		"Wall Jumps per Jump": 5,
 		"Floaty Physics in Low-Gravity": false,
 		"Floaty Physics Power": 1,
 		"Enable Jetpack Super-Boost": false,
