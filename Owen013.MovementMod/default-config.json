@@ -2,25 +2,46 @@
 	"enabled": true,
 	"settings": {
 		"Enable Debug Log": false,
+
+		"Character Attributes": {
+			"type": "separator"
+		},
 		"Normal Speed (Default 6)": 6,
 		"Walk Speed (Default 3)": 3,
 		"Focused Lantern Speed (Default 2)": 2,
 		"Ground Acceleration (Default 0.5)": 0.5,
+		"Jump Power (Default 7)": 7,
 		"Air Speed (Default 3)": 3,
 		"Air Acceleration (Default 0.09)": 0.09,
-		"Jump Power (Default 7)": 7,
 		"Jetpack Acceleration (Default 6)": 6,
 		"Jetpack Boost Acceleration (Default 23)": 23,
 		"Jetpack Boost Seconds until Depletion (Default 1)": 1,
-		"Instant Jump": true,
+
+		"Instant Jump": {
+			"type": "separator"
+		},
+		"Enable Instant Jump": true,
+
+		"Strafing Slowdown": {
+			"type": "separator"
+		},
 		"Disable Strafing Slowdown": true,
-		"Enhanced Air Control": true,
+
+		"Enhanced Air Control": {
+			"type": "separator"
+		},
+		"Enable Enhanced Air Control": true,
+
+		"Sprinting": {
+			"type": "separator"
+		},
 		"Enable Sprinting": {
 			"type": "selector",
 			"value": "Real World Only",
 			"options": [ "No", "Real World Only", "Everywhere" ],
 			"title": "Enable Sprinting"
 		},
+		"Sprint Speed": 11,
 		"Sprint Button": {
 			"type": "selector",
 			"value": "Up Thrust",
@@ -28,7 +49,10 @@
 			"title": "Sprint Button"
 		},
 		"Allow Thrusting on Ground with Sprinting Enabled": true,
-		"Sprint Speed": 11,
+
+		"Wall Jumping": {
+			"type": "separator"
+		},
 		"Enable Wall Jumping": {
 			"type": "selector",
 			"value": "No",
@@ -36,8 +60,16 @@
 			"title": "Enable Wall Jumping"
 		},
 		"Wall Jumps per Jump": 5,
+
+		"Floaty Physics": {
+			"type": "separator"
+		},
 		"Floaty Physics in Low-Gravity": false,
 		"Floaty Physics Power": 1,
+
+		"Super-Boosting": {
+			"type": "separator"
+		},
 		"Enable Jetpack Super-Boost": false,
 		"Super-Boost Power": 25
 	}
