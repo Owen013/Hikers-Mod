@@ -5,7 +5,7 @@ namespace HikersMod
 {
     public class SuperBoostNote : MonoBehaviour
     {
-        AssetBundle textAssets = HikersMod.Instance.textAssets;
+        AssetBundle textAssets = HikersModController.Instance._textAssets;
 
         public void Start()
         {
@@ -22,9 +22,9 @@ namespace HikersMod
             interactVolume.transform.position = page.transform.position;
             interactVolume.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
             interactVolume.GetComponent<InteractReceiver>()._usableInShip = true;
-            gameObject.SetActive(HikersMod.Instance.superBoostEnabled);
-            HikersMod.Instance.superBoostNote = gameObject;
-            HikersMod.Instance.ModHelper.Events.Unity.FireInNUpdates(() =>
+            gameObject.SetActive(HikersModController.Instance._isSuperBoostEnabled);
+            HikersModController.Instance._superBoostNote = gameObject;
+            HikersModController.Instance.ModHelper.Events.Unity.FireInNUpdates(() =>
             {
                 dialogueTree._attentionPoint = page.transform;
                 dialogueTree._characterName = "HikersMod_SuperBoostNote";
@@ -37,7 +37,7 @@ namespace HikersMod
             }, 60);
         }
 
-        private void AddTranslations(string textAsset)
+        public void AddTranslations(string textAsset)
         {
             XmlDocument xmlDocument = new XmlDocument();
             xmlDocument.LoadXml(textAsset);
