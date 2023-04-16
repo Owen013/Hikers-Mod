@@ -9,6 +9,7 @@ namespace HikersMod
     {
         // Mod fields
         public static HikersModController Instance;
+        public ISmolHatchling SmolHatchlingAPI;
         public AssetBundle _textAssets;
         public PlayerCharacterController _characterController;
         public PlayerAnimController _animController;
@@ -19,11 +20,20 @@ namespace HikersMod
         public OWAudioSource _superBoostAudio;
         public ThrusterFlameController _downThrustFlame;
         public GameObject _superBoostNote;
+        public PlayerCloneController _cloneController;
+        public EyeMirrorController _mirrorController;
         public MoveSpeed _moveSpeed;
         public IInputCommands _sprintButton;
         public bool _isCharacterLoaded, _isSuperBoosting;
         public bool _isVerticalThrustDisabled, _isDreamLanternFocused, _hasDreamLanternFocusChanged, _isDreaming;
-        public float _strafeSpeed, _sprintStrafeSpeed, _wallJumpsLeft, _lastWallJumpTime, _lastWallJumpRefill, _lastBoostInputTime, _lastBoostTime;
+        public float _strafeSpeed;
+        public float _sprintStrafeSpeed;
+        public float _animSpeed;
+        public float _wallJumpsLeft;
+        public float _lastWallJumpTime;
+        public float _lastWallJumpRefill;
+        public float _lastBoostInputTime;
+        public float _lastBoostTime;
 
         // Config fields
         public bool _isDebugLogEnabled;
@@ -37,7 +47,7 @@ namespace HikersMod
         public float _jetpackAccel;
         public float _jetpackBoostAccel;
         public float _jetpackBoostTime;
-        public bool _isInstantJumpEnabled;
+        public string _jumpStyle;
         public bool _isSlowStrafeDisabled;
         public bool _enhancedAirControlEnabled;
         public string _sprintEnabledMode;
@@ -61,6 +71,8 @@ namespace HikersMod
         public void Start()
         {
             _textAssets = ModHelper.Assets.LoadBundle("Assets/textassets");
+            SmolHatchlingAPI = ModHelper.Interaction.TryGetModApi<ISmolHatchling>("Owen013.TeenyHatchling");
+            if (SmolHatchlingAPI != null) SmolHatchlingAPI.SetHikersModEnabled();
 
             // Set characterLoaded to false whenever a new scene begins loading
             LoadManager.OnStartSceneLoad += (scene, loadScene) => _isCharacterLoaded = false;
@@ -88,6 +100,7 @@ namespace HikersMod
             UpdateWallJump();
             UpdateSuperBoost();
             if (_isFloatyPhysicsEnabled) UpdateAcceleration();
+            UpdateAnimSpeed();
             _hasDreamLanternFocusChanged = false;
         }
 
@@ -97,17 +110,17 @@ namespace HikersMod
 
             // Get all settings values
             _isDebugLogEnabled = config.GetSettingsValue<bool>("Enable Debug Log");
-            _normalSpeed = config.GetSettingsValue<float>("Normal Speed (Default 6)");
-            _walkSpeed = config.GetSettingsValue<float>("Walk Speed (Default 3)");
-            _dreamLanternSpeed = config.GetSettingsValue<float>("Focused Lantern Speed (Default 2)");
-            _groundAccel = config.GetSettingsValue<float>("Ground Acceleration (Default 0.5)");
-            _airSpeed = config.GetSettingsValue<float>("Air Speed (Default 3)");
-            _airAccel = config.GetSettingsValue<float>("Air Acceleration (Default 0.09)");
-            _jumpPower = config.GetSettingsValue<float>("Jump Power (Default 7)");
-            _isInstantJumpEnabled = config.GetSettingsValue<bool>("Enable Instant Jump");
-            _jetpackAccel = config.GetSettingsValue<float>("Jetpack Acceleration (Default 6)");
-            _jetpackBoostAccel = config.GetSettingsValue<float>("Jetpack Boost Acceleration (Default 23)");
-            _jetpackBoostTime = config.GetSettingsValue<float>("Jetpack Boost Seconds until Depletion (Default 1)");
+            _normalSpeed = config.GetSettingsValue<float>("Normal Speed");
+            _walkSpeed = config.GetSettingsValue<float>("Walk Speed");
+            _dreamLanternSpeed = config.GetSettingsValue<float>("Focused Lantern Speed");
+            _groundAccel = config.GetSettingsValue<float>("Ground Acceleration");
+            _airSpeed = config.GetSettingsValue<float>("Air Speed");
+            _airAccel = config.GetSettingsValue<float>("Air Acceleration");
+            _jumpPower = config.GetSettingsValue<float>("Jump Power");
+            _jumpStyle = config.GetSettingsValue<string>("Jump Style");
+            _jetpackAccel = config.GetSettingsValue<float>("Jetpack Acceleration");
+            _jetpackBoostAccel = config.GetSettingsValue<float>("Jetpack Boost Acceleration");
+            _jetpackBoostTime = config.GetSettingsValue<float>("Max Jetpack Boost Time");
             _isSlowStrafeDisabled = config.GetSettingsValue<bool>("Disable Strafing Slowdown");
             _enhancedAirControlEnabled = config.GetSettingsValue<bool>("Enable Enhanced Air Control");
             _sprintEnabledMode = config.GetSettingsValue<string>("Enable Sprinting");
@@ -174,7 +187,7 @@ namespace HikersMod
             }
 
             // Change built-in character attributes
-            _characterController._useChargeJump = !_isInstantJumpEnabled;
+            _characterController._useChargeJump = _jumpStyle == "Charge";
             _characterController._runSpeed = _normalSpeed;
             _characterController._strafeSpeed = _strafeSpeed;
             _characterController._walkSpeed = _walkSpeed;
@@ -230,8 +243,6 @@ namespace HikersMod
                 _characterController._strafeSpeed = _strafeSpeed;
                 _isVerticalThrustDisabled = false;
             }
-
-            UpdateAnimSpeed();
             if (_moveSpeed != oldSpeed) DebugLog($"Changed movement speed to {_moveSpeed}");
         }
 
@@ -241,16 +252,30 @@ namespace HikersMod
             if (_characterController.IsGrounded() && !_characterController.IsSlidingOnIce()) gravMultiplier = Mathf.Min(Mathf.Pow(_characterController.GetNormalAccelerationScalar() / 12, _floatyPhysicsPower), 1);
             else gravMultiplier = 1;
             _characterController._acceleration = _groundAccel * gravMultiplier;
-            UpdateAnimSpeed();
         }
 
         public void UpdateAnimSpeed()
         {
-            float multiplier = _characterController._acceleration / _groundAccel;
-            if (_moveSpeed == MoveSpeed.Walking) _animController._animator.speed = Mathf.Max(_walkSpeed / 6 * multiplier, multiplier);
-            else if (_moveSpeed == MoveSpeed.DreamLantern) _animController._animator.speed = Mathf.Max(_dreamLanternSpeed / 6 * multiplier, multiplier);
-            else _animController._animator.speed = Mathf.Max(_characterController._runSpeed / 6 * multiplier, multiplier);
+            float groundSpeed = _characterController.GetRelativeGroundVelocity().magnitude;
+            float gravMultiplier = _characterController._acceleration / _groundAccel;
+            float sizeMultiplier = 1f;
+            if (SmolHatchlingAPI != null) sizeMultiplier = SmolHatchlingAPI.GetAnimSpeed();
+            float oldAnimSpeed = _animSpeed;
+            if (_characterController.IsGrounded()) _animSpeed = Mathf.Max(groundSpeed / (6 / sizeMultiplier) * gravMultiplier, gravMultiplier);
+            else _animSpeed = 1f;
+            if (oldAnimSpeed == _animSpeed) return;
+            _animController._animator.speed = _animSpeed;
             DebugLog("UpdatedAnimSpeed");
+
+            if (_cloneController != null)
+            {
+                _cloneController._playerVisuals.GetComponent<PlayerAnimController>()._animator.speed = _animSpeed;
+            }
+
+            if (_mirrorController != null)
+            {
+                _mirrorController._mirrorPlayer.GetComponentInChildren<PlayerAnimController>()._animator.speed = _animSpeed;
+            }
         }
 
         public void UpdateWallJump()
@@ -364,18 +389,18 @@ namespace HikersMod
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
         public static void CharacterControllerStart()
         {
-            HikersModController.Instance.OnCharacterStart();
+            Instance.OnCharacterStart();
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
         public static void GetJetpackInput(ref Vector3 __result)
         {
-            if (HikersModController.Instance._sprintButton == InputLibrary.thrustDown && HikersModController.Instance._isVerticalThrustDisabled && __result.y < 0 ||
-            HikersModController.Instance._sprintButton == InputLibrary.thrustUp && HikersModController.Instance._isVerticalThrustDisabled && __result.y > 0)
+            if (Instance._sprintButton == InputLibrary.thrustDown && Instance._isVerticalThrustDisabled && __result.y < 0 ||
+            Instance._sprintButton == InputLibrary.thrustUp && Instance._isVerticalThrustDisabled && __result.y > 0)
             {
                 __result.y = 0;
-                HikersModController.Instance._jetpackModel._boostActivated = false;
+                Instance._jetpackModel._boostActivated = false;
             }
         }
 
@@ -384,28 +409,28 @@ namespace HikersMod
         public static void DreamLanternFocusChanged(DreamLanternItem __instance)
         {
             if (__instance._wasFocusing == __instance._focusing) return;
-            HikersModController.Instance._isDreamLanternFocused = __instance._focusing;
-            HikersModController.Instance._hasDreamLanternFocusChanged = true;
-            if (__instance._focusing) HikersModController.Instance.DebugLog("Focused Dream Lantern", MessageType.Info);
-            else HikersModController.Instance.DebugLog("Unfocused Dream Lantern", MessageType.Info);
+            Instance._isDreamLanternFocused = __instance._focusing;
+            Instance._hasDreamLanternFocusChanged = true;
+            if (__instance._focusing) Instance.DebugLog("Focused Dream Lantern", MessageType.Info);
+            else Instance.DebugLog("Unfocused Dream Lantern", MessageType.Info);
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.OnEnterDreamWorld))]
         public static void EnteredDreamWorld()
         {
-            HikersModController.Instance._isDreaming = true;
-            HikersModController.Instance.ChangeMoveSpeed();
-            HikersModController.Instance.DebugLog("Entered Dream World", MessageType.Info);
+            Instance._isDreaming = true;
+            Instance.ChangeMoveSpeed();
+            Instance.DebugLog("Entered Dream World", MessageType.Info);
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.OnExitDreamWorld))]
         public static void ExitedDreamWorld()
         {
-            HikersModController.Instance._isDreaming = false;
-            HikersModController.Instance.ChangeMoveSpeed();
-            HikersModController.Instance.DebugLog("Left Dream World", MessageType.Info);
+            Instance._isDreaming = false;
+            Instance.ChangeMoveSpeed();
+            Instance.DebugLog("Left Dream World", MessageType.Info);
         }
 
         [HarmonyPrefix]
@@ -416,7 +441,7 @@ namespace HikersMod
             {
                 return false;
             }
-            if ((OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f) || (HikersModController.Instance._sprintButton == InputLibrary.thrustUp && HikersModController.Instance._isVerticalThrustDisabled))
+            if ((OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f) || (Instance._sprintButton == InputLibrary.thrustUp && Instance._isVerticalThrustDisabled))
             {
                 __instance.UpdateJumpInput();
             }
@@ -437,7 +462,7 @@ namespace HikersMod
         [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
         public static bool IsBoosterAllowed(ref bool __result, PlayerResources __instance)
         {
-            __result = !PlayerState.InZeroG() && !Locator.GetPlayerSuit().IsTrainingSuit() && !__instance._cameraFluidDetector.InFluidType(FluidVolume.Type.WATER) && __instance._currentFuel > 0f && !HikersModController.Instance._isVerticalThrustDisabled;
+            __result = !PlayerState.InZeroG() && !Locator.GetPlayerSuit().IsTrainingSuit() && !__instance._cameraFluidDetector.InFluidType(FluidVolume.Type.WATER) && __instance._currentFuel > 0f && !Instance._isVerticalThrustDisabled;
             return false;
         }
 
@@ -449,7 +474,7 @@ namespace HikersMod
             if (audioType != AudioType.None)
             {
                 __instance._footstepAudio.pitch = Random.Range(0.9f, 1.1f);
-                if (HikersModController.Instance._moveSpeed == MoveSpeed.Sprinting) __instance._footstepAudio.PlayOneShot(audioType, 1.4f);
+                if (Instance._moveSpeed == MoveSpeed.Sprinting) __instance._footstepAudio.PlayOneShot(audioType, 1.4f);
                 else __instance._footstepAudio.PlayOneShot(audioType, 0.7f);
             }
             return false;
@@ -459,7 +484,7 @@ namespace HikersMod
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.UpdateAirControl))]
         public static bool CharacterUpdateAirControl(PlayerCharacterController __instance)
         {
-            if (!HikersModController.Instance._enhancedAirControlEnabled) return true;
+            if (!Instance._enhancedAirControlEnabled) return true;
             if (__instance == null) return true;
             if (__instance._lastGroundBody != null)
             {
@@ -484,10 +509,18 @@ namespace HikersMod
         {
             float num = 1f - __instance._lanternController.GetFocus();
             num *= num;
-            maxSpeedX = Mathf.Lerp(HikersModController.Instance._dreamLanternSpeed, maxSpeedX, num);
-            maxSpeedZ = Mathf.Lerp(HikersModController.Instance._dreamLanternSpeed, maxSpeedZ, num);
+            maxSpeedX = Mathf.Lerp(Instance._dreamLanternSpeed, maxSpeedX, num);
+            maxSpeedZ = Mathf.Lerp(Instance._dreamLanternSpeed, maxSpeedZ, num);
             return false;
         }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(PlayerCloneController), nameof(PlayerCloneController.Start))]
+        public static void EyeCloneStart(PlayerCloneController __instance) => Instance._cloneController = __instance;
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(EyeMirrorController), nameof(EyeMirrorController.Start))]
+        public static void EyeMirrorStart(EyeMirrorController __instance) => Instance._mirrorController = __instance;
 
         /*
         [HarmonyPostfix]

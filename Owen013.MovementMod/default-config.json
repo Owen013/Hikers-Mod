@@ -1,36 +1,89 @@
 {
+	"$schema": "https://json-schema.org/draft-07/schema",
 	"enabled": true,
 	"settings": {
-		"Enable Debug Log": false,
 
 		"Character Attributes": {
 			"type": "separator"
 		},
-		"Normal Speed (Default 6)": 6,
-		"Walk Speed (Default 3)": 3,
-		"Focused Lantern Speed (Default 2)": 2,
-		"Ground Acceleration (Default 0.5)": 0.5,
-		"Jump Power (Default 7)": 7,
-		"Air Speed (Default 3)": 3,
-		"Air Acceleration (Default 0.09)": 0.09,
-		"Jetpack Acceleration (Default 6)": 6,
-		"Jetpack Boost Acceleration (Default 23)": 23,
-		"Jetpack Boost Seconds until Depletion (Default 1)": 1,
+		"Normal Speed": {
+			"type": "number",
+			"value": 6,
+			"tooltip": "How quickly the player moves. Vanilla: 6"
+		},
+		"Walk Speed": {
+			"type": "number",
+			"value": 3,
+			"tooltip": "How quickly the player moves when holding the walk (roll mode) button. Vanilla: 3"
+		},
+		"Focused Lantern Speed": {
+			"type": "number",
+			"value": 2,
+			"tooltip": "How quickly the player moves while focusing a lantern. Vanilla: 2"
+		},
+		"Ground Acceleration": {
+			"type": "number",
+			"value": 0.5,
+			"tooltip": "How quickly the player reaches their maximum speed. Vanilla: 0.5"
+		},
+		"Jump Power": {
+			"type": "number",
+			"value": 7,
+			"tooltip": "How high the player jumps. Vanilla: 7"
+		},
+		"Air Speed": {
+			"type": "number",
+			"value": 3,
+			"tooltip": "How quickly the player can move in midair. Vanilla: 3"
+		},
+		"Air Acceleration": {
+			"type": "number",
+			"value": 0.09,
+			"tooltip": "How quickly the player reaches their maximum speed while in midair. Vanilla: 0.09"
+		},
+		"Jetpack Acceleration": {
+			"type": "number",
+			"value": 6,
+			"tooltip": "How powerful the player's jetpack is. Vanilla: 6"
+		},
+		"Jetpack Boost Acceleration": {
+			"type": "number",
+			"value": 23,
+			"tooltip": "How powerful the player's jetpack is while boosting. Vanilla: 23"
+		},
+		"Max Jetpack Boost Time": {
+			"type": "number",
+			"value": 1,
+			"tooltip": "How long the player can use their jetpack boost, in seconds. Vanilla: 1"
+		},
 
 		"Instant Jump": {
 			"type": "separator"
 		},
-		"Enable Instant Jump": true,
+		"Jump Style": {
+			"type": "selector",
+			"value": "Instant",
+			"options": [ "Charge", "Instant" ],
+			"tooltip": "Charge: you have to hold space to charge a jump and release space to perform the jump. Instant: the player will jump immediately upon pressing space. Vanilla: Charge"
+		},
 
 		"Strafing Slowdown": {
 			"type": "separator"
 		},
-		"Disable Strafing Slowdown": true,
+		"Disable Strafing Slowdown": {
+			"type": "toggle",
+			"value": true,
+			"tooltip": "How long the player can use their jetpack boost, in seconds. Vanilla: Disabled"
+		},
 
 		"Enhanced Air Control": {
 			"type": "separator"
 		},
-		"Enable Enhanced Air Control": true,
+		"Enable Enhanced Air Control": {
+			"type": "toggle",
+			"value": true,
+			"tooltip": "Makes the character more maneuverable in midair; allows changing direction during a jump. Vanilla: Disabled"
+		},
 
 		"Sprinting": {
 			"type": "separator"
@@ -39,16 +92,24 @@
 			"type": "selector",
 			"value": "Real World Only",
 			"options": [ "No", "Real World Only", "Everywhere" ],
-			"title": "Enable Sprinting"
+			"tooltip": "Allows the player to sprint. Vanilla: No"
 		},
-		"Sprint Speed": 11,
+		"Sprint Speed": {
+			"type": "number",
+			"value": 11,
+			"tooltip": "How long the player can use their jetpack boost, in seconds. Default Mod Setting: 11"
+		},
 		"Sprint Button": {
 			"type": "selector",
 			"value": "Up Thrust",
 			"options": [ "Up Thrust", "Down Thrust" ],
-			"title": "Sprint Button"
+			"tooltip": "Whether sprinting uses the Up Thrust button (usually shift or right trigger) or the Down Thrust button (usually control or left trigger). Default Mod Setting: Up Thrust."
 		},
-		"Allow Thrusting on Ground with Sprinting Enabled": true,
+		"Allow Thrusting on Ground with Sprinting Enabled": {
+			"type": "toggle",
+			"value": true,
+			"tooltip": "With this enabled, the player can start thrusting on the ground as long as they aren't actively moving. Default Mod Setting: Enabled"
+		},
 
 		"Wall Jumping": {
 			"type": "separator"
@@ -57,20 +118,49 @@
 			"type": "selector",
 			"value": "No",
 			"options": [ "No", "When Unsuited", "Always" ],
-			"title": "Enable Wall Jumping"
+			"tooltip": "For fun. Allows the player to climb up walls by jumping off of them. Default Mod Setting: Disabled"
 		},
-		"Wall Jumps per Jump": 5,
+		"Wall Jumps per Jump": {
+			"type": "number",
+			"value": 5,
+			"tooltip": "How many times the player can Wall Jump without touching the ground. Default Mod Setting: 5"
+		},
 
 		"Floaty Physics": {
 			"type": "separator"
 		},
-		"Floaty Physics in Low-Gravity": false,
-		"Floaty Physics Power": 1,
+		"Floaty Physics in Low-Gravity": {
+			"type": "toggle",
+			"value": false,
+			"tooltip": "For fun. Lowers the player's acceleration in low gravity, making movement floatier. Default Mod Setting: Disabled"
+		},
+		"Floaty Physics Power": {
+			"type": "number",
+			"value": 1,
+			"tooltip": "How strongly floaty physics takes affect in any given gravity.. Default Mod Setting: 1"
+		},
 
 		"Super-Boosting": {
 			"type": "separator"
 		},
-		"Enable Jetpack Super-Boost": false,
-		"Super-Boost Power": 25
+		"Enable Jetpack Super-Boost": {
+			"type": "toggle",
+			"value": false,
+			"tooltip": "For fun. Allows the player to shoot up into the air by pressing space twice. Default Mod Setting: Disabled"
+		},
+		"Super-Boost Power": {
+			"type": "number",
+			"value": 25,
+			"tooltip": "How powerful a Super-Boost is. Default Mod Setting: 25"
+		},
+
+		"Miscellaneous": {
+			"type": "separator"
+		},
+		"Enable Debug Log": {
+			"type": "toggle",
+			"value": false,
+			"tooltip": "Prints certain events to the Outer Wilds Mod Manager console."
+		}
 	}
 }
