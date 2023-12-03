@@ -111,10 +111,10 @@ namespace HikersMod
             _superBoostPower = config.GetSettingsValue<float>("Super-Boost Power");
 
             OnConfigure();
-            ChangeAttributes();
+            ApplyChanges();
         }
 
-        public void ChangeAttributes()
+        public void ApplyChanges()
         {
             if (!_characterController) return;
 
@@ -180,7 +180,7 @@ namespace HikersMod
             Instance._characterController = Locator.GetPlayerController();
             Instance._animController = FindObjectOfType<PlayerAnimController>();
 
-            Instance.ChangeAttributes();
+            Instance.ApplyChanges();
         }
 
         [HarmonyPrefix]

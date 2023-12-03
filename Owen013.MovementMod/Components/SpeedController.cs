@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using System.Security.Permissions;
 using UnityEngine;
 
 namespace HikersMod.Components
@@ -25,34 +26,7 @@ namespace HikersMod.Components
         {
             Instance = this;
             Harmony.CreateAndPatchAll(typeof(SpeedController));
-            HikersMod.Instance.OnConfigure += () =>
-            {
-                if (!_characterController) return;
-
-                // Strafe speed depends on whether or not slowStrafeDisabled is true
-                if (HikersMod.Instance._isSlowStrafeDisabled)
-                {
-                    _strafeSpeed = HikersMod.Instance._normalSpeed;
-                    _sprintStrafeSpeed = HikersMod.Instance._sprintSpeed;
-                }
-                else
-                {
-                    _strafeSpeed = HikersMod.Instance._normalSpeed * 2f / 3f;
-                    _sprintStrafeSpeed = HikersMod.Instance._sprintSpeed * 2f / 3f;
-                }
-
-                // Change built-in character attributes
-                _characterController._runSpeed = HikersMod.Instance._normalSpeed;
-                _characterController._strafeSpeed = _strafeSpeed;
-                _characterController._walkSpeed = HikersMod.Instance._walkSpeed;
-                _characterController._airSpeed = HikersMod.Instance._airSpeed;
-                _characterController._airAcceleration = HikersMod.Instance._airAccel;
-
-                if (HikersMod.Instance._sprintButtonMode == "Down Thrust") HikersMod.Instance._sprintButton = InputLibrary.thrustDown;
-                else HikersMod.Instance._sprintButton = InputLibrary.thrustUp;
-
-                ChangeMoveSpeed();
-            };
+            HikersMod.Instance.OnConfigure += ApplyChanges;
         }
 
         public void Update()
@@ -72,6 +46,35 @@ namespace HikersMod.Components
 
             // Update everthing else
             _hasDreamLanternFocusChanged = false;
+        }
+
+        public void ApplyChanges()
+        {
+            if (!_characterController) return;
+
+            // Strafe speed depends on whether or not slowStrafeDisabled is true
+            if (HikersMod.Instance._isSlowStrafeDisabled)
+            {
+                _strafeSpeed = HikersMod.Instance._normalSpeed;
+                _sprintStrafeSpeed = HikersMod.Instance._sprintSpeed;
+            }
+            else
+            {
+                _strafeSpeed = HikersMod.Instance._normalSpeed * 2f / 3f;
+                _sprintStrafeSpeed = HikersMod.Instance._sprintSpeed * 2f / 3f;
+            }
+
+            // Change built-in character attributes
+            _characterController._runSpeed = HikersMod.Instance._normalSpeed;
+            _characterController._strafeSpeed = _strafeSpeed;
+            _characterController._walkSpeed = HikersMod.Instance._walkSpeed;
+            _characterController._airSpeed = HikersMod.Instance._airSpeed;
+            _characterController._airAcceleration = HikersMod.Instance._airAccel;
+
+            if (HikersMod.Instance._sprintButtonMode == "Down Thrust") HikersMod.Instance._sprintButton = InputLibrary.thrustDown;
+            else HikersMod.Instance._sprintButton = InputLibrary.thrustUp;
+
+            ChangeMoveSpeed();
         }
 
         public void ChangeMoveSpeed()
@@ -120,8 +123,8 @@ namespace HikersMod.Components
             Instance._characterController = FindObjectOfType<PlayerCharacterController>();
             Instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
             Instance._characterController.OnBecomeGrounded += Instance.ChangeMoveSpeed;
-
             Instance._isDreaming = false;
+            Instance.ApplyChanges();
         }
 
         [HarmonyPostfix]
