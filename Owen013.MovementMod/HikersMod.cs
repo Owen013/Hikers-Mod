@@ -160,17 +160,6 @@ namespace HikersMod
             }
         }
 
-        public bool IsCorrectScene()
-        {
-            OWScene scene = LoadManager.s_currentScene;
-            return (scene == OWScene.SolarSystem || scene == OWScene.EyeOfTheUniverse);
-        }
-
-        public bool InputChanged(IInputCommands input)
-        {
-            return OWInput.IsNewlyPressed(input) || OWInput.IsNewlyReleased(input);
-        }
-
         public void DebugLog(string text)
         {
             if (!_isDebugLogEnabled) return;
