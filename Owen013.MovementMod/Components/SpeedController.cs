@@ -8,8 +8,7 @@ namespace HikersMod.Components
     {
         public static SpeedController Instance;
         public PlayerCharacterController _characterController;
-        public PlayerCloneController _cloneController;
-        public EyeMirrorController _mirrorController;
+        public JetpackThrusterModel _jetpackModel;
         public MoveSpeed _moveSpeed;
         public bool _isVerticalThrustDisabled, _isDreamLanternFocused, _hasDreamLanternFocusChanged, _isDreaming;
         public float _strafeSpeed;
@@ -27,6 +26,34 @@ namespace HikersMod.Components
         {
             Instance = this;
             Harmony.CreateAndPatchAll(typeof(SpeedController));
+            HikersMod.Instance.OnConfigure += () =>
+            {
+                if (!_characterController) return;
+
+                // Strafe speed depends on whether or not slowStrafeDisabled is true
+                if (HikersMod.Instance._isSlowStrafeDisabled)
+                {
+                    _strafeSpeed = HikersMod.Instance._normalSpeed;
+                    _sprintStrafeSpeed = HikersMod.Instance._sprintSpeed;
+                }
+                else
+                {
+                    _strafeSpeed = HikersMod.Instance._normalSpeed * 2f / 3f;
+                    _sprintStrafeSpeed = HikersMod.Instance._sprintSpeed * 2f / 3f;
+                }
+
+                // Change built-in character attributes
+                _characterController._runSpeed = HikersMod.Instance._normalSpeed;
+                _characterController._strafeSpeed = _strafeSpeed;
+                _characterController._walkSpeed = HikersMod.Instance._walkSpeed;
+                _characterController._airSpeed = HikersMod.Instance._airSpeed;
+                _characterController._airAcceleration = HikersMod.Instance._airAccel;
+
+                if (HikersMod.Instance._sprintButtonMode == "Down Thrust") HikersMod.Instance._sprintButton = InputLibrary.thrustDown;
+                else HikersMod.Instance._sprintButton = InputLibrary.thrustUp;
+
+                ChangeMoveSpeed();
+            };
         }
 
         public void Update()
@@ -45,7 +72,6 @@ namespace HikersMod.Components
             }
 
             // Update everthing else
-            UpdateAnimSpeed();
             _hasDreamLanternFocusChanged = false;
         }
 
@@ -88,40 +114,12 @@ namespace HikersMod.Components
             if (_moveSpeed != oldSpeed) HikersMod.Instance.DebugLog($"Changed movement speed to {_moveSpeed}");
         }
 
-        public void ChangeAttributes()
-        {
-            if (!_characterController) return;
-
-            // Strafe speed depends on whether or not slowStrafeDisabled is true
-            if (HikersMod.Instance._isSlowStrafeDisabled)
-            {
-                _strafeSpeed = HikersMod.Instance._normalSpeed;
-                _sprintStrafeSpeed = HikersMod.Instance._sprintSpeed;
-            }
-            else
-            {
-                _strafeSpeed = HikersMod.Instance._normalSpeed * 2f / 3f;
-                _sprintStrafeSpeed = HikersMod.Instance._sprintSpeed * 2f / 3f;
-            }
-
-            // Change built-in character attributes
-            _characterController._runSpeed = HikersMod.Instance._normalSpeed;
-            _characterController._strafeSpeed = _strafeSpeed;
-            _characterController._walkSpeed = HikersMod.Instance._walkSpeed;
-            _characterController._airSpeed = HikersMod.Instance._airSpeed;
-            _characterController._airAcceleration = HikersMod.Instance._airAccel;
-
-            if (HikersMod.Instance._sprintButtonMode == "Down Thrust") _sprintButton = InputLibrary.thrustDown;
-            else _sprintButton = InputLibrary.thrustUp;
-
-            ChangeMoveSpeed();
-        }
-
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
         public static void CharacterControllerStart()
         {
             Instance._characterController = FindObjectOfType<PlayerCharacterController>();
+            Instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
             Instance._characterController.OnBecomeGrounded += () =>
             {
                 Instance.ChangeMoveSpeed();
@@ -149,8 +147,8 @@ namespace HikersMod.Components
             if (__instance._wasFocusing == __instance._focusing) return;
             Instance._isDreamLanternFocused = __instance._focusing;
             Instance._hasDreamLanternFocusChanged = true;
-            if (__instance._focusing) Instance.DebugLog("Focused Dream Lantern", MessageType.Info);
-            else Instance.DebugLog("Unfocused Dream Lantern", MessageType.Info);
+            if (__instance._focusing) HikersMod.Instance.DebugLog("Focused Dream Lantern", OWML.Common.MessageType.Info);
+            else HikersMod.Instance.DebugLog("Unfocused Dream Lantern", OWML.Common.MessageType.Info);
         }
 
         [HarmonyPostfix]
@@ -159,7 +157,7 @@ namespace HikersMod.Components
         {
             Instance._isDreaming = true;
             Instance.ChangeMoveSpeed();
-            Instance.DebugLog("Entered Dream World", MessageType.Info);
+            HikersMod.Instance.DebugLog("Entered Dream World", OWML.Common.MessageType.Info);
         }
 
         [HarmonyPostfix]
@@ -168,7 +166,7 @@ namespace HikersMod.Components
         {
             Instance._isDreaming = false;
             Instance.ChangeMoveSpeed();
-            Instance.DebugLog("Left Dream World", MessageType.Info);
+            HikersMod.Instance.DebugLog("Left Dream World", OWML.Common.MessageType.Info);
         }
 
         [HarmonyPrefix]
@@ -179,7 +177,7 @@ namespace HikersMod.Components
             {
                 return false;
             }
-            if ((OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f) || (Instance._sprintButton == InputLibrary.thrustUp && Instance._isVerticalThrustDisabled))
+            if ((OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f) || (HikersMod.Instance._sprintButton == InputLibrary.thrustUp && Instance._isVerticalThrustDisabled))
             {
                 __instance.UpdateJumpInput();
             }

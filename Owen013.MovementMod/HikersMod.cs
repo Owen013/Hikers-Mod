@@ -17,7 +17,6 @@ namespace HikersMod
         public PlayerAudioController _audioController;
         public PlayerImpactAudio _impactAudio;
         public ThrusterFlameController _downThrustFlame;
-        public JetpackThrusterModel _jetpackModel;
         public GameObject _superBoostNote;
         public bool _isCharacterLoaded;
         public float _wallJumpsLeft;
@@ -25,6 +24,9 @@ namespace HikersMod
         public float _lastWallJumpRefill;
         public IInputCommands _sprintButton;
         public float _animSpeed;
+        public PlayerCloneController _cloneController;
+        public EyeMirrorController _mirrorController;
+        public event ConfigureEvent OnConfigure;
 
         // Config fields
         public bool _isDebugLogEnabled;
@@ -52,10 +54,13 @@ namespace HikersMod
         public bool _isSuperBoostEnabled;
         public float _superBoostPower;
 
+        public delegate void ConfigureEvent();
+
         public void Awake()
         {
             // Static reference to HikersMod so it can be used in patches.
             Instance = this;
+            gameObject.AddComponent<SpeedController>();
             gameObject.AddComponent<SuperBoostController>();
             Harmony.CreateAndPatchAll(typeof(HikersMod));
         }
@@ -113,6 +118,7 @@ namespace HikersMod
             _isSuperBoostEnabled = config.GetSettingsValue<bool>("Enable Jetpack Super-Boost");
             _superBoostPower = config.GetSettingsValue<float>("Super-Boost Power");
 
+            OnConfigure();
             ChangeAttributes();
         }
 
@@ -123,7 +129,6 @@ namespace HikersMod
             _animController = FindObjectOfType<PlayerAnimController>();
             _audioController = FindObjectOfType<PlayerAudioController>();
             _impactAudio = FindObjectOfType<PlayerImpactAudio>();
-            _jetpackModel = FindObjectOfType<JetpackThrusterModel>();
             var thrusters = Resources.FindObjectsOfTypeAll<ThrusterFlameController>();
             for (int i = 0; i < thrusters.Length; i++) if (thrusters[i]._thruster == Thruster.Up_LeftThruster) _downThrustFlame = thrusters[i];
 
@@ -153,8 +158,6 @@ namespace HikersMod
             else _sprintButton = InputLibrary.thrustUp;
 
             if (_superBoostNote != null) _superBoostNote.SetActive(_isSuperBoostEnabled);
-
-            ChangeMoveSpeed();
         }
 
         public void UpdateAcceleration()
