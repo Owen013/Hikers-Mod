@@ -15,13 +15,9 @@ namespace HikersMod
         public PlayerCharacterController _characterController;
         public PlayerAnimController _animController;
         public PlayerAudioController _audioController;
-        public PlayerImpactAudio _impactAudio;
         public ThrusterFlameController _downThrustFlame;
         public GameObject _superBoostNote;
         public bool _isCharacterLoaded;
-        public float _wallJumpsLeft;
-        public float _lastWallJumpTime;
-        public float _lastWallJumpRefill;
         public IInputCommands _sprintButton;
         public float _animSpeed;
         public PlayerCloneController _cloneController;
@@ -61,6 +57,7 @@ namespace HikersMod
             // Static reference to HikersMod so it can be used in patches.
             Instance = this;
             gameObject.AddComponent<SpeedController>();
+            gameObject.AddComponent<WallJumpController>();
             gameObject.AddComponent<SuperBoostController>();
             Harmony.CreateAndPatchAll(typeof(HikersMod));
         }
@@ -84,8 +81,8 @@ namespace HikersMod
             if (!IsCorrectScene() || !_isCharacterLoaded) return;
             
             // Update everthing else
-            UpdateWallJump();
             if (_isFloatyPhysicsEnabled) UpdateAcceleration();
+            UpdateAnimSpeed();
         }
 
         public override void Configure(IModConfig config)
@@ -128,14 +125,8 @@ namespace HikersMod
             _characterController = Locator.GetPlayerController();
             _animController = FindObjectOfType<PlayerAnimController>();
             _audioController = FindObjectOfType<PlayerAudioController>();
-            _impactAudio = FindObjectOfType<PlayerImpactAudio>();
             var thrusters = Resources.FindObjectsOfTypeAll<ThrusterFlameController>();
             for (int i = 0; i < thrusters.Length; i++) if (thrusters[i]._thruster == Thruster.Up_LeftThruster) _downThrustFlame = thrusters[i];
-
-            _characterController.OnBecomeGrounded += () =>
-            {
-                _wallJumpsLeft = _wallJumpsPerJump;
-            };
 
             // The Update() code won't run until after Setup() has at least once
             _isCharacterLoaded = true;
@@ -190,44 +181,6 @@ namespace HikersMod
             {
                 _mirrorController._mirrorPlayer.GetComponentInChildren<PlayerAnimController>()._animator.speed = _animSpeed;
             }
-        }
-
-        public void UpdateWallJump()
-        {
-            _characterController.UpdatePushable();
-            if (((_wallJumpEnabledMode == "When Unsuited" && !PlayerState.IsWearingSuit()) || _wallJumpEnabledMode == "Always") &&
-                _characterController._isPushable &&
-                !PlayerState.InZeroG() &&
-                !_characterController._isGrounded &&
-                OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) &&
-                _wallJumpsLeft > 0)
-            {
-                OWRigidbody pushBody = _characterController._pushableBody;
-                Vector3 pushPoint = _characterController._pushContactPt;
-                Vector3 pointVelocity = pushBody.GetPointVelocity(pushPoint);
-                Vector3 climbVelocity = new Vector3(0, _jumpPower * (_wallJumpsLeft / _wallJumpsPerJump), 0);
-
-                if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20) DebugLog("Can't Wall-Jump; going too fast");
-                else
-                {
-                    _characterController._owRigidbody.SetVelocity(pointVelocity);
-                    _characterController._owRigidbody.AddLocalVelocityChange(climbVelocity);
-                    _wallJumpsLeft -= 1;
-                    _impactAudio._impactAudioSrc.PlayOneShot(AudioType.ImpactLowSpeed);
-                    _lastWallJumpTime = _lastWallJumpRefill = Time.time;
-                    DebugLog("Wall-Jumped");
-                }
-            }
-
-            // Replenish 1 wall jump if the player hasn't done one for five seconds
-            if (Time.time - _lastWallJumpRefill > 5 && _wallJumpsLeft < _wallJumpsPerJump)
-            {
-                _wallJumpsLeft += 1;
-                _lastWallJumpRefill = Time.time;
-            }
-
-            // Make player play fast freefall animation for one second after each wall jump
-            if (Time.time - _lastWallJumpTime < 1) _animController._animator.SetFloat("FreefallSpeed", 100);
         }
 
         public void PlaceSuperBoostNote()
