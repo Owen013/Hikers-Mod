@@ -72,7 +72,7 @@
 		},
 		"Disable Strafing Slowdown": {
 			"type": "toggle",
-			"value": true,
+			"value": false,
 			"tooltip": "How long the player can use their jetpack boost, in seconds. Vanilla: Disabled"
 		},
 
@@ -104,6 +104,11 @@
 			"value": "Up Thrust",
 			"options": [ "Up Thrust", "Down Thrust" ],
 			"tooltip": "Whether sprinting uses the Up Thrust button (usually shift or right trigger) or the Down Thrust button (usually control or left trigger). Default Mod Setting: Up Thrust."
+		},
+		"Allow Sprinting Backwards": {
+			"type": "toggle",
+			"value": false,
+			"tooltip": "Allows the player to sprint backwards. Default Mod Setting: Disabled"
 		},
 		"Allow Thrusting on Ground with Sprinting Enabled": {
 			"type": "toggle",

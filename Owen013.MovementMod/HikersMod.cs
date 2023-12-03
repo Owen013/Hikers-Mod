@@ -14,10 +14,7 @@ namespace HikersMod
         public AssetBundle _textAssets;
         public PlayerCharacterController _characterController;
         public PlayerAnimController _animController;
-        public PlayerAudioController _audioController;
-        public ThrusterFlameController _downThrustFlame;
         public GameObject _superBoostNote;
-        public bool _isCharacterLoaded;
         public IInputCommands _sprintButton;
         public float _animSpeed;
         public PlayerCloneController _cloneController;
@@ -41,6 +38,7 @@ namespace HikersMod
         public bool _enhancedAirControlEnabled;
         public string _sprintEnabledMode;
         public string _sprintButtonMode;
+        public bool _canSprintBackwards;
         public bool _canGroundThrustWithSprint;
         public float _sprintSpeed;
         public string _wallJumpEnabledMode;
@@ -68,9 +66,6 @@ namespace HikersMod
             SmolHatchlingAPI = ModHelper.Interaction.TryGetModApi<ISmolHatchling>("Owen013.TeenyHatchling");
             if (SmolHatchlingAPI != null) SmolHatchlingAPI.SetHikersModEnabled();
 
-            // Set characterLoaded to false whenever a new scene begins loading
-            LoadManager.OnStartSceneLoad += (scene, loadScene) => _isCharacterLoaded = false;
-
             // Ready!
             ModHelper.Console.WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
         }
@@ -78,7 +73,7 @@ namespace HikersMod
         public void Update()
         {
             // Make sure that the scene is the SS or Eye and that everything is loaded
-            if (!IsCorrectScene() || !_isCharacterLoaded) return;
+            if (!_characterController) return;
             
             // Update everthing else
             if (_isFloatyPhysicsEnabled) UpdateAcceleration();
@@ -106,6 +101,7 @@ namespace HikersMod
             _enhancedAirControlEnabled = config.GetSettingsValue<bool>("Enable Enhanced Air Control");
             _sprintEnabledMode = config.GetSettingsValue<string>("Enable Sprinting");
             _sprintButtonMode = config.GetSettingsValue<string>("Sprint Button");
+            _canSprintBackwards = config.GetSettingsValue<bool>("Allow Sprinting Backwards");
             _canGroundThrustWithSprint = config.GetSettingsValue<bool>("Allow Thrusting on Ground with Sprinting Enabled");
             _sprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
             _wallJumpEnabledMode = config.GetSettingsValue<string>("Enable Wall Jumping");
@@ -124,20 +120,13 @@ namespace HikersMod
             // Get vars
             _characterController = Locator.GetPlayerController();
             _animController = FindObjectOfType<PlayerAnimController>();
-            _audioController = FindObjectOfType<PlayerAudioController>();
-            var thrusters = Resources.FindObjectsOfTypeAll<ThrusterFlameController>();
-            for (int i = 0; i < thrusters.Length; i++) if (thrusters[i]._thruster == Thruster.Up_LeftThruster) _downThrustFlame = thrusters[i];
-
-            // The Update() code won't run until after Setup() has at least once
-            _isCharacterLoaded = true;
-            DebugLog("Character loaded", MessageType.Info);
 
             Configure(ModHelper.Config);
         }
 
         public void ChangeAttributes()
         {
-            if (!IsCorrectScene() || !_isCharacterLoaded) return;
+            if (!_characterController) return;
 
             // Change built-in character attributes
             _characterController._useChargeJump = _jumpStyle == "Charge";
@@ -240,17 +229,6 @@ namespace HikersMod
                     __instance._owRigidbody.AddLocalVelocityChange(-localVelocity + Vector3.ClampMagnitude(newLocalVelocity, localVelocity.magnitude));
                 else __instance._owRigidbody.AddLocalVelocityChange(localVelocityChange);
             }
-            return false;
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(DreamLanternItem), nameof(DreamLanternItem.OverrideMaxRunSpeed))]
-        public static bool OverrideMaxRunSpeed(ref float maxSpeedX, ref float maxSpeedZ, DreamLanternItem __instance)
-        {
-            float num = 1f - __instance._lanternController.GetFocus();
-            num *= num;
-            maxSpeedX = Mathf.Lerp(Instance._dreamLanternSpeed, maxSpeedX, num);
-            maxSpeedZ = Mathf.Lerp(Instance._dreamLanternSpeed, maxSpeedZ, num);
             return false;
         }
 

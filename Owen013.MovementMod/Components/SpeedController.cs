@@ -91,7 +91,7 @@ namespace HikersMod.Components
             {
                 _moveSpeed = MoveSpeed.Sprinting;
                 _characterController._runSpeed = HikersMod.Instance._sprintSpeed;
-                _characterController._strafeSpeed = _sprintStrafeSpeed;
+                _characterController._strafeSpeed = (HikersMod.Instance._canSprintBackwards ? _sprintStrafeSpeed : _strafeSpeed);
                 _isVerticalThrustDisabled = true;
             }
             else if (walking)
@@ -212,6 +212,17 @@ namespace HikersMod.Components
                 __instance._footstepAudio.pitch = Random.Range(0.9f, 1.1f);
                 __instance._footstepAudio.PlayOneShot(audioType, 1.4f * Instance._characterController.GetRelativeGroundVelocity().magnitude / 6);
             }
+            return false;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(DreamLanternItem), nameof(DreamLanternItem.OverrideMaxRunSpeed))]
+        public static bool OverrideMaxRunSpeed(ref float maxSpeedX, ref float maxSpeedZ, DreamLanternItem __instance)
+        {
+            float num = 1f - __instance._lanternController.GetFocus();
+            num *= num;
+            maxSpeedX = Mathf.Lerp(HikersMod.Instance._dreamLanternSpeed, maxSpeedX, num);
+            maxSpeedZ = Mathf.Lerp(HikersMod.Instance._dreamLanternSpeed, maxSpeedZ, num);
             return false;
         }
     }
