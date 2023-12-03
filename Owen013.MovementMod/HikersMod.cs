@@ -14,7 +14,6 @@ namespace HikersMod
         public AssetBundle _textAssets;
         public PlayerCharacterController _characterController;
         public PlayerAnimController _animController;
-        public GameObject _superBoostNote;
         public IInputCommands _sprintButton;
         public float _animSpeed;
         public PlayerCloneController _cloneController;
@@ -115,15 +114,6 @@ namespace HikersMod
             ChangeAttributes();
         }
 
-        public void OnCharacterStart()
-        {
-            // Get vars
-            _characterController = Locator.GetPlayerController();
-            _animController = FindObjectOfType<PlayerAnimController>();
-
-            Configure(ModHelper.Config);
-        }
-
         public void ChangeAttributes()
         {
             if (!_characterController) return;
@@ -136,8 +126,6 @@ namespace HikersMod
 
             if (_sprintButtonMode == "Down Thrust") _sprintButton = InputLibrary.thrustDown;
             else _sprintButton = InputLibrary.thrustUp;
-
-            if (_superBoostNote != null) _superBoostNote.SetActive(_isSuperBoostEnabled);
         }
 
         public void UpdateAcceleration()
@@ -172,13 +160,6 @@ namespace HikersMod
             }
         }
 
-        public void PlaceSuperBoostNote()
-        {
-            if (GameObject.Find("Ship_Body") == null) return;
-            GameObject notesObject = Instantiate(GameObject.Find("DeepFieldNotes_2"));
-            notesObject.AddComponent<SuperBoostNote>();
-        }
-
         public bool IsCorrectScene()
         {
             OWScene scene = LoadManager.s_currentScene;
@@ -206,7 +187,11 @@ namespace HikersMod
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
         public static void CharacterControllerStart()
         {
-            Instance.OnCharacterStart();
+            // Get vars
+            Instance._characterController = Locator.GetPlayerController();
+            Instance._animController = FindObjectOfType<PlayerAnimController>();
+
+            Instance.ChangeAttributes();
         }
 
         [HarmonyPrefix]

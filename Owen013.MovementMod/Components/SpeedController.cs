@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using UnityEngine;
-using static HikersMod.HikersMod;
 
 namespace HikersMod.Components
 {
@@ -120,10 +119,7 @@ namespace HikersMod.Components
         {
             Instance._characterController = FindObjectOfType<PlayerCharacterController>();
             Instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
-            Instance._characterController.OnBecomeGrounded += () =>
-            {
-                Instance.ChangeMoveSpeed();
-            };
+            Instance._characterController.OnBecomeGrounded += Instance.ChangeMoveSpeed;
 
             Instance._isDreaming = false;
         }
