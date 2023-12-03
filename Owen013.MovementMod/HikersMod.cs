@@ -11,7 +11,6 @@ namespace HikersMod
         // Mod fields
         public static HikersMod Instance;
         public ISmolHatchling SmolHatchlingAPI;
-        public AssetBundle _textAssets;
         public PlayerCharacterController _characterController;
         public PlayerAnimController _animController;
         public IInputCommands _sprintButton;
@@ -20,7 +19,7 @@ namespace HikersMod
         public EyeMirrorController _mirrorController;
         public event ConfigureEvent OnConfigure;
 
-        // Config fields
+        // Config
         public bool _isDebugLogEnabled;
         public float _normalSpeed;
         public float _walkSpeed;
@@ -61,7 +60,6 @@ namespace HikersMod
 
         public void Start()
         {
-            _textAssets = ModHelper.Assets.LoadBundle("Assets/textassets");
             SmolHatchlingAPI = ModHelper.Interaction.TryGetModApi<ISmolHatchling>("Owen013.TeenyHatchling");
             if (SmolHatchlingAPI != null) SmolHatchlingAPI.SetHikersModEnabled();
 
@@ -75,7 +73,6 @@ namespace HikersMod
             if (!_characterController) return;
             
             // Update everthing else
-            if (_isFloatyPhysicsEnabled) UpdateAcceleration();
             UpdateAnimSpeed();
         }
 
@@ -110,8 +107,8 @@ namespace HikersMod
             _isSuperBoostEnabled = config.GetSettingsValue<bool>("Enable Jetpack Super-Boost");
             _superBoostPower = config.GetSettingsValue<float>("Super-Boost Power");
 
-            OnConfigure();
             ApplyChanges();
+            OnConfigure();
         }
 
         public void ApplyChanges()
@@ -128,24 +125,12 @@ namespace HikersMod
             else _sprintButton = InputLibrary.thrustUp;
         }
 
-        public void UpdateAcceleration()
-        {
-            float gravMultiplier;
-            if (_characterController.IsGrounded() && !_characterController.IsSlidingOnIce()) gravMultiplier = Mathf.Min(Mathf.Pow(_characterController.GetNormalAccelerationScalar() / 12, _floatyPhysicsPower), 1);
-            else gravMultiplier = 1;
-            _characterController._acceleration = _groundAccel * gravMultiplier;
-        }
-
         public void UpdateAnimSpeed()
         {
             float gravMultiplier = _characterController._acceleration / _groundAccel;
-            float sizeMultiplier = 1f;
-            if (SmolHatchlingAPI != null) sizeMultiplier = SmolHatchlingAPI.GetAnimSpeed();
+            float sizeMultiplier = SmolHatchlingAPI != null ? SmolHatchlingAPI.GetAnimSpeed() : 1;
             float groundSpeedMultiplier = Mathf.Pow(_characterController.GetRelativeGroundVelocity().magnitude / 6 * sizeMultiplier, 0.5f);
-            float oldAnimSpeed = _animSpeed;
-            if (_characterController.IsGrounded()) _animSpeed = Mathf.Max(groundSpeedMultiplier * gravMultiplier, gravMultiplier);
-            else _animSpeed = 1f;
-            if (oldAnimSpeed == _animSpeed) return;
+            _animSpeed = _characterController.IsGrounded() ? Mathf.Max(groundSpeedMultiplier * gravMultiplier, gravMultiplier) : 1f;
             _animController._animator.speed = _animSpeed;
             DebugLog("UpdatedAnimSpeed");
 
