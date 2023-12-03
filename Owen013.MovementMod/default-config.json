@@ -97,7 +97,7 @@
 		"Sprint Speed": {
 			"type": "number",
 			"value": 11,
-			"tooltip": "How long the player can use their jetpack boost, in seconds. Default Mod Setting: 11"
+			"tooltip": "How quickly the player moves while sprinting. Default Mod Setting: 11"
 		},
 		"Sprint Button": {
 			"type": "selector",
@@ -137,7 +137,7 @@
 		"Floaty Physics Power": {
 			"type": "number",
 			"value": 1,
-			"tooltip": "How strongly floaty physics takes affect in any given gravity.. Default Mod Setting: 1"
+			"tooltip": "How strongly floaty physics takes affect in any given gravity. Default Mod Setting: 1"
 		},
 
 		"Super-Boosting": {

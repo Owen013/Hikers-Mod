@@ -2,38 +2,29 @@
 using OWML.ModHelper;
 using OWML.Common;
 using UnityEngine;
+using HikersMod.Components;
 
 namespace HikersMod
 {
-    public class HikersModController : ModBehaviour
+    public class HikersMod : ModBehaviour
     {
         // Mod fields
-        public static HikersModController Instance;
+        public static HikersMod Instance;
         public ISmolHatchling SmolHatchlingAPI;
         public AssetBundle _textAssets;
         public PlayerCharacterController _characterController;
         public PlayerAnimController _animController;
         public PlayerAudioController _audioController;
         public PlayerImpactAudio _impactAudio;
-        public JetpackThrusterController _jetpackController;
-        public JetpackThrusterModel _jetpackModel;
-        public OWAudioSource _superBoostAudio;
         public ThrusterFlameController _downThrustFlame;
+        public JetpackThrusterModel _jetpackModel;
         public GameObject _superBoostNote;
-        public PlayerCloneController _cloneController;
-        public EyeMirrorController _mirrorController;
-        public MoveSpeed _moveSpeed;
-        public IInputCommands _sprintButton;
-        public bool _isCharacterLoaded, _isSuperBoosting;
-        public bool _isVerticalThrustDisabled, _isDreamLanternFocused, _hasDreamLanternFocusChanged, _isDreaming;
-        public float _strafeSpeed;
-        public float _sprintStrafeSpeed;
-        public float _animSpeed;
+        public bool _isCharacterLoaded;
         public float _wallJumpsLeft;
         public float _lastWallJumpTime;
         public float _lastWallJumpRefill;
-        public float _lastBoostInputTime;
-        public float _lastBoostTime;
+        public IInputCommands _sprintButton;
+        public float _animSpeed;
 
         // Config fields
         public bool _isDebugLogEnabled;
@@ -65,7 +56,8 @@ namespace HikersMod
         {
             // Static reference to HikersMod so it can be used in patches.
             Instance = this;
-            Harmony.CreateAndPatchAll(typeof(HikersModController));
+            gameObject.AddComponent<SuperBoostController>();
+            Harmony.CreateAndPatchAll(typeof(HikersMod));
         }
 
         public void Start()
@@ -85,23 +77,10 @@ namespace HikersMod
         {
             // Make sure that the scene is the SS or Eye and that everything is loaded
             if (!IsCorrectScene() || !_isCharacterLoaded) return;
-
-            // If the input changes for rollmode or thrustdown, or if the dream lantern focus just changed, then call UpdateMoveSpeed()
-            if (InputChanged(InputLibrary.rollMode) ||
-                InputChanged(InputLibrary.thrustDown) ||
-                InputChanged(InputLibrary.thrustUp) ||
-                (OWInput.IsNewlyPressed(InputLibrary.boost) && !_characterController.IsGrounded()) ||
-                _hasDreamLanternFocusChanged)
-            {
-                ChangeMoveSpeed();
-            }
             
             // Update everthing else
             UpdateWallJump();
-            UpdateSuperBoost();
             if (_isFloatyPhysicsEnabled) UpdateAcceleration();
-            UpdateAnimSpeed();
-            _hasDreamLanternFocusChanged = false;
         }
 
         public override void Configure(IModConfig config)
@@ -144,24 +123,14 @@ namespace HikersMod
             _animController = FindObjectOfType<PlayerAnimController>();
             _audioController = FindObjectOfType<PlayerAudioController>();
             _impactAudio = FindObjectOfType<PlayerImpactAudio>();
-            _jetpackController = FindObjectOfType<JetpackThrusterController>();
             _jetpackModel = FindObjectOfType<JetpackThrusterModel>();
             var thrusters = Resources.FindObjectsOfTypeAll<ThrusterFlameController>();
             for (int i = 0; i < thrusters.Length; i++) if (thrusters[i]._thruster == Thruster.Up_LeftThruster) _downThrustFlame = thrusters[i];
 
             _characterController.OnBecomeGrounded += () =>
             {
-                ChangeMoveSpeed();
                 _wallJumpsLeft = _wallJumpsPerJump;
-                _isSuperBoosting = false;
             };
-
-            // Create superboost audio source
-            _superBoostAudio = new GameObject("HikersMod_SuperBoostAudioSrc").AddComponent<OWAudioSource>();
-            _superBoostAudio.transform.parent = _audioController.transform;
-            _superBoostAudio.transform.localPosition = new Vector3(0, 0, 1);
-
-            _isDreaming = false;
 
             // The Update() code won't run until after Setup() has at least once
             _isCharacterLoaded = true;
@@ -174,30 +143,11 @@ namespace HikersMod
         {
             if (!IsCorrectScene() || !_isCharacterLoaded) return;
 
-            // Strafe speed depends on whether or not slowStrafeDisabled is true
-            if (_isSlowStrafeDisabled)
-            {
-                _strafeSpeed = _normalSpeed;
-                _sprintStrafeSpeed = _sprintSpeed;
-            }
-            else
-            {
-                _strafeSpeed = _normalSpeed * 2f / 3f;
-                _sprintStrafeSpeed = _sprintSpeed * 2f / 3f;
-            }
-
             // Change built-in character attributes
             _characterController._useChargeJump = _jumpStyle == "Charge";
-            _characterController._runSpeed = _normalSpeed;
-            _characterController._strafeSpeed = _strafeSpeed;
-            _characterController._walkSpeed = _walkSpeed;
             if (!_isFloatyPhysicsEnabled) _characterController._acceleration = _groundAccel;
             _characterController._airSpeed = _airSpeed;
             _characterController._airAcceleration = _airAccel;
-            _characterController._maxJumpSpeed = _jumpPower;
-            _jetpackModel._maxTranslationalThrust = _jetpackAccel;
-            _jetpackModel._boostThrust = _jetpackBoostAccel;
-            _jetpackModel._boostSeconds = _jetpackBoostTime;
 
             if (_sprintButtonMode == "Down Thrust") _sprintButton = InputLibrary.thrustDown;
             else _sprintButton = InputLibrary.thrustUp;
@@ -205,45 +155,6 @@ namespace HikersMod
             if (_superBoostNote != null) _superBoostNote.SetActive(_isSuperBoostEnabled);
 
             ChangeMoveSpeed();
-        }
-
-        public void ChangeMoveSpeed()
-        {
-            bool holdingLantern = _characterController._heldLanternItem != null;
-            bool walking = OWInput.IsPressed(InputLibrary.rollMode) && !holdingLantern;
-            MoveSpeed oldSpeed = _moveSpeed;
-
-            if (OWInput.IsPressed(_sprintButton) &&
-                _characterController._isGrounded &&
-                !_characterController.IsSlidingOnIce() &&
-                !walking &&
-                !_isDreamLanternFocused &&
-                ((_sprintEnabledMode == "Everywhere") || _sprintEnabledMode == "Real World Only" && !_isDreaming) &&
-                (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 || !_characterController._isWearingSuit || !_canGroundThrustWithSprint || _moveSpeed == MoveSpeed.Sprinting))
-            {
-                _moveSpeed = MoveSpeed.Sprinting;
-                _characterController._runSpeed = _sprintSpeed;
-                _characterController._strafeSpeed = _sprintStrafeSpeed;
-                _isVerticalThrustDisabled = true;
-            }
-            else if (walking)
-            {
-                _moveSpeed = MoveSpeed.Walking;
-                _isVerticalThrustDisabled = false;
-            }
-            else if (_isDreamLanternFocused)
-            {
-                _moveSpeed = MoveSpeed.DreamLantern;
-                _isVerticalThrustDisabled = false;
-            }
-            else
-            {
-                _moveSpeed = MoveSpeed.Normal;
-                _characterController._runSpeed = _normalSpeed;
-                _characterController._strafeSpeed = _strafeSpeed;
-                _isVerticalThrustDisabled = false;
-            }
-            if (_moveSpeed != oldSpeed) DebugLog($"Changed movement speed to {_moveSpeed}");
         }
 
         public void UpdateAcceleration()
@@ -256,12 +167,12 @@ namespace HikersMod
 
         public void UpdateAnimSpeed()
         {
-            float groundSpeed = _characterController.GetRelativeGroundVelocity().magnitude;
             float gravMultiplier = _characterController._acceleration / _groundAccel;
             float sizeMultiplier = 1f;
             if (SmolHatchlingAPI != null) sizeMultiplier = SmolHatchlingAPI.GetAnimSpeed();
+            float groundSpeedMultiplier = Mathf.Pow(_characterController.GetRelativeGroundVelocity().magnitude / 6 * sizeMultiplier, 0.5f);
             float oldAnimSpeed = _animSpeed;
-            if (_characterController.IsGrounded()) _animSpeed = Mathf.Max(groundSpeed / (6 / sizeMultiplier) * gravMultiplier, gravMultiplier);
+            if (_characterController.IsGrounded()) _animSpeed = Mathf.Max(groundSpeedMultiplier * gravMultiplier, gravMultiplier);
             else _animSpeed = 1f;
             if (oldAnimSpeed == _animSpeed) return;
             _animController._animator.speed = _animSpeed;
@@ -316,45 +227,6 @@ namespace HikersMod
             if (Time.time - _lastWallJumpTime < 1) _animController._animator.SetFloat("FreefallSpeed", 100);
         }
 
-        public void UpdateSuperBoost()
-        {
-            bool isInputting = OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && (!OWInput.IsPressed(InputLibrary.thrustUp, InputMode.Character));
-            bool meetsCriteria = _characterController._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
-            if (!meetsCriteria) _isSuperBoosting = false;
-            else if (isInputting && meetsCriteria && _jetpackController._resources.GetFuel() > 0 && Time.time - _lastBoostInputTime < 0.25f && _isSuperBoostEnabled && !_isSuperBoosting)
-            {
-                _lastBoostTime = Time.time;
-                _isSuperBoosting = true;
-                _jetpackModel._boostChargeFraction = 1f;
-                _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, 1f);
-                DebugLog("Super-Boosted");
-            }
-            if (isInputting && meetsCriteria) _lastBoostInputTime = Time.time;
-            if (_isSuperBoosting)
-            {
-                if (_jetpackModel._boostChargeFraction > 0)
-                {
-                    _jetpackModel._boostActivated = true;
-                    _jetpackController._translationalInput.y = 1;
-                }
-                else
-                {
-                    _jetpackController._translationalInput.y = 0;
-                }
-                _jetpackModel._boostThrust = _jetpackBoostAccel * _superBoostPower;
-                _jetpackModel._boostSeconds = _jetpackBoostTime / _superBoostPower;
-                _jetpackModel._chargeSeconds = float.PositiveInfinity;
-                _downThrustFlame._currentScale = Mathf.Max(_downThrustFlame._currentScale, Mathf.Max(2 - (Time.time - _lastBoostTime), 0) * 7.5f * _jetpackModel._boostChargeFraction);
-            }
-            else
-            {
-                _jetpackModel._boostThrust = _jetpackBoostAccel;
-                _jetpackModel._boostSeconds = _jetpackBoostTime;
-                if (_characterController.IsGrounded()) _jetpackModel._chargeSeconds = _jetpackModel._chargeSecondsGround;
-                else _jetpackModel._chargeSeconds = _jetpackModel._chargeSecondsAir;
-            }
-        }
-
         public void PlaceSuperBoostNote()
         {
             if (GameObject.Find("Ship_Body") == null) return;
@@ -390,94 +262,6 @@ namespace HikersMod
         public static void CharacterControllerStart()
         {
             Instance.OnCharacterStart();
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
-        public static void GetJetpackInput(ref Vector3 __result)
-        {
-            if (Instance._sprintButton == InputLibrary.thrustDown && Instance._isVerticalThrustDisabled && __result.y < 0 ||
-            Instance._sprintButton == InputLibrary.thrustUp && Instance._isVerticalThrustDisabled && __result.y > 0)
-            {
-                __result.y = 0;
-                Instance._jetpackModel._boostActivated = false;
-            }
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(DreamLanternItem), nameof(DreamLanternItem.UpdateFocus))]
-        public static void DreamLanternFocusChanged(DreamLanternItem __instance)
-        {
-            if (__instance._wasFocusing == __instance._focusing) return;
-            Instance._isDreamLanternFocused = __instance._focusing;
-            Instance._hasDreamLanternFocusChanged = true;
-            if (__instance._focusing) Instance.DebugLog("Focused Dream Lantern", MessageType.Info);
-            else Instance.DebugLog("Unfocused Dream Lantern", MessageType.Info);
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.OnEnterDreamWorld))]
-        public static void EnteredDreamWorld()
-        {
-            Instance._isDreaming = true;
-            Instance.ChangeMoveSpeed();
-            Instance.DebugLog("Entered Dream World", MessageType.Info);
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.OnExitDreamWorld))]
-        public static void ExitedDreamWorld()
-        {
-            Instance._isDreaming = false;
-            Instance.ChangeMoveSpeed();
-            Instance.DebugLog("Left Dream World", MessageType.Info);
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Update))]
-        public static bool CharacterControllerUpdate(PlayerCharacterController __instance)
-        {
-            if (!__instance._isAlignedToForce && !__instance._isZeroGMovementEnabled)
-            {
-                return false;
-            }
-            if ((OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f) || (Instance._sprintButton == InputLibrary.thrustUp && Instance._isVerticalThrustDisabled))
-            {
-                __instance.UpdateJumpInput();
-            }
-            else
-            {
-                __instance._jumpChargeTime = 0f;
-                __instance._jumpNextFixedUpdate = false;
-                __instance._jumpPressedInOtherMode = false;
-            }
-            if (__instance._isZeroGMovementEnabled)
-            {
-                __instance._pushPrompt.SetVisibility(OWInput.IsInputMode(InputMode.Character | InputMode.NomaiRemoteCam) && __instance._isPushable);
-            }
-            return false;
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
-        public static bool IsBoosterAllowed(ref bool __result, PlayerResources __instance)
-        {
-            __result = !PlayerState.InZeroG() && !Locator.GetPlayerSuit().IsTrainingSuit() && !__instance._cameraFluidDetector.InFluidType(FluidVolume.Type.WATER) && __instance._currentFuel > 0f && !Instance._isVerticalThrustDisabled;
-            return false;
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(PlayerMovementAudio), nameof(PlayerMovementAudio.PlayFootstep))]
-        public static bool PlayFootstep(PlayerMovementAudio __instance)
-        {
-            AudioType audioType = (!PlayerState.IsCameraUnderwater() && __instance._fluidDetector.InFluidType(FluidVolume.Type.WATER)) ? AudioType.MovementShallowWaterFootstep : PlayerMovementAudio.GetFootstepAudioType(__instance._playerController.GetGroundSurface());
-            if (audioType != AudioType.None)
-            {
-                __instance._footstepAudio.pitch = Random.Range(0.9f, 1.1f);
-                if (Instance._moveSpeed == MoveSpeed.Sprinting) __instance._footstepAudio.PlayOneShot(audioType, 1.4f);
-                else __instance._footstepAudio.PlayOneShot(audioType, 0.7f);
-            }
-            return false;
         }
 
         [HarmonyPrefix]

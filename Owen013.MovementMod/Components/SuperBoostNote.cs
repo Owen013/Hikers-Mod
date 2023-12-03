@@ -1,11 +1,11 @@
 ﻿using System.Xml;
 using UnityEngine;
 
-namespace HikersMod
+namespace HikersMod.Components
 {
     public class SuperBoostNote : MonoBehaviour
     {
-        AssetBundle textAssets = HikersModController.Instance._textAssets;
+        AssetBundle textAssets = HikersMod.Instance._textAssets;
 
         public void Start()
         {
@@ -22,9 +22,9 @@ namespace HikersMod
             interactVolume.transform.position = page.transform.position;
             interactVolume.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
             interactVolume.GetComponent<InteractReceiver>()._usableInShip = true;
-            gameObject.SetActive(HikersModController.Instance._isSuperBoostEnabled);
-            HikersModController.Instance._superBoostNote = gameObject;
-            HikersModController.Instance.ModHelper.Events.Unity.FireInNUpdates(() =>
+            gameObject.SetActive(HikersMod.Instance._isSuperBoostEnabled);
+            HikersMod.Instance._superBoostNote = gameObject;
+            HikersMod.Instance.ModHelper.Events.Unity.FireInNUpdates(() =>
             {
                 dialogueTree._attentionPoint = page.transform;
                 dialogueTree._characterName = "HikersMod_SuperBoostNote";
