@@ -21,6 +21,7 @@ namespace HikersMod.Components
 
         public void UpdateAcceleration()
         {
+            if (!_characterController) return;
             float gravMultiplier;
             if (_characterController.IsGrounded() && !_characterController.IsSlidingOnIce()) gravMultiplier = Mathf.Min(Mathf.Pow(_characterController.GetNormalAccelerationScalar() / 12, HikersMod.Instance._floatyPhysicsPower), 1);
             else gravMultiplier = 1;

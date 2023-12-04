@@ -158,6 +158,11 @@
 			"value": 25,
 			"tooltip": "How powerful a Super-Boost is. Default Mod Setting: 25"
 		},
+		"Super-Boost Cost": {
+			"type": "number",
+			"value": 10,
+			"tooltip": "The amount of fuel you will lost immediately after starting a super-boost. Default Mod Setting: 10"
+		},
 
 		"Miscellaneous": {
 			"type": "separator"

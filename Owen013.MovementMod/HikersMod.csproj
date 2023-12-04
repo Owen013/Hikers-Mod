@@ -13,6 +13,9 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Components\ViewBobController.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="OWML" Version="2.7.1" />
     <PackageReference Include="OuterWildsGameLibs" Version="1.1.13.393" />
   </ItemGroup>

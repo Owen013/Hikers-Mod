@@ -15,6 +15,7 @@ namespace HikersMod.Components
         public PlayerCharacterController _characterController;
         public PlayerAudioController _audioController;
         public ThrusterFlameController _downThrustFlame;
+        public HUDHelmetAnimator _helmetAnimator;
 
         public void Awake()
         {
@@ -24,43 +25,31 @@ namespace HikersMod.Components
 
         public void Update()
         {
-            if (!_characterController)
-            {
-                HikersMod.Instance.DebugLog("No character controller", OWML.Common.MessageType.Warning);
-                return;
-            }
+            if (!_characterController) return;
             bool isInputting = OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && !OWInput.IsPressed(InputLibrary.thrustUp, InputMode.Character);
             bool meetsCriteria = _characterController._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
             if (!meetsCriteria) _isSuperBoosting = false;
-            else if (isInputting && meetsCriteria && _jetpackController._resources.GetFuel() > 0 && Time.time - _lastBoostInputTime < 0.25f && HikersMod.Instance._isSuperBoostEnabled && !_isSuperBoosting)
+            else if (isInputting && meetsCriteria && _jetpackController._resources.GetFuel() > 0f && Time.time - _lastBoostInputTime < 0.25f && HikersMod.Instance._isSuperBoostEnabled && !_isSuperBoosting)
             {
                 _lastBoostTime = Time.time;
                 _isSuperBoosting = true;
-                _jetpackModel._boostChargeFraction = 1f;
+                _jetpackModel._boostChargeFraction = 0f;
+                _jetpackController._resources._currentFuel -= HikersMod.Instance._superBoostCost;
+                _characterController._owRigidbody.AddLocalVelocityChange(new Vector3(0f, HikersMod.Instance._superBoostPower, 0f));
                 _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, 1f);
+                _helmetAnimator.OnInstantDamage(50f, InstantDamageType.Impact);
+                NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "EMERGENCY BOOST ACTIVATED", 5f), false);
                 HikersMod.Instance.DebugLog("Super-Boosted");
             }
             if (isInputting && meetsCriteria) _lastBoostInputTime = Time.time;
             if (_isSuperBoosting)
             {
-                if (_jetpackModel._boostChargeFraction > 0)
-                {
-                    _jetpackModel._boostActivated = true;
-                    _jetpackController._translationalInput.y = 1;
-                }
-                else
-                {
-                    _jetpackController._translationalInput.y = 0;
-                }
-                _jetpackModel._boostThrust = HikersMod.Instance._jetpackBoostAccel * HikersMod.Instance._superBoostPower;
-                _jetpackModel._boostSeconds = HikersMod.Instance._jetpackBoostTime / HikersMod.Instance._superBoostPower;
+                _jetpackController._translationalInput.y = 0;
                 _jetpackModel._chargeSeconds = float.PositiveInfinity;
-                _downThrustFlame._currentScale = Mathf.Max(_downThrustFlame._currentScale, Mathf.Max(2 - (Time.time - _lastBoostTime), 0) * 7.5f * _jetpackModel._boostChargeFraction);
+                _downThrustFlame._currentScale = 10f;//Mathf.Max(_downThrustFlame._currentScale, Mathf.Max(2 - (Time.time - _lastBoostTime), 0) * 7.5f);
             }
             else
             {
-                _jetpackModel._boostThrust = HikersMod.Instance._jetpackBoostAccel;
-                _jetpackModel._boostSeconds = HikersMod.Instance._jetpackBoostTime;
                 if (_characterController.IsGrounded()) _jetpackModel._chargeSeconds = _jetpackModel._chargeSecondsGround;
                 else _jetpackModel._chargeSeconds = _jetpackModel._chargeSecondsAir;
             }
@@ -74,6 +63,7 @@ namespace HikersMod.Components
             Instance._audioController = FindObjectOfType<PlayerAudioController>();
             Instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
             Instance._jetpackController = FindObjectOfType<JetpackThrusterController>();
+            Instance._helmetAnimator = FindObjectOfType<HUDHelmetAnimator>();
             Instance._superBoostAudio = new GameObject("HikersMod_SuperBoostAudioSrc").AddComponent<OWAudioSource>();
             Instance._superBoostAudio.transform.parent = Instance._audioController.transform;
             Instance._superBoostAudio.transform.localPosition = new Vector3(0, 0, 1);

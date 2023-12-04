@@ -45,6 +45,7 @@ namespace HikersMod
         public float _floatyPhysicsPower;
         public bool _isSuperBoostEnabled;
         public float _superBoostPower;
+        public float _superBoostCost;
 
         public delegate void ConfigureEvent();
 
@@ -54,6 +55,7 @@ namespace HikersMod
             Instance = this;
             gameObject.AddComponent<SpeedController>();
             gameObject.AddComponent<WallJumpController>();
+            gameObject.AddComponent<FloatyPhysicsController>();
             gameObject.AddComponent<SuperBoostController>();
             Harmony.CreateAndPatchAll(typeof(HikersMod));
         }
@@ -106,6 +108,7 @@ namespace HikersMod
             _floatyPhysicsPower = config.GetSettingsValue<float>("Floaty Physics Power");
             _isSuperBoostEnabled = config.GetSettingsValue<bool>("Enable Jetpack Super-Boost");
             _superBoostPower = config.GetSettingsValue<float>("Super-Boost Power");
+            _superBoostCost = config.GetSettingsValue<float>("Super-Boost Cost");
 
             ApplyChanges();
             OnConfigure();
@@ -127,7 +130,7 @@ namespace HikersMod
 
         public void UpdateAnimSpeed()
         {
-            float gravMultiplier = _characterController._acceleration / _groundAccel;
+            float gravMultiplier = Mathf.Sqrt(_characterController._acceleration / _groundAccel);
             float sizeMultiplier = SmolHatchlingAPI != null ? SmolHatchlingAPI.GetAnimSpeed() : 1;
             float groundSpeedMultiplier = Mathf.Pow(_characterController.GetRelativeGroundVelocity().magnitude / 6 * sizeMultiplier, 0.5f);
             _animSpeed = _characterController.IsGrounded() ? Mathf.Max(groundSpeedMultiplier * gravMultiplier, gravMultiplier) : 1f;
