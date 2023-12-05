@@ -38,7 +38,7 @@ namespace HikersMod.Components
                 _jetpackController._resources._currentFuel -= HikersMod.Instance._superBoostCost;
                 Vector3 pointVelocity = _characterController._transform.InverseTransformDirection(_characterController._lastGroundBody.GetPointVelocity(_characterController._transform.position));
                 Vector3 localVelocity = _characterController._transform.InverseTransformDirection(_characterController._owRigidbody.GetVelocity()) - pointVelocity;
-                _characterController._owRigidbody.AddLocalVelocityChange(new Vector3(0f, HikersMod.Instance._superBoostPower - localVelocity.y, 0f));
+                _characterController._owRigidbody.AddLocalVelocityChange(new Vector3(-localVelocity.x, HikersMod.Instance._superBoostPower - localVelocity.y, -localVelocity.z));
                 _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, 1f);
                 _helmetAnimator.OnInstantDamage(10f, InstantDamageType.Impact);
                 NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "EMERGENCY BOOST ACTIVATED", 5f), false);

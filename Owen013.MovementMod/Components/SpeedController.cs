@@ -10,7 +10,10 @@ namespace HikersMod.Components
         public PlayerCharacterController _characterController;
         public JetpackThrusterModel _jetpackModel;
         public MoveSpeed _moveSpeed;
-        public bool _isVerticalThrustDisabled, _isDreamLanternFocused, _hasDreamLanternFocusChanged, _isDreaming;
+        public bool _isVerticalThrustDisabled;
+        public bool _isDreamLanternFocused;
+        public bool _hasDreamLanternFocusChanged;
+        public bool _isDreaming;
         public float _strafeSpeed;
         public float _sprintStrafeSpeed;
 
@@ -118,7 +121,7 @@ namespace HikersMod.Components
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
-        public static void CharacterControllerStart()
+        public static void OnCharacterControllerStart()
         {
             Instance._characterController = FindObjectOfType<PlayerCharacterController>();
             Instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
@@ -129,7 +132,7 @@ namespace HikersMod.Components
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
-        public static void GetJetpackInput(ref Vector3 __result)
+        public static void OnGetJetpackInput(ref Vector3 __result)
         {
             if (HikersMod.Instance._sprintButton == InputLibrary.thrustDown && Instance._isVerticalThrustDisabled && __result.y < 0 ||
             HikersMod.Instance._sprintButton == InputLibrary.thrustUp && Instance._isVerticalThrustDisabled && __result.y > 0)
@@ -141,7 +144,7 @@ namespace HikersMod.Components
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(DreamLanternItem), nameof(DreamLanternItem.UpdateFocus))]
-        public static void DreamLanternFocusChanged(DreamLanternItem __instance)
+        public static void OnDreamLanternFocusChanged(DreamLanternItem __instance)
         {
             if (__instance._wasFocusing == __instance._focusing) return;
             Instance._isDreamLanternFocused = __instance._focusing;
@@ -152,7 +155,7 @@ namespace HikersMod.Components
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.OnEnterDreamWorld))]
-        public static void EnteredDreamWorld()
+        public static void OnEnteredDreamWorld()
         {
             Instance._isDreaming = true;
             Instance.ChangeMoveSpeed();
@@ -161,7 +164,7 @@ namespace HikersMod.Components
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.OnExitDreamWorld))]
-        public static void ExitedDreamWorld()
+        public static void OnExitedDreamWorld()
         {
             Instance._isDreaming = false;
             Instance.ChangeMoveSpeed();

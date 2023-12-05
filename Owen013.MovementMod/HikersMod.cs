@@ -8,7 +8,6 @@ namespace HikersMod
 {
     public class HikersMod : ModBehaviour
     {
-        // Mod fields
         public static HikersMod Instance;
         public ISmolHatchling SmolHatchlingAPI;
         public PlayerCharacterController _characterController;
@@ -162,7 +161,7 @@ namespace HikersMod
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
-        public static void CharacterControllerStart()
+        public static void OnCharacterControllerStart()
         {
             // Get vars
             Instance._characterController = Locator.GetPlayerController();
@@ -173,7 +172,7 @@ namespace HikersMod
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.UpdateAirControl))]
-        public static bool CharacterUpdateAirControl(PlayerCharacterController __instance)
+        public static bool UpdateAirControl(PlayerCharacterController __instance)
         {
             if (!Instance._enhancedAirControlEnabled) return true;
             if (__instance == null) return true;
@@ -201,14 +200,5 @@ namespace HikersMod
         [HarmonyPostfix]
         [HarmonyPatch(typeof(EyeMirrorController), nameof(EyeMirrorController.Start))]
         public static void EyeMirrorStart(EyeMirrorController __instance) => Instance._mirrorController = __instance;
-
-        /*
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(PlayerAnimController), nameof(PlayerAnimController.LateUpdate))]
-        public static void Animator_GetLayerWeight(PlayerAnimController __instance)
-        {
-            __instance._animator.SetLayerWeight(1, 1);
-        }
-        */
     }
 }

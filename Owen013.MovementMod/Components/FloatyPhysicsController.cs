@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace HikersMod.Components
 {
-    public  class FloatyPhysicsController : MonoBehaviour
+    public class FloatyPhysicsController : MonoBehaviour
     {
         public static FloatyPhysicsController Instance;
         public PlayerCharacterController _characterController;
@@ -22,9 +22,7 @@ namespace HikersMod.Components
         public void UpdateAcceleration()
         {
             if (!_characterController) return;
-            float gravMultiplier;
-            if (_characterController.IsGrounded() && !_characterController.IsSlidingOnIce()) gravMultiplier = Mathf.Min(Mathf.Pow(_characterController.GetNormalAccelerationScalar() / 12, HikersMod.Instance._floatyPhysicsPower), 1);
-            else gravMultiplier = 1;
+            float gravMultiplier = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce() ? Mathf.Min(Mathf.Pow(_characterController.GetNormalAccelerationScalar() / 12, HikersMod.Instance._floatyPhysicsPower), 1) : 1;
             _characterController._acceleration = HikersMod.Instance._groundAccel * gravMultiplier;
         }
 

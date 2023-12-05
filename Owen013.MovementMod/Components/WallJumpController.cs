@@ -75,11 +75,7 @@ namespace HikersMod.Components
             Instance._characterController = FindObjectOfType<PlayerCharacterController>();
             Instance._animController = FindObjectOfType<PlayerAnimController>();
             Instance._impactAudio = FindObjectOfType<PlayerImpactAudio>();
-
-            Instance._characterController.OnBecomeGrounded += () =>
-            {
-                Instance._wallJumpsLeft = HikersMod.Instance._wallJumpsPerJump;
-            };
+            Instance._characterController.OnBecomeGrounded += () => Instance._wallJumpsLeft = HikersMod.Instance._wallJumpsPerJump; 
         }
     }
 }

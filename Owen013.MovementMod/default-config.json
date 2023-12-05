@@ -96,8 +96,8 @@
 		},
 		"Sprint Speed": {
 			"type": "number",
-			"value": 11,
-			"tooltip": "How quickly the player moves while sprinting. Default Mod Setting: 11"
+			"value": 12,
+			"tooltip": "How quickly the player moves while sprinting. Default Mod Setting: 12"
 		},
 		"Sprint Button": {
 			"type": "selector",
