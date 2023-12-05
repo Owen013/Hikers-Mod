@@ -14,11 +14,11 @@ You've got 22 minutes, so get a move on! Move faster by holding down the sprint 
 ### Modify your movement speed, jump height, and more
 Change your speed, jump height, and more in the config menu!
 
-### Floaty Physics
-This feature makes your movement floatier on low-gravity bodies! The lower the gravity is, the lower your acceleration is, which means you'll take longer to reach your top speed.
-
 ### Emergency Boost
 For those tough situations where you need a quick burst of upward movement! Press space twice in quick succession (while not holding the up- or downward thrust buttons) to shoot up into the air, but be wary! It uses a lot of fuel.
+
+### Floaty Physics
+This feature makes your movement floatier on low-gravity bodies! The lower the gravity is, the lower your acceleration is, which means you'll take longer to reach your top speed.
 
 ### Wall-Jumping
 Want to get up to the observatory quickly? Press space in midair while facing a wall to jump off of it, and repeat to climb up walls!
