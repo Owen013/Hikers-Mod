@@ -11,6 +11,11 @@
 			"value": 6,
 			"tooltip": "How quickly the player moves. Vanilla: 6"
 		},
+		"Strafe Speed": {
+			"type": "number",
+			"value": 4,
+			"tooltip": "How quickly the player moves when walking backwards or to the side. Vanilla: 4"
+		},
 		"Walk Speed": {
 			"type": "number",
 			"value": 3,
@@ -57,7 +62,7 @@
 			"tooltip": "How long the player can use their jetpack boost, in seconds. Vanilla: 1"
 		},
 
-		"Instant Jump": {
+		"Air Control": {
 			"type": "separator"
 		},
 		"Jump Style": {
@@ -66,23 +71,10 @@
 			"options": [ "Charge", "Instant" ],
 			"tooltip": "Charge: you have to hold space to charge a jump and release space to perform the jump. Instant: the player will jump immediately upon pressing space. Vanilla: Charge"
 		},
-
-		"Enhanced Air Control": {
-			"type": "separator"
-		},
 		"Enable Enhanced Air Control": {
 			"type": "toggle",
 			"value": true,
 			"tooltip": "Makes the character more maneuverable in midair; allows changing direction during a jump. Vanilla: Disabled"
-		},
-
-		"Strafing Slowdown": {
-			"type": "separator"
-		},
-		"Disable Strafing Slowdown": {
-			"type": "toggle",
-			"value": false,
-			"tooltip": "How long the player can use their jetpack boost, in seconds. Vanilla: Disabled"
 		},
 
 		"Sprinting": {
@@ -90,8 +82,8 @@
 		},
 		"Enable Sprinting": {
 			"type": "selector",
-			"value": "Real World Only",
-			"options": [ "No", "Real World Only", "Everywhere" ],
+			"value": "Vanilla Friendly",
+			"options": [ "No", "Vanilla Friendly", "Always" ],
 			"tooltip": "Allows the player to sprint. Vanilla: No"
 		},
 		"Sprint Speed": {
@@ -99,16 +91,16 @@
 			"value": 12,
 			"tooltip": "How quickly the player moves while sprinting. Default Mod Setting: 12"
 		},
+		"Sprint Strafe Speed": {
+			"type": "number",
+			"value": 8,
+			"tooltip": "How quickly the player moves when sprinting backwards or to the side. Default Mod Setting: 8"
+		},
 		"Sprint Button": {
 			"type": "selector",
 			"value": "Up Thrust",
 			"options": [ "Up Thrust", "Down Thrust" ],
 			"tooltip": "Whether sprinting uses the Up Thrust button (usually shift or right trigger) or the Down Thrust button (usually control or left trigger). Default Mod Setting: Up Thrust."
-		},
-		"Allow Sprinting Backwards": {
-			"type": "toggle",
-			"value": false,
-			"tooltip": "Allows the player to sprint backwards. Default Mod Setting: Disabled"
 		},
 		"Allow Thrusting on Ground with Sprinting Enabled": {
 			"type": "toggle",
@@ -135,7 +127,7 @@
 			"tooltip": "The amount of fuel an emergency boost uses. Default Mod Setting: 20"
 		},
 
-		"Floaty Physics": {
+		"Other": {
 			"type": "separator"
 		},
 		"Floaty Physics in Low-Gravity": {
@@ -148,10 +140,6 @@
 			"value": 1,
 			"tooltip": "How strongly floaty physics takes affect in any given gravity. Default Mod Setting: 1"
 		},
-
-		"Wall Jumping": {
-			"type": "separator"
-		},
 		"Enable Wall Jumping": {
 			"type": "selector",
 			"value": "No",
@@ -162,10 +150,6 @@
 			"type": "number",
 			"value": 5,
 			"tooltip": "How many times the player can Wall Jump without touching the ground. Default Mod Setting: 5"
-		},
-
-		"Miscellaneous": {
-			"type": "separator"
 		},
 		"Enable Debug Log": {
 			"type": "toggle",

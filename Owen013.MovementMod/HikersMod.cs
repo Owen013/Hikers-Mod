@@ -21,6 +21,7 @@ namespace HikersMod
         // Config
         public bool _isDebugLogEnabled;
         public float _normalSpeed;
+        public float _strafeSpeed;
         public float _walkSpeed;
         public float _dreamLanternSpeed;
         public float _groundAccel;
@@ -32,15 +33,16 @@ namespace HikersMod
         public float _jetpackBoostTime;
         public string _jumpStyle;
         public bool _enhancedAirControlEnabled;
-        public bool _isSlowStrafeDisabled;
         public string _sprintEnabledMode;
         public string _sprintButtonMode;
         public bool _canSprintBackwards;
-        public bool _canGroundThrustWithSprint;
         public float _sprintSpeed;
+        public float _sprintStrafeSpeed;
+        public bool _canGroundThrustWithSprint;
         public bool _isSuperBoostEnabled;
         public float _superBoostPower;
         public float _superBoostCost;
+        public bool _isSlowStrafeDisabled;
         public bool _isFloatyPhysicsEnabled;
         public float _floatyPhysicsPower;
         public string _wallJumpEnabledMode;
@@ -84,6 +86,7 @@ namespace HikersMod
             // Get all settings values
             _isDebugLogEnabled = config.GetSettingsValue<bool>("Enable Debug Log");
             _normalSpeed = config.GetSettingsValue<float>("Normal Speed");
+            _strafeSpeed = config.GetSettingsValue<float>("Strafe Speed");
             _walkSpeed = config.GetSettingsValue<float>("Walk Speed");
             _dreamLanternSpeed = config.GetSettingsValue<float>("Focused Lantern Speed");
             _groundAccel = config.GetSettingsValue<float>("Ground Acceleration");
@@ -95,12 +98,11 @@ namespace HikersMod
             _jetpackBoostTime = config.GetSettingsValue<float>("Max Jetpack Boost Time");
             _jumpStyle = config.GetSettingsValue<string>("Jump Style");
             _enhancedAirControlEnabled = config.GetSettingsValue<bool>("Enable Enhanced Air Control");
-            _isSlowStrafeDisabled = config.GetSettingsValue<bool>("Disable Strafing Slowdown");
             _sprintEnabledMode = config.GetSettingsValue<string>("Enable Sprinting");
             _sprintButtonMode = config.GetSettingsValue<string>("Sprint Button");
-            _canSprintBackwards = config.GetSettingsValue<bool>("Allow Sprinting Backwards");
-            _canGroundThrustWithSprint = config.GetSettingsValue<bool>("Allow Thrusting on Ground with Sprinting Enabled");
             _sprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
+            _sprintStrafeSpeed = config.GetSettingsValue<float>("Sprint Strafe Speed");
+            _canGroundThrustWithSprint = config.GetSettingsValue<bool>("Allow Thrusting on Ground with Sprinting Enabled");
             _isSuperBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
             _superBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");
             _superBoostCost = config.GetSettingsValue<float>("Emergency Boost Cost");
@@ -134,7 +136,6 @@ namespace HikersMod
             float groundSpeedMultiplier = Mathf.Pow(_characterController.GetRelativeGroundVelocity().magnitude / 6 * sizeMultiplier, 0.5f);
             _animSpeed = _characterController.IsGrounded() ? Mathf.Max(groundSpeedMultiplier * gravMultiplier, gravMultiplier) : 1f;
             _animController._animator.speed = _animSpeed;
-            DebugLog("UpdatedAnimSpeed");
 
             if (_cloneController != null)
             {

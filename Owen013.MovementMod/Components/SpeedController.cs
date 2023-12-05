@@ -14,8 +14,6 @@ namespace HikersMod.Components
         public bool _isDreamLanternFocused;
         public bool _hasDreamLanternFocusChanged;
         public bool _isDreaming;
-        public float _strafeSpeed;
-        public float _sprintStrafeSpeed;
 
         public enum MoveSpeed
         {
@@ -55,21 +53,9 @@ namespace HikersMod.Components
         {
             if (!_characterController) return;
 
-            // Strafe speed depends on whether or not slowStrafeDisabled is true
-            if (HikersMod.Instance._isSlowStrafeDisabled)
-            {
-                _strafeSpeed = HikersMod.Instance._normalSpeed;
-                _sprintStrafeSpeed = HikersMod.Instance._sprintSpeed;
-            }
-            else
-            {
-                _strafeSpeed = HikersMod.Instance._normalSpeed * 2f / 3f;
-                _sprintStrafeSpeed = HikersMod.Instance._sprintSpeed * 2f / 3f;
-            }
-
             // Change built-in character attributes
             _characterController._runSpeed = HikersMod.Instance._normalSpeed;
-            _characterController._strafeSpeed = _strafeSpeed;
+            _characterController._strafeSpeed = HikersMod.Instance._strafeSpeed;
             _characterController._walkSpeed = HikersMod.Instance._walkSpeed;
             _characterController._airSpeed = HikersMod.Instance._airSpeed;
             _characterController._airAcceleration = HikersMod.Instance._airAccel;
@@ -96,7 +82,7 @@ namespace HikersMod.Components
             {
                 _moveSpeed = MoveSpeed.Sprinting;
                 _characterController._runSpeed = HikersMod.Instance._sprintSpeed;
-                _characterController._strafeSpeed = (HikersMod.Instance._canSprintBackwards ? _sprintStrafeSpeed : _strafeSpeed);
+                _characterController._strafeSpeed = HikersMod.Instance._sprintStrafeSpeed;
                 _isVerticalThrustDisabled = true;
             }
             else if (walking)
@@ -113,7 +99,7 @@ namespace HikersMod.Components
             {
                 _moveSpeed = MoveSpeed.Normal;
                 _characterController._runSpeed = HikersMod.Instance._normalSpeed;
-                _characterController._strafeSpeed = _strafeSpeed;
+                _characterController._strafeSpeed = HikersMod.Instance._strafeSpeed;
                 _isVerticalThrustDisabled = false;
             }
             if (_moveSpeed != oldSpeed) HikersMod.Instance.DebugLog($"Changed movement speed to {_moveSpeed}");
