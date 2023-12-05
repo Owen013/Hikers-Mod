@@ -116,20 +116,6 @@
 			"tooltip": "With this enabled, the player can start thrusting on the ground as long as they aren't actively moving. Default Mod Setting: Enabled"
 		},
 
-		"Floaty Physics": {
-			"type": "separator"
-		},
-		"Floaty Physics in Low-Gravity": {
-			"type": "toggle",
-			"value": false,
-			"tooltip": "For fun. Lowers the player's acceleration in low gravity, making movement floatier. Default Mod Setting: Disabled"
-		},
-		"Floaty Physics Power": {
-			"type": "number",
-			"value": 1,
-			"tooltip": "How strongly floaty physics takes affect in any given gravity. Default Mod Setting: 1"
-		},
-
 		"Emergency Boost": {
 			"type": "separator"
 		},
@@ -147,6 +133,20 @@
 			"type": "number",
 			"value": 20,
 			"tooltip": "The amount of fuel an emergency boost uses. Default Mod Setting: 20"
+		},
+
+		"Floaty Physics": {
+			"type": "separator"
+		},
+		"Floaty Physics in Low-Gravity": {
+			"type": "toggle",
+			"value": false,
+			"tooltip": "For fun. Lowers the player's acceleration in low gravity, making movement floatier. Default Mod Setting: Disabled"
+		},
+		"Floaty Physics Power": {
+			"type": "number",
+			"value": 1,
+			"tooltip": "How strongly floaty physics takes affect in any given gravity. Default Mod Setting: 1"
 		},
 
 		"Wall Jumping": {
