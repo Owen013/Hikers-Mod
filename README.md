@@ -9,19 +9,19 @@ Makes you slightly more maneuverable in midair without your jetpack! Allows you 
 Full speed ahead...even if you're not moving directly ahead! Allows you to move at full speed when moving backwards or to the side.
 
 ### Sprinting
-The sprinting feature (which is enabled by default, unless you're dreaming) allows you to run faster! This feature is carefully designed to work with the jetpack controls! Your sprinting speed, which button you use to sprint, and more can be changed in the config menu.
+You've got 22 minutes, so get a move on! Move faster by holding down the sprint key, which can be bound to the thrust-up or thrust-down button! Carefully designed to work with the jetpack controls and to avoid cheese.
 
 ### Modify your movement speed, jump height, and more
-Hiker's Mod allows you to change your character's running, walking, and sprinting speeds, your jump height, and your acceleration so that you can make the hatchling as acrobatic as you please!
-
-### Wall-Jumping
-This feature allows you to climb up walls to an extent by pressing the jump button while facing a wall.
+Change your speed, jump height, and more in the config menu!
 
 ### Floaty Physics
-This feature makes the player's movement floatier on low-gravity bodies! The lower the gravity is, the lower your acceleration is, which means you'll take longer to reach your top speed.
+This feature makes your movement floatier on low-gravity bodies! The lower the gravity is, the lower your acceleration is, which means you'll take longer to reach your top speed.
 
-### Jetpack Super-Boost
-This feature allows you to shoot upward with your jetpack when you double-tap the jump button. The downside to this is that you won't be able to use your jetpack's boost until you touch the ground again. Note: you can't boost while holding the thrust-up button.
+### Emergency Boost
+For those tough situations where you need a quick burst of upward movement! Press space twice in quick succession (while not holding the up- or downward thrust buttons) to shoot up into the air, but be wary! It uses a lot of fuel.
+
+### Wall-Jumping
+Want to get up to the observatory quickly? Press space in midair while facing a wall to jump off of it, and repeat to climb up walls!
 
 ### Don't like it? Turn it off!
 Any of Hiker's Mod's features can be enabled or disabled so that you can use the features that you want without being forced to use the ones that you don't like! Furthermore, not all features are enabled by default. Go to the config menu to enable/disable/customize Hiker's Mod features.
