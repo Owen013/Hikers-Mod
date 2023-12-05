@@ -151,7 +151,7 @@
 		"Enable Emergency Boost": {
 			"type": "toggle",
 			"value": false,
-			"tooltip": "For fun. Allows the player to shoot up into the air by pressing space twice. Default Mod Setting: Disabled"
+			"tooltip": "Allows the player to shoot up into the air by pressing space twice. Default Mod Setting: Disabled"
 		},
 		"Emergency Boost Power": {
 			"type": "number",

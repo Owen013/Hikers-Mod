@@ -31,6 +31,7 @@ namespace HikersMod.Components
             if (!meetsCriteria) _isSuperBoosting = false;
             else if (isInputting && meetsCriteria && _jetpackController._resources.GetFuel() > 0f && Time.time - _lastBoostInputTime < 0.25f && HikersMod.Instance._isSuperBoostEnabled && !_isSuperBoosting)
             {
+                // Apply superboost
                 _lastBoostTime = Time.time;
                 _isSuperBoosting = true;
                 _jetpackModel._boostChargeFraction = 0f;
@@ -62,7 +63,7 @@ namespace HikersMod.Components
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
-        public static void CharacterControllerStart()
+        public static void OnCharacterControllerStart()
         {
             Instance._characterController = FindObjectOfType<PlayerCharacterController>();
             Instance._audioController = FindObjectOfType<PlayerAudioController>();
@@ -74,10 +75,7 @@ namespace HikersMod.Components
             Instance._superBoostAudio.transform.localPosition = new Vector3(0, 0, 1);
             var thrusters = Resources.FindObjectsOfTypeAll<ThrusterFlameController>();
             for (int i = 0; i < thrusters.Length; i++) if (thrusters[i]._thruster == Thruster.Up_LeftThruster) Instance._downThrustFlame = thrusters[i];
-            Instance._characterController.OnBecomeGrounded += () =>
-            {
-                Instance._isSuperBoosting = false;
-            };
+            Instance._characterController.OnBecomeGrounded += () => Instance._isSuperBoosting = false;
         }
     }
 }

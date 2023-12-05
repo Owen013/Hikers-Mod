@@ -62,8 +62,10 @@ namespace HikersMod.Components
                 _lastWallJumpRefill = Time.time;
             }
 
-            // Make player play fast freefall animation for one second after each wall jump
-            if (Time.time - _lastWallJumpTime < 1) _animController._animator.SetFloat("FreefallSpeed", 100);
+            // Make player play fast freefall animation after each wall jump
+            float freeFallSpeed = _animController._animator.GetFloat("FreefallSpeed");
+            float climbFraction = Mathf.Max(0, 1 - (Time.time - _lastWallJumpTime));
+            _animController._animator.SetFloat("FreefallSpeed", Mathf.Max(freeFallSpeed, climbFraction));
         }
 
         [HarmonyPostfix]
