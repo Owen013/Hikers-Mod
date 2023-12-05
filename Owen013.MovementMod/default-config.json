@@ -67,15 +67,6 @@
 			"tooltip": "Charge: you have to hold space to charge a jump and release space to perform the jump. Instant: the player will jump immediately upon pressing space. Vanilla: Charge"
 		},
 
-		"Strafing Slowdown": {
-			"type": "separator"
-		},
-		"Disable Strafing Slowdown": {
-			"type": "toggle",
-			"value": false,
-			"tooltip": "How long the player can use their jetpack boost, in seconds. Vanilla: Disabled"
-		},
-
 		"Enhanced Air Control": {
 			"type": "separator"
 		},
@@ -83,6 +74,15 @@
 			"type": "toggle",
 			"value": true,
 			"tooltip": "Makes the character more maneuverable in midair; allows changing direction during a jump. Vanilla: Disabled"
+		},
+
+		"Strafing Slowdown": {
+			"type": "separator"
+		},
+		"Disable Strafing Slowdown": {
+			"type": "toggle",
+			"value": false,
+			"tooltip": "How long the player can use their jetpack boost, in seconds. Vanilla: Disabled"
 		},
 
 		"Sprinting": {
@@ -155,13 +155,13 @@
 		},
 		"Emergency Boost Power": {
 			"type": "number",
-			"value": 25,
-			"tooltip": "How powerful an emergency boost is. Default Mod Setting: 25"
+			"value": 20,
+			"tooltip": "How powerful an emergency boost is. Default Mod Setting: 20"
 		},
 		"Emergency Boost Cost": {
 			"type": "number",
-			"value": 25,
-			"tooltip": "The amount of fuel you will lost immediately after starting an emergency boost. Default Mod Setting: 10"
+			"value": 20,
+			"tooltip": "The amount of fuel an emergency boost uses. Default Mod Setting: 20"
 		},
 
 		"Miscellaneous": {

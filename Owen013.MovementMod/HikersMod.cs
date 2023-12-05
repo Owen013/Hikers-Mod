@@ -31,8 +31,8 @@ namespace HikersMod
         public float _jetpackBoostAccel;
         public float _jetpackBoostTime;
         public string _jumpStyle;
-        public bool _isSlowStrafeDisabled;
         public bool _enhancedAirControlEnabled;
+        public bool _isSlowStrafeDisabled;
         public string _sprintEnabledMode;
         public string _sprintButtonMode;
         public bool _canSprintBackwards;
@@ -94,8 +94,8 @@ namespace HikersMod
             _jetpackAccel = config.GetSettingsValue<float>("Jetpack Acceleration");
             _jetpackBoostAccel = config.GetSettingsValue<float>("Jetpack Boost Acceleration");
             _jetpackBoostTime = config.GetSettingsValue<float>("Max Jetpack Boost Time");
-            _isSlowStrafeDisabled = config.GetSettingsValue<bool>("Disable Strafing Slowdown");
             _enhancedAirControlEnabled = config.GetSettingsValue<bool>("Enable Enhanced Air Control");
+            _isSlowStrafeDisabled = config.GetSettingsValue<bool>("Disable Strafing Slowdown");
             _sprintEnabledMode = config.GetSettingsValue<string>("Enable Sprinting");
             _sprintButtonMode = config.GetSettingsValue<string>("Sprint Button");
             _canSprintBackwards = config.GetSettingsValue<bool>("Allow Sprinting Backwards");
