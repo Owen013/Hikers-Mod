@@ -38,13 +38,13 @@ namespace HikersMod
         public bool _canSprintBackwards;
         public bool _canGroundThrustWithSprint;
         public float _sprintSpeed;
-        public string _wallJumpEnabledMode;
-        public float _wallJumpsPerJump;
-        public bool _isFloatyPhysicsEnabled;
-        public float _floatyPhysicsPower;
         public bool _isSuperBoostEnabled;
         public float _superBoostPower;
         public float _superBoostCost;
+        public bool _isFloatyPhysicsEnabled;
+        public float _floatyPhysicsPower;
+        public string _wallJumpEnabledMode;
+        public float _wallJumpsPerJump;
 
         public delegate void ConfigureEvent();
 
@@ -53,9 +53,9 @@ namespace HikersMod
             // Static reference to HikersMod so it can be used in patches.
             Instance = this;
             gameObject.AddComponent<SpeedController>();
-            gameObject.AddComponent<WallJumpController>();
-            gameObject.AddComponent<FloatyPhysicsController>();
             gameObject.AddComponent<SuperBoostController>();
+            gameObject.AddComponent<FloatyPhysicsController>();
+            gameObject.AddComponent<WallJumpController>();
             Harmony.CreateAndPatchAll(typeof(HikersMod));
         }
 
@@ -90,10 +90,10 @@ namespace HikersMod
             _airSpeed = config.GetSettingsValue<float>("Air Speed");
             _airAccel = config.GetSettingsValue<float>("Air Acceleration");
             _jumpPower = config.GetSettingsValue<float>("Jump Power");
-            _jumpStyle = config.GetSettingsValue<string>("Jump Style");
             _jetpackAccel = config.GetSettingsValue<float>("Jetpack Acceleration");
             _jetpackBoostAccel = config.GetSettingsValue<float>("Jetpack Boost Acceleration");
             _jetpackBoostTime = config.GetSettingsValue<float>("Max Jetpack Boost Time");
+            _jumpStyle = config.GetSettingsValue<string>("Jump Style");
             _enhancedAirControlEnabled = config.GetSettingsValue<bool>("Enable Enhanced Air Control");
             _isSlowStrafeDisabled = config.GetSettingsValue<bool>("Disable Strafing Slowdown");
             _sprintEnabledMode = config.GetSettingsValue<string>("Enable Sprinting");
@@ -101,13 +101,13 @@ namespace HikersMod
             _canSprintBackwards = config.GetSettingsValue<bool>("Allow Sprinting Backwards");
             _canGroundThrustWithSprint = config.GetSettingsValue<bool>("Allow Thrusting on Ground with Sprinting Enabled");
             _sprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
-            _wallJumpEnabledMode = config.GetSettingsValue<string>("Enable Wall Jumping");
-            _wallJumpsPerJump = config.GetSettingsValue<float>("Wall Jumps per Jump");
-            _isFloatyPhysicsEnabled = config.GetSettingsValue<bool>("Floaty Physics in Low-Gravity");
-            _floatyPhysicsPower = config.GetSettingsValue<float>("Floaty Physics Power");
             _isSuperBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
             _superBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");
             _superBoostCost = config.GetSettingsValue<float>("Emergency Boost Cost");
+            _isFloatyPhysicsEnabled = config.GetSettingsValue<bool>("Floaty Physics in Low-Gravity");
+            _floatyPhysicsPower = config.GetSettingsValue<float>("Floaty Physics Power");
+            _wallJumpEnabledMode = config.GetSettingsValue<string>("Enable Wall Jumping");
+            _wallJumpsPerJump = config.GetSettingsValue<float>("Wall Jumps per Jump");
 
             ApplyChanges();
             OnConfigure();
