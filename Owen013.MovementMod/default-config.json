@@ -121,8 +121,8 @@
 		},
 		"Enable Emergency Boost": {
 			"type": "toggle",
-			"value": false,
-			"tooltip": "Allows the player to shoot up into the air by pressing space twice. Default Mod Setting: Disabled"
+			"value": true,
+			"tooltip": "Allows the player to shoot up into the air by pressing space twice. Default Mod Setting: Enabled"
 		},
 		"Emergency Boost Power": {
 			"type": "number",
@@ -141,7 +141,7 @@
 		"Floaty Physics in Low-Gravity": {
 			"type": "toggle",
 			"value": false,
-			"tooltip": "For fun. Lowers the player's acceleration in low gravity, making movement floatier. Default Mod Setting: Disabled"
+			"tooltip": "Lowers the player's acceleration in low gravity, making movement floatier. Default Mod Setting: Disabled"
 		},
 		"Floaty Physics Power": {
 			"type": "number",
@@ -156,7 +156,7 @@
 			"type": "selector",
 			"value": "No",
 			"options": [ "No", "When Unsuited", "Always" ],
-			"tooltip": "For fun. Allows the player to climb up walls by jumping off of them. Default Mod Setting: Disabled"
+			"tooltip": "Allows the player to climb up walls by jumping off of them. Default Mod Setting: Disabled"
 		},
 		"Wall Jumps per Jump": {
 			"type": "number",
