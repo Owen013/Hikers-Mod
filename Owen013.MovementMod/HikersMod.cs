@@ -106,9 +106,9 @@ namespace HikersMod
             _wallJumpsPerJump = config.GetSettingsValue<float>("Wall Jumps per Jump");
             _isFloatyPhysicsEnabled = config.GetSettingsValue<bool>("Floaty Physics in Low-Gravity");
             _floatyPhysicsPower = config.GetSettingsValue<float>("Floaty Physics Power");
-            _isSuperBoostEnabled = config.GetSettingsValue<bool>("Enable Jetpack Super-Boost");
-            _superBoostPower = config.GetSettingsValue<float>("Super-Boost Power");
-            _superBoostCost = config.GetSettingsValue<float>("Super-Boost Cost");
+            _isSuperBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
+            _superBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");
+            _superBoostCost = config.GetSettingsValue<float>("Emergency Boost Cost");
 
             ApplyChanges();
             OnConfigure();

@@ -35,18 +35,23 @@ namespace HikersMod.Components
                 _isSuperBoosting = true;
                 _jetpackModel._boostChargeFraction = 0f;
                 _jetpackController._resources._currentFuel -= HikersMod.Instance._superBoostCost;
-                _characterController._owRigidbody.AddLocalVelocityChange(new Vector3(0f, HikersMod.Instance._superBoostPower, 0f));
+                Vector3 pointVelocity = _characterController._transform.InverseTransformDirection(_characterController._lastGroundBody.GetPointVelocity(_characterController._transform.position));
+                Vector3 localVelocity = _characterController._transform.InverseTransformDirection(_characterController._owRigidbody.GetVelocity()) - pointVelocity;
+                _characterController._owRigidbody.AddLocalVelocityChange(new Vector3(0f, HikersMod.Instance._superBoostPower - localVelocity.y, 0f));
                 _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, 1f);
-                _helmetAnimator.OnInstantDamage(50f, InstantDamageType.Impact);
+                _helmetAnimator.OnInstantDamage(10f, InstantDamageType.Impact);
                 NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "EMERGENCY BOOST ACTIVATED", 5f), false);
                 HikersMod.Instance.DebugLog("Super-Boosted");
             }
             if (isInputting && meetsCriteria) _lastBoostInputTime = Time.time;
             if (_isSuperBoosting)
             {
-                _jetpackController._translationalInput.y = 0;
                 _jetpackModel._chargeSeconds = float.PositiveInfinity;
-                _downThrustFlame._currentScale = 10f;//Mathf.Max(_downThrustFlame._currentScale, Mathf.Max(2 - (Time.time - _lastBoostTime), 0) * 7.5f);
+                float thrusterScale = Mathf.Max(_downThrustFlame._currentScale, Mathf.Max(1 - (Time.time - _lastBoostTime), 0) * 10f);
+                _downThrustFlame.transform.localScale = Vector3.one * thrusterScale;
+                _downThrustFlame._light.range = _downThrustFlame._baseLightRadius * thrusterScale;
+                _downThrustFlame._thrusterRenderer.enabled = (thrusterScale > 0f);
+                _downThrustFlame._light.enabled = (thrusterScale > 0f);
             }
             else
             {

@@ -148,20 +148,20 @@
 		"Super-Boosting": {
 			"type": "separator"
 		},
-		"Enable Jetpack Super-Boost": {
+		"Enable Emergency Boost": {
 			"type": "toggle",
 			"value": false,
 			"tooltip": "For fun. Allows the player to shoot up into the air by pressing space twice. Default Mod Setting: Disabled"
 		},
-		"Super-Boost Power": {
+		"Emergency Boost Power": {
 			"type": "number",
 			"value": 25,
-			"tooltip": "How powerful a Super-Boost is. Default Mod Setting: 25"
+			"tooltip": "How powerful an emergency boost is. Default Mod Setting: 25"
 		},
-		"Super-Boost Cost": {
+		"Emergency Boost Cost": {
 			"type": "number",
-			"value": 10,
-			"tooltip": "The amount of fuel you will lost immediately after starting a super-boost. Default Mod Setting: 10"
+			"value": 25,
+			"tooltip": "The amount of fuel you will lost immediately after starting an emergency boost. Default Mod Setting: 10"
 		},
 
 		"Miscellaneous": {
