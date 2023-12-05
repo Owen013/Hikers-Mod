@@ -116,21 +116,6 @@
 			"tooltip": "With this enabled, the player can start thrusting on the ground as long as they aren't actively moving. Default Mod Setting: Enabled"
 		},
 
-		"Wall Jumping": {
-			"type": "separator"
-		},
-		"Enable Wall Jumping": {
-			"type": "selector",
-			"value": "No",
-			"options": [ "No", "When Unsuited", "Always" ],
-			"tooltip": "For fun. Allows the player to climb up walls by jumping off of them. Default Mod Setting: Disabled"
-		},
-		"Wall Jumps per Jump": {
-			"type": "number",
-			"value": 5,
-			"tooltip": "How many times the player can Wall Jump without touching the ground. Default Mod Setting: 5"
-		},
-
 		"Floaty Physics": {
 			"type": "separator"
 		},
@@ -145,7 +130,7 @@
 			"tooltip": "How strongly floaty physics takes affect in any given gravity. Default Mod Setting: 1"
 		},
 
-		"Super-Boosting": {
+		"Emergency Boost": {
 			"type": "separator"
 		},
 		"Enable Emergency Boost": {
@@ -162,6 +147,21 @@
 			"type": "number",
 			"value": 20,
 			"tooltip": "The amount of fuel an emergency boost uses. Default Mod Setting: 20"
+		},
+
+		"Wall Jumping": {
+			"type": "separator"
+		},
+		"Enable Wall Jumping": {
+			"type": "selector",
+			"value": "No",
+			"options": [ "No", "When Unsuited", "Always" ],
+			"tooltip": "For fun. Allows the player to climb up walls by jumping off of them. Default Mod Setting: Disabled"
+		},
+		"Wall Jumps per Jump": {
+			"type": "number",
+			"value": 5,
+			"tooltip": "How many times the player can Wall Jump without touching the ground. Default Mod Setting: 5"
 		},
 
 		"Miscellaneous": {
