@@ -23,8 +23,8 @@
 		},
 		"Enable Sprinting": {
 			"type": "selector",
-			"value": "When Awake",
-			"options": [ "No", "When Awake", "Always" ],
+			"value": "When Suited",
+			"options": [ "No", "When Suited", "Always" ],
 			"tooltip": "Allows the player to sprint. Vanilla: No"
 		},
 		"Sprint Speed": {

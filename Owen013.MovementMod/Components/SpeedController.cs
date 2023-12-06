@@ -8,10 +8,11 @@ namespace HikersMod.Components
         public static SpeedController Instance;
         public PlayerCharacterController _characterController;
         public JetpackThrusterModel _jetpackModel;
+        public ThrusterFlameController _forward_left_thruster, _forward_right_thruster, _backward_left_thruster, _backward_right_thruster, _left_thruster, _right_thruster;
         public string _moveSpeed;
         public bool _isDreamLanternFocused;
         public bool _hasDreamLanternFocusChanged;
-        public bool _isDreaming;
+        //public bool _isDreaming;
 
         public void Awake()
         {
@@ -31,6 +32,18 @@ namespace HikersMod.Components
             if (rollInputChanged || downInputChanged || upInputChanged || boostedInMidair || _hasDreamLanternFocusChanged) ChangeMoveSpeed();
 
             _hasDreamLanternFocusChanged = false;
+            if (_jetpackModel._translationalInput.magnitude == 0)
+            {
+                Vector2 _thrusterVector;
+                if (_moveSpeed == "sprinting") _thrusterVector = OWInput.GetAxisValue(InputLibrary.moveXZ);
+                else _thrusterVector = Vector2.zero;
+                SetThrusterIntensity(_forward_left_thruster, _thrusterVector.y > 0 ? _thrusterVector.y : 0);
+                SetThrusterIntensity(_forward_right_thruster, _thrusterVector.y > 0 ? _thrusterVector.y : 0);
+                SetThrusterIntensity(_backward_left_thruster, _thrusterVector.y < 0 ? -_thrusterVector.y : 0);
+                SetThrusterIntensity(_backward_right_thruster, _thrusterVector.y < 0 ? -_thrusterVector.y : 0);
+                SetThrusterIntensity(_left_thruster, _thrusterVector.x > 0 ? _thrusterVector.x : 0);
+                SetThrusterIntensity(_right_thruster, _thrusterVector.x < 0 ? -_thrusterVector.x : 0);
+            }
         }
 
         public void ApplyChanges()
@@ -57,7 +70,7 @@ namespace HikersMod.Components
             bool walking = OWInput.IsPressed(InputLibrary.rollMode) && !holdingLantern;
             bool grounded = _characterController._isGrounded && !_characterController.IsSlidingOnIce();
             bool notInDifferentMoveState = !walking && !_isDreamLanternFocused;
-            bool sprintAllowed = HikersMod.Instance._sprintEnabledMode == "Always" || (HikersMod.Instance._sprintEnabledMode == "When Awake" && !_isDreaming);
+            bool sprintAllowed = HikersMod.Instance._sprintEnabledMode == "Always" || (HikersMod.Instance._sprintEnabledMode == "When Suited" && PlayerState.IsWearingSuit());
 
             if (OWInput.IsPressed(HikersMod.Instance._sprintButton) && grounded && notInDifferentMoveState && sprintAllowed && (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 || _moveSpeed == "sprinting"))
             {
@@ -82,6 +95,15 @@ namespace HikersMod.Components
             if (_moveSpeed != oldSpeed) HikersMod.Instance.DebugLog($"Changed movement speed to {_moveSpeed}");
         }
 
+        public void SetThrusterIntensity(ThrusterFlameController thruster, float intensity)
+        {
+            intensity = thruster._scaleSpring.Update(thruster.transform.localScale.magnitude, intensity, Time.deltaTime);
+            thruster.transform.localScale = Vector3.one * intensity;
+            thruster._light.range = thruster._baseLightRadius * intensity;
+            thruster._thrusterRenderer.enabled = (intensity > 0f);
+            thruster._light.enabled = (intensity > 0f);
+        }
+
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
         public static void OnCharacterControllerStart()
@@ -89,7 +111,20 @@ namespace HikersMod.Components
             Instance._characterController = FindObjectOfType<PlayerCharacterController>();
             Instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
             Instance._characterController.OnBecomeGrounded += Instance.ChangeMoveSpeed;
-            Instance._isDreaming = false;
+            //Instance._isDreaming = false;
+            var thrusters = Resources.FindObjectsOfTypeAll<ThrusterFlameController>();
+            for (int i = 0; i < thrusters.Length; i++)
+            {
+                switch(thrusters[i]._thruster)
+                {
+                    case Thruster.Forward_LeftThruster: Instance._forward_left_thruster = thrusters[i]; break;
+                    case Thruster.Forward_RightThruster: Instance._forward_right_thruster = thrusters[i]; break;
+                    case Thruster.Backward_LeftThruster: Instance._backward_left_thruster = thrusters[i]; break;
+                    case Thruster.Backward_RightThruster: Instance._backward_right_thruster = thrusters[i]; break;
+                    case Thruster.Left_Thruster: Instance._left_thruster = thrusters[i]; break;
+                    case Thruster.Right_Thruster: Instance._right_thruster = thrusters[i]; break;
+                }
+            };
             Instance.ApplyChanges();
         }
 
@@ -116,23 +151,23 @@ namespace HikersMod.Components
             else HikersMod.Instance.DebugLog("Unfocused Dream Lantern", OWML.Common.MessageType.Info);
         }
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.OnEnterDreamWorld))]
-        public static void OnEnteredDreamWorld()
-        {
-            Instance._isDreaming = true;
-            Instance.ChangeMoveSpeed();
-            HikersMod.Instance.DebugLog("Entered Dream World", OWML.Common.MessageType.Info);
-        }
+        //[HarmonyPostfix]
+        //[HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.OnEnterDreamWorld))]
+        //public static void OnEnteredDreamWorld()
+        //{
+        //    Instance._isDreaming = true;
+        //    Instance.ChangeMoveSpeed();
+        //    HikersMod.Instance.DebugLog("Entered Dream World", OWML.Common.MessageType.Info);
+        //}
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.OnExitDreamWorld))]
-        public static void OnExitedDreamWorld()
-        {
-            Instance._isDreaming = false;
-            Instance.ChangeMoveSpeed();
-            HikersMod.Instance.DebugLog("Left Dream World", OWML.Common.MessageType.Info);
-        }
+        //[HarmonyPostfix]
+        //[HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.OnExitDreamWorld))]
+        //public static void OnExitedDreamWorld()
+        //{
+        //    Instance._isDreaming = false;
+        //    Instance.ChangeMoveSpeed();
+        //    HikersMod.Instance.DebugLog("Left Dream World", OWML.Common.MessageType.Info);
+        //}
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Update))]
