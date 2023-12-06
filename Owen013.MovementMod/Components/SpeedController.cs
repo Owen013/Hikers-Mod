@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using System.Security.Permissions;
 using UnityEngine;
 
 namespace HikersMod.Components
@@ -9,19 +8,11 @@ namespace HikersMod.Components
         public static SpeedController Instance;
         public PlayerCharacterController _characterController;
         public JetpackThrusterModel _jetpackModel;
-        public MoveSpeed _moveSpeed;
+        public string _moveSpeed;
         public bool _isVerticalThrustDisabled;
         public bool _isDreamLanternFocused;
         public bool _hasDreamLanternFocusChanged;
         public bool _isDreaming;
-
-        public enum MoveSpeed
-        {
-            Normal,
-            Walking,
-            DreamLantern,
-            Sprinting
-        }
 
         public void Awake()
         {
@@ -70,34 +61,34 @@ namespace HikersMod.Components
         {
             bool holdingLantern = _characterController._heldLanternItem != null;
             bool walking = OWInput.IsPressed(InputLibrary.rollMode) && !holdingLantern;
-            MoveSpeed oldSpeed = _moveSpeed;
+            string oldSpeed = _moveSpeed;
 
             if (OWInput.IsPressed(HikersMod.Instance._sprintButton) &&
                 _characterController._isGrounded &&
                 !_characterController.IsSlidingOnIce() &&
                 !walking &&
                 !_isDreamLanternFocused &&
-                ((HikersMod.Instance._sprintEnabledMode == "Everywhere") || HikersMod.Instance._sprintEnabledMode == "Real World Only" && !_isDreaming) &&
-                (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 || !_characterController._isWearingSuit || !HikersMod.Instance._canGroundThrustWithSprint || _moveSpeed == MoveSpeed.Sprinting))
+                ((HikersMod.Instance._sprintEnabledMode == "Always") || HikersMod.Instance._sprintEnabledMode == "Vanilla Friendly" && !_isDreaming) &&
+                (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 || !_characterController._isWearingSuit || !HikersMod.Instance._canGroundThrustWithSprint || _moveSpeed == "sprinting"))
             {
-                _moveSpeed = MoveSpeed.Sprinting;
+                _moveSpeed = "sprinting";
                 _characterController._runSpeed = HikersMod.Instance._sprintSpeed;
                 _characterController._strafeSpeed = HikersMod.Instance._sprintStrafeSpeed;
                 _isVerticalThrustDisabled = true;
             }
             else if (walking)
             {
-                _moveSpeed = MoveSpeed.Walking;
+                _moveSpeed = "walking";
                 _isVerticalThrustDisabled = false;
             }
             else if (_isDreamLanternFocused)
             {
-                _moveSpeed = MoveSpeed.DreamLantern;
+                _moveSpeed = "dream_lantern";
                 _isVerticalThrustDisabled = false;
             }
             else
             {
-                _moveSpeed = MoveSpeed.Normal;
+                _moveSpeed = "normal";
                 _characterController._runSpeed = HikersMod.Instance._normalSpeed;
                 _characterController._strafeSpeed = HikersMod.Instance._strafeSpeed;
                 _isVerticalThrustDisabled = false;

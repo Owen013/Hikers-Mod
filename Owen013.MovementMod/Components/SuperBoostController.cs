@@ -8,6 +8,7 @@ namespace HikersMod.Components
         public static SuperBoostController Instance;
         public float _lastBoostInputTime;
         public float _lastBoostTime;
+        public float _lastBoostPower;
         public bool _isSuperBoosting;
         public OWAudioSource _superBoostAudio;
         public JetpackThrusterModel _jetpackModel;
@@ -35,12 +36,16 @@ namespace HikersMod.Components
                 _lastBoostTime = Time.time;
                 _isSuperBoosting = true;
                 _jetpackModel._boostChargeFraction = 0f;
-                _jetpackController._resources._currentFuel -= HikersMod.Instance._superBoostCost;
+                float powerPercent = Mathf.Min(HikersMod.Instance._superBoostCost, _jetpackController._resources.GetFuel()) / HikersMod.Instance._superBoostCost;
+                float boostPower = HikersMod.Instance._superBoostPower * powerPercent;
+                _lastBoostPower = boostPower;
+                float boostCost = HikersMod.Instance._superBoostCost * powerPercent;
+                _jetpackController._resources._currentFuel -= boostCost;
                 Vector3 pointVelocity = _characterController._transform.InverseTransformDirection(_characterController._lastGroundBody.GetPointVelocity(_characterController._transform.position));
                 Vector3 localVelocity = _characterController._transform.InverseTransformDirection(_characterController._owRigidbody.GetVelocity()) - pointVelocity;
-                _characterController._owRigidbody.AddLocalVelocityChange(new Vector3(-localVelocity.x, HikersMod.Instance._superBoostPower - localVelocity.y, -localVelocity.z));
-                _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, 1f);
-                _helmetAnimator.OnInstantDamage(HikersMod.Instance._superBoostPower, InstantDamageType.Impact);
+                _characterController._owRigidbody.AddLocalVelocityChange(new Vector3(-localVelocity.x * 0.5f, boostPower - localVelocity.y * 0.5f, -localVelocity.z * 0.5f));
+                _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, Mathf.Min(boostPower * 0.05f, 50));
+                _helmetAnimator.OnInstantDamage(boostPower, InstantDamageType.Impact);
                 NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "EMERGENCY BOOST ACTIVATED", 5f), false);
                 HikersMod.Instance.DebugLog("Super-Boosted");
             }
@@ -48,7 +53,7 @@ namespace HikersMod.Components
             if (_isSuperBoosting)
             {
                 _jetpackModel._chargeSeconds = float.PositiveInfinity;
-                float thrusterScale = Mathf.Max(_downThrustFlame._currentScale, Mathf.Max(1 - (Time.time - _lastBoostTime), 0) * 10f);
+                float thrusterScale = Mathf.Max(_downThrustFlame._currentScale, Mathf.Pow(Mathf.Max(1 - (Time.time - _lastBoostTime), 0), 2) * _lastBoostPower);
                 _downThrustFlame.transform.localScale = Vector3.one * thrusterScale;
                 _downThrustFlame._light.range = _downThrustFlame._baseLightRadius * thrusterScale;
                 _downThrustFlame._thrusterRenderer.enabled = (thrusterScale > 0f);

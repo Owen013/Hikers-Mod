@@ -88,12 +88,12 @@
 		},
 		"Sprint Speed": {
 			"type": "number",
-			"value": 12,
+			"value": 9,
 			"tooltip": "How quickly the player moves while sprinting. Default Mod Setting: 12"
 		},
 		"Sprint Strafe Speed": {
 			"type": "number",
-			"value": 8,
+			"value": 6,
 			"tooltip": "How quickly the player moves when sprinting backwards or to the side. Default Mod Setting: 8"
 		},
 		"Sprint Button": {
