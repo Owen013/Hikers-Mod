@@ -6,7 +6,7 @@ No longer do you have to hold down the button before you jump! With this enabled
 Makes you slightly more maneuverable in midair without your jetpack! Allows you to change speed and direction in midair.
 
 ### Sprinting
-You've got 22 minutes, so get a move on! Move faster by holding down the sprint key, which can be bound to the thrust-up or thrust-down button! Carefully designed to work with the jetpack controls and to avoid cheese.
+Move faster by holding down the up-thrust button **while moving**. Doesn't conflict with jetpack controls; you will start thrusting if you press the button while standing still or press the boost button in midair.
 
 ### Emergency Boost
 For those tough situations where you need a quick burst of upward movement! Press space twice in quick succession (while not holding the up- or downward thrust buttons) to shoot up into the air, but be wary! It uses a lot of fuel.
