@@ -19,7 +19,16 @@ namespace HikersMod
         public event ConfigureEvent OnConfigure;
 
         // Config
-        public bool _isDebugLogEnabled;
+        public string _jumpStyle;
+        public bool _enhancedAirControlEnabled;
+        public string _sprintEnabledMode;
+        public string _sprintButtonMode;
+        public bool _canSprintBackwards;
+        public float _sprintSpeed;
+        public float _sprintStrafeSpeed;
+        public bool _isSuperBoostEnabled;
+        public float _superBoostPower;
+        public float _superBoostCost;
         public float _normalSpeed;
         public float _strafeSpeed;
         public float _walkSpeed;
@@ -31,22 +40,11 @@ namespace HikersMod
         public float _jetpackAccel;
         public float _jetpackBoostAccel;
         public float _jetpackBoostTime;
-        public string _jumpStyle;
-        public bool _enhancedAirControlEnabled;
-        public string _sprintEnabledMode;
-        public string _sprintButtonMode;
-        public bool _canSprintBackwards;
-        public float _sprintSpeed;
-        public float _sprintStrafeSpeed;
-        public bool _canGroundThrustWithSprint;
-        public bool _isSuperBoostEnabled;
-        public float _superBoostPower;
-        public float _superBoostCost;
-        public bool _isSlowStrafeDisabled;
         public bool _isFloatyPhysicsEnabled;
         public float _floatyPhysicsPower;
         public string _wallJumpEnabledMode;
         public float _wallJumpsPerJump;
+        public bool _isDebugLogEnabled;
 
         public delegate void ConfigureEvent();
 
@@ -84,7 +82,15 @@ namespace HikersMod
             base.Configure(config);
 
             // Get all settings values
-            _isDebugLogEnabled = config.GetSettingsValue<bool>("Enable Debug Log");
+            _jumpStyle = config.GetSettingsValue<string>("Jump Style");
+            _enhancedAirControlEnabled = config.GetSettingsValue<bool>("Enable Enhanced Air Control");
+            _sprintEnabledMode = config.GetSettingsValue<string>("Enable Sprinting");
+            _sprintButtonMode = config.GetSettingsValue<string>("Sprint Button");
+            _sprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
+            _sprintStrafeSpeed = config.GetSettingsValue<float>("Sprint Strafe Speed");
+            _isSuperBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
+            _superBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");
+            _superBoostCost = config.GetSettingsValue<float>("Emergency Boost Cost");
             _normalSpeed = config.GetSettingsValue<float>("Normal Speed");
             _strafeSpeed = config.GetSettingsValue<float>("Strafe Speed");
             _walkSpeed = config.GetSettingsValue<float>("Walk Speed");
@@ -96,20 +102,11 @@ namespace HikersMod
             _jetpackAccel = config.GetSettingsValue<float>("Jetpack Acceleration");
             _jetpackBoostAccel = config.GetSettingsValue<float>("Jetpack Boost Acceleration");
             _jetpackBoostTime = config.GetSettingsValue<float>("Max Jetpack Boost Time");
-            _jumpStyle = config.GetSettingsValue<string>("Jump Style");
-            _enhancedAirControlEnabled = config.GetSettingsValue<bool>("Enable Enhanced Air Control");
-            _sprintEnabledMode = config.GetSettingsValue<string>("Enable Sprinting");
-            _sprintButtonMode = config.GetSettingsValue<string>("Sprint Button");
-            _sprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
-            _sprintStrafeSpeed = config.GetSettingsValue<float>("Sprint Strafe Speed");
-            _canGroundThrustWithSprint = config.GetSettingsValue<bool>("Allow Thrusting on Ground with Sprinting Enabled");
-            _isSuperBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
-            _superBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");
-            _superBoostCost = config.GetSettingsValue<float>("Emergency Boost Cost");
             _isFloatyPhysicsEnabled = config.GetSettingsValue<bool>("Floaty Physics in Low-Gravity");
             _floatyPhysicsPower = config.GetSettingsValue<float>("Floaty Physics Power");
             _wallJumpEnabledMode = config.GetSettingsValue<string>("Enable Wall Jumping");
             _wallJumpsPerJump = config.GetSettingsValue<float>("Wall Jumps per Jump");
+            _isDebugLogEnabled = config.GetSettingsValue<bool>("Enable Debug Log");
 
             ApplyChanges();
             OnConfigure();

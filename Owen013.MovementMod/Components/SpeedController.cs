@@ -58,9 +58,8 @@ namespace HikersMod.Components
             bool grounded = _characterController._isGrounded && !_characterController.IsSlidingOnIce();
             bool notInDifferentMoveState = !walking && !_isDreamLanternFocused;
             bool sprintAllowed = HikersMod.Instance._sprintEnabledMode == "Always" || (HikersMod.Instance._sprintEnabledMode == "When Awake" && !_isDreaming);
-            bool startSprint = OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 || !_characterController._isWearingSuit || !HikersMod.Instance._canGroundThrustWithSprint;
 
-            if (OWInput.IsPressed(HikersMod.Instance._sprintButton) && grounded && notInDifferentMoveState && sprintAllowed && (startSprint || _moveSpeed == "sprinting"))
+            if (OWInput.IsPressed(HikersMod.Instance._sprintButton) && grounded && notInDifferentMoveState && sprintAllowed && (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 || _moveSpeed == "sprinting"))
             {
                 _moveSpeed = "sprinting";
                 _characterController._runSpeed = HikersMod.Instance._sprintSpeed;

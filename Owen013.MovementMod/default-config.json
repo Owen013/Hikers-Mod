@@ -3,6 +3,71 @@
 	"enabled": true,
 	"settings": {
 
+		"Air Control": {
+			"type": "separator"
+		},
+		"Jump Style": {
+			"type": "selector",
+			"value": "Instant",
+			"options": [ "Charge", "Instant" ],
+			"tooltip": "Charge: you have to hold space to charge a jump and release space to perform the jump. Instant: the player will jump immediately upon pressing space. Vanilla: Charge"
+		},
+		"Enable Enhanced Air Control": {
+			"type": "toggle",
+			"value": true,
+			"tooltip": "Makes the character more maneuverable in midair; allows changing direction during a jump. Vanilla: Disabled"
+		},
+
+		"Sprinting": {
+			"type": "separator"
+		},
+		"Enable Sprinting": {
+			"type": "selector",
+			"value": "When Awake",
+			"options": [ "No", "When Awake", "Always" ],
+			"tooltip": "Allows the player to sprint. Vanilla: No"
+		},
+		"Sprint Speed": {
+			"type": "number",
+			"value": 9,
+			"tooltip": "How quickly the player moves while sprinting. Recommended: 9"
+		},
+		"Sprint Strafe Speed": {
+			"type": "number",
+			"value": 6,
+			"tooltip": "How quickly the player moves when sprinting backwards or to the side. Recommended: 6"
+		},
+		"Sprint Button": {
+			"type": "selector",
+			"value": "Up Thrust",
+			"options": [ "Up Thrust", "Down Thrust" ],
+			"tooltip": "Whether sprinting uses the Up Thrust button (usually shift or right trigger) or the Down Thrust button (usually control or left trigger). Recommended: Up Thrust."
+		},
+		"Allow Thrusting on Ground with Sprinting Enabled": {
+			"type": "toggle",
+			"value": true,
+			"tooltip": "With this enabled, the player can start thrusting on the ground as long as they aren't actively moving. Recommended: Enabled"
+		},
+
+		"Emergency Boost": {
+			"type": "separator"
+		},
+		"Enable Emergency Boost": {
+			"type": "toggle",
+			"value": true,
+			"tooltip": "Allows the player to shoot up into the air by pressing space twice. Recommended: Enabled"
+		},
+		"Emergency Boost Power": {
+			"type": "number",
+			"value": 20,
+			"tooltip": "How powerful an emergency boost is. Recommended: 20"
+		},
+		"Emergency Boost Cost": {
+			"type": "number",
+			"value": 20,
+			"tooltip": "The amount of fuel an emergency boost uses. Recommended: 20"
+		},
+
 		"Character Attributes": {
 			"type": "separator"
 		},
@@ -62,94 +127,29 @@
 			"tooltip": "How long the player can use their jetpack boost, in seconds. Vanilla: 1"
 		},
 
-		"Air Control": {
-			"type": "separator"
-		},
-		"Jump Style": {
-			"type": "selector",
-			"value": "Instant",
-			"options": [ "Charge", "Instant" ],
-			"tooltip": "Charge: you have to hold space to charge a jump and release space to perform the jump. Instant: the player will jump immediately upon pressing space. Vanilla: Charge"
-		},
-		"Enable Enhanced Air Control": {
-			"type": "toggle",
-			"value": true,
-			"tooltip": "Makes the character more maneuverable in midair; allows changing direction during a jump. Vanilla: Disabled"
-		},
-
-		"Sprinting": {
-			"type": "separator"
-		},
-		"Enable Sprinting": {
-			"type": "selector",
-			"value": "When Awake",
-			"options": [ "No", "When Awake", "Always" ],
-			"tooltip": "Allows the player to sprint. Vanilla: No"
-		},
-		"Sprint Speed": {
-			"type": "number",
-			"value": 9,
-			"tooltip": "How quickly the player moves while sprinting. Default Mod Setting: 12"
-		},
-		"Sprint Strafe Speed": {
-			"type": "number",
-			"value": 6,
-			"tooltip": "How quickly the player moves when sprinting backwards or to the side. Default Mod Setting: 8"
-		},
-		"Sprint Button": {
-			"type": "selector",
-			"value": "Up Thrust",
-			"options": [ "Up Thrust", "Down Thrust" ],
-			"tooltip": "Whether sprinting uses the Up Thrust button (usually shift or right trigger) or the Down Thrust button (usually control or left trigger). Default Mod Setting: Up Thrust."
-		},
-		"Allow Thrusting on Ground with Sprinting Enabled": {
-			"type": "toggle",
-			"value": true,
-			"tooltip": "With this enabled, the player can start thrusting on the ground as long as they aren't actively moving. Default Mod Setting: Enabled"
-		},
-
-		"Emergency Boost": {
-			"type": "separator"
-		},
-		"Enable Emergency Boost": {
-			"type": "toggle",
-			"value": true,
-			"tooltip": "Allows the player to shoot up into the air by pressing space twice. Default Mod Setting: Enabled"
-		},
-		"Emergency Boost Power": {
-			"type": "number",
-			"value": 20,
-			"tooltip": "How powerful an emergency boost is. Default Mod Setting: 20"
-		},
-		"Emergency Boost Cost": {
-			"type": "number",
-			"value": 20,
-			"tooltip": "The amount of fuel an emergency boost uses. Default Mod Setting: 20"
-		},
-
 		"Other": {
 			"type": "separator"
 		},
 		"Floaty Physics in Low-Gravity": {
 			"type": "toggle",
 			"value": false,
-			"tooltip": "Lowers the player's acceleration in low gravity, making movement floatier. Default Mod Setting: Disabled"
+			"tooltip": "Lowers the player's acceleration in low gravity, making movement floatier. Recommended: Disabled"
 		},
 		"Floaty Physics Power": {
 			"type": "number",
 			"value": 1,
-			"tooltip": "How strongly floaty physics takes affect in any given gravity. Default Mod Setting: 1"
+			"tooltip": "How strongly floaty physics takes affect in any given gravity. Recommended: 1"
 		},
 		"Enable Wall Jumping": {
 			"type": "selector",
 			"value": "No",
 			"options": [ "No", "When Unsuited", "Always" ],
-			"tooltip": "Allows the player to climb up walls by jumping off of them. Default Mod Setting: Disabled"
+			"tooltip": "Allows the player to climb up walls by jumping off of them. Recommended: Disabled"
 		},
 		"Wall Jumps per Jump": {
 			"type": "number",
 			"value": 5,
-			"tooltip": "How many times the player can Wall Jump without touching the ground. Default Mod Setting: 5"
+			"tooltip": "How many times the player can Wall Jump without touching the ground. Recommended: 5"
 		},
 		"Enable Debug Log": {
 			"type": "toggle",
