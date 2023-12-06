@@ -11,7 +11,7 @@ Move faster by holding down the up-thrust button **while moving**. Doesn't confl
 ### Emergency Boost
 For those tough situations where you need a quick burst of upward movement! Press space twice in quick succession (while not holding the up- or downward thrust buttons) to shoot up into the air, but be wary! It uses a lot of fuel.
 
-## Miscellaneous Features (Check Config)
+## Miscellaneous Features
 
 ### Modify your movement attributes
 Change your speed, jump height, and more in the config menu!
@@ -23,4 +23,4 @@ This feature makes your movement floatier on low-gravity bodies! The lower the g
 Want to get up to the observatory quickly? Press space in midair while facing a wall to jump off of it, and repeat to climb up walls! **Disabled by default.**
 
 ### Don't like it? Turn it off!
-Any of Hiker's Mod's features can be enabled or disabled so that you can use the features that you want without being forced to use the ones that you don't like!
+Any of Hiker's Mod's features can be enabled or disabled so that you can use the features that you want without being forced to use the ones that you don't like! Go to the config menu to customize your experience.
