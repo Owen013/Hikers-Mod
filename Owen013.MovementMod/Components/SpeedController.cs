@@ -5,9 +5,9 @@ namespace HikersMod.Components
 {
     public class SpeedController : MonoBehaviour
     {
-        public static SpeedController Instance;
+        public static SpeedController s_instance;
         public PlayerCharacterController _characterController;
-        public JetpackThrusterController _jetpackController;
+        //public JetpackThrusterController _jetpackController;
         public JetpackThrusterModel _jetpackModel;
         public ThrusterFlameController _forward_left_thruster, _forward_right_thruster, _backward_left_thruster, _backward_right_thruster, _left_thruster, _right_thruster;
         public string _moveSpeed;
@@ -17,9 +17,9 @@ namespace HikersMod.Components
 
         public void Awake()
         {
-            Instance = this;
+            s_instance = this;
             Harmony.CreateAndPatchAll(typeof(SpeedController));
-            HikersMod.Instance.OnConfigure += ApplyChanges;
+            HikersMod.s_instance.OnConfigure += ApplyChanges;
         }
 
         public void Update()
@@ -50,14 +50,14 @@ namespace HikersMod.Components
             if (!_characterController) return;
 
             // Change built-in character attributes
-            _characterController._runSpeed = HikersMod.Instance._normalSpeed;
-            _characterController._strafeSpeed = HikersMod.Instance._strafeSpeed;
-            _characterController._walkSpeed = HikersMod.Instance._walkSpeed;
-            _characterController._airSpeed = HikersMod.Instance._airSpeed;
-            _characterController._airAcceleration = HikersMod.Instance._airAccel;
+            _characterController._runSpeed = HikersMod.s_instance._normalSpeed;
+            _characterController._strafeSpeed = HikersMod.s_instance._strafeSpeed;
+            _characterController._walkSpeed = HikersMod.s_instance._walkSpeed;
+            _characterController._airSpeed = HikersMod.s_instance._airSpeed;
+            _characterController._airAcceleration = HikersMod.s_instance._airAccel;
 
-            if (HikersMod.Instance._sprintButtonMode == "Down Thrust") HikersMod.Instance._sprintButton = InputLibrary.thrustDown;
-            else HikersMod.Instance._sprintButton = InputLibrary.thrustUp;
+            if (HikersMod.s_instance._sprintButtonMode == "Down Thrust") HikersMod.s_instance._sprintButton = InputLibrary.thrustDown;
+            else HikersMod.s_instance._sprintButton = InputLibrary.thrustUp;
 
             ChangeMoveSpeed();
         }
@@ -69,13 +69,13 @@ namespace HikersMod.Components
             bool walking = OWInput.IsPressed(InputLibrary.rollMode) && !holdingLantern;
             bool grounded = _characterController._isGrounded && !_characterController.IsSlidingOnIce();
             bool notInDifferentMoveState = !walking && !_isDreamLanternFocused;
-            bool sprintAllowed = HikersMod.Instance._sprintEnabledMode == "Always" || (HikersMod.Instance._sprintEnabledMode == "When Suited" && PlayerState.IsWearingSuit());
+            bool sprintAllowed = HikersMod.s_instance._sprintEnabledMode == "Always" || (HikersMod.s_instance._sprintEnabledMode == "When Suited" && PlayerState.IsWearingSuit());
 
-            if (OWInput.IsPressed(HikersMod.Instance._sprintButton) && grounded && notInDifferentMoveState && sprintAllowed && (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 || _moveSpeed == "sprinting"))
+            if (OWInput.IsPressed(HikersMod.s_instance._sprintButton) && grounded && notInDifferentMoveState && sprintAllowed && (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 || _moveSpeed == "sprinting"))
             {
                 _moveSpeed = "sprinting";
-                _characterController._runSpeed = HikersMod.Instance._sprintSpeed;
-                _characterController._strafeSpeed = HikersMod.Instance._sprintStrafeSpeed;
+                _characterController._runSpeed = HikersMod.s_instance._sprintSpeed;
+                _characterController._strafeSpeed = HikersMod.s_instance._sprintStrafeSpeed;
             }
             else if (walking)
             {
@@ -88,10 +88,10 @@ namespace HikersMod.Components
             else
             {
                 _moveSpeed = "normal";
-                _characterController._runSpeed = HikersMod.Instance._normalSpeed;
-                _characterController._strafeSpeed = HikersMod.Instance._strafeSpeed;
+                _characterController._runSpeed = HikersMod.s_instance._normalSpeed;
+                _characterController._strafeSpeed = HikersMod.s_instance._strafeSpeed;
             }
-            if (_moveSpeed != oldSpeed) HikersMod.Instance.DebugLog($"Changed movement speed to {_moveSpeed}");
+            if (_moveSpeed != oldSpeed) HikersMod.s_instance.DebugLog($"Changed movement speed to {_moveSpeed}");
         }
 
         //public void SetThrusterIntensity(ThrusterFlameController thruster, float intensity)
@@ -107,36 +107,36 @@ namespace HikersMod.Components
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
         public static void OnCharacterControllerStart()
         {
-            Instance._characterController = FindObjectOfType<PlayerCharacterController>();
-            Instance._jetpackController = FindObjectOfType<JetpackThrusterController>();
-            Instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
-            Instance._characterController.OnBecomeGrounded += Instance.ChangeMoveSpeed;
-            //Instance._isDreaming = false;
+            s_instance._characterController = FindObjectOfType<PlayerCharacterController>();
+            //s_instance._jetpackController = FindObjectOfType<JetpackThrusterController>();
+            s_instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
+            s_instance._characterController.OnBecomeGrounded += s_instance.ChangeMoveSpeed;
+            //s_instance._isDreaming = false;
             var thrusters = Resources.FindObjectsOfTypeAll<ThrusterFlameController>();
             for (int i = 0; i < thrusters.Length; i++)
             {
                 switch(thrusters[i]._thruster)
                 {
-                    case Thruster.Forward_LeftThruster: Instance._forward_left_thruster = thrusters[i]; break;
-                    case Thruster.Forward_RightThruster: Instance._forward_right_thruster = thrusters[i]; break;
-                    case Thruster.Backward_LeftThruster: Instance._backward_left_thruster = thrusters[i]; break;
-                    case Thruster.Backward_RightThruster: Instance._backward_right_thruster = thrusters[i]; break;
-                    case Thruster.Left_Thruster: Instance._left_thruster = thrusters[i]; break;
-                    case Thruster.Right_Thruster: Instance._right_thruster = thrusters[i]; break;
+                    case Thruster.Forward_LeftThruster: s_instance._forward_left_thruster = thrusters[i]; break;
+                    case Thruster.Forward_RightThruster: s_instance._forward_right_thruster = thrusters[i]; break;
+                    case Thruster.Backward_LeftThruster: s_instance._backward_left_thruster = thrusters[i]; break;
+                    case Thruster.Backward_RightThruster: s_instance._backward_right_thruster = thrusters[i]; break;
+                    case Thruster.Left_Thruster: s_instance._left_thruster = thrusters[i]; break;
+                    case Thruster.Right_Thruster: s_instance._right_thruster = thrusters[i]; break;
                 }
             };
-            Instance.ApplyChanges();
+            s_instance.ApplyChanges();
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
         public static void OnGetJetpackInput(ref Vector3 __result)
         {
-            if (HikersMod.Instance._sprintButton == InputLibrary.thrustDown && Instance._moveSpeed == "sprinting" && __result.y < 0 ||
-            HikersMod.Instance._sprintButton == InputLibrary.thrustUp && Instance._moveSpeed == "sprinting" && __result.y > 0)
+            if (HikersMod.s_instance._sprintButton == InputLibrary.thrustDown && s_instance._moveSpeed == "sprinting" && __result.y < 0 ||
+            HikersMod.s_instance._sprintButton == InputLibrary.thrustUp && s_instance._moveSpeed == "sprinting" && __result.y > 0)
             {
                 __result.y = 0;
-                Instance._jetpackModel._boostActivated = false;
+                s_instance._jetpackModel._boostActivated = false;
             }
         }
 
@@ -145,28 +145,28 @@ namespace HikersMod.Components
         public static void OnDreamLanternFocusChanged(DreamLanternItem __instance)
         {
             if (__instance._wasFocusing == __instance._focusing) return;
-            Instance._isDreamLanternFocused = __instance._focusing;
-            Instance._hasDreamLanternFocusChanged = true;
-            if (__instance._focusing) HikersMod.Instance.DebugLog("Focused Dream Lantern", OWML.Common.MessageType.Info);
-            else HikersMod.Instance.DebugLog("Unfocused Dream Lantern", OWML.Common.MessageType.Info);
+            s_instance._isDreamLanternFocused = __instance._focusing;
+            s_instance._hasDreamLanternFocusChanged = true;
+            if (__instance._focusing) HikersMod.s_instance.DebugLog("Focused Dream Lantern", OWML.Common.MessageType.Info);
+            else HikersMod.s_instance.DebugLog("Unfocused Dream Lantern", OWML.Common.MessageType.Info);
         }
 
         //[HarmonyPostfix]
         //[HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.OnEnterDreamWorld))]
         //public static void OnEnteredDreamWorld()
         //{
-        //    Instance._isDreaming = true;
-        //    Instance.ChangeMoveSpeed();
-        //    HikersMod.Instance.DebugLog("Entered Dream World", OWML.Common.MessageType.Info);
+        //    s_instance._isDreaming = true;
+        //    s_instance.ChangeMoveSpeed();
+        //    HikersMod.s_instance.DebugLog("Entered Dream World", OWML.Common.MessageType.Info);
         //}
 
         //[HarmonyPostfix]
         //[HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.OnExitDreamWorld))]
         //public static void OnExitedDreamWorld()
         //{
-        //    Instance._isDreaming = false;
-        //    Instance.ChangeMoveSpeed();
-        //    HikersMod.Instance.DebugLog("Left Dream World", OWML.Common.MessageType.Info);
+        //    s_instance._isDreaming = false;
+        //    s_instance.ChangeMoveSpeed();
+        //    HikersMod.s_instance.DebugLog("Left Dream World", OWML.Common.MessageType.Info);
         //}
 
         [HarmonyPrefix]
@@ -177,7 +177,7 @@ namespace HikersMod.Components
             {
                 return false;
             }
-            if ((OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f) || (HikersMod.Instance._sprintButton == InputLibrary.thrustUp && Instance._moveSpeed == "sprinting"))
+            if ((OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f) || (HikersMod.s_instance._sprintButton == InputLibrary.thrustUp && s_instance._moveSpeed == "sprinting"))
             {
                 __instance.UpdateJumpInput();
             }
@@ -198,7 +198,7 @@ namespace HikersMod.Components
         [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
         public static bool IsBoosterAllowed(ref bool __result, PlayerResources __instance)
         {
-            __result = !PlayerState.InZeroG() && !Locator.GetPlayerSuit().IsTrainingSuit() && !__instance._cameraFluidDetector.InFluidType(FluidVolume.Type.WATER) && __instance._currentFuel > 0f && Instance._moveSpeed != "sprinting";
+            __result = !PlayerState.InZeroG() && !Locator.GetPlayerSuit().IsTrainingSuit() && !__instance._cameraFluidDetector.InFluidType(FluidVolume.Type.WATER) && __instance._currentFuel > 0f && s_instance._moveSpeed != "sprinting";
             return false;
         }
 
@@ -210,7 +210,7 @@ namespace HikersMod.Components
             if (audioType != AudioType.None)
             {
                 __instance._footstepAudio.pitch = Random.Range(0.9f, 1.1f);
-                __instance._footstepAudio.PlayOneShot(audioType, 1.4f * Instance._characterController.GetRelativeGroundVelocity().magnitude / 6);
+                __instance._footstepAudio.PlayOneShot(audioType, 1.4f * s_instance._characterController.GetRelativeGroundVelocity().magnitude / 6);
             }
             return false;
         }
@@ -221,8 +221,8 @@ namespace HikersMod.Components
         {
             float num = 1f - __instance._lanternController.GetFocus();
             num *= num;
-            maxSpeedX = Mathf.Lerp(HikersMod.Instance._dreamLanternSpeed, maxSpeedX, num);
-            maxSpeedZ = Mathf.Lerp(HikersMod.Instance._dreamLanternSpeed, maxSpeedZ, num);
+            maxSpeedX = Mathf.Lerp(HikersMod.s_instance._dreamLanternSpeed, maxSpeedX, num);
+            maxSpeedZ = Mathf.Lerp(HikersMod.s_instance._dreamLanternSpeed, maxSpeedZ, num);
             return false;
         }
     }

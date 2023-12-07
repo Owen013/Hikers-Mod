@@ -8,7 +8,7 @@ namespace HikersMod
 {
     public class HikersMod : ModBehaviour
     {
-        public static HikersMod Instance;
+        public static HikersMod s_instance;
         public ISmolHatchling SmolHatchlingAPI;
         public PlayerCharacterController _characterController;
         public PlayerAnimController _animController;
@@ -51,7 +51,7 @@ namespace HikersMod
         public void Awake()
         {
             // Static reference to HikersMod so it can be used in patches.
-            Instance = this;
+            s_instance = this;
             gameObject.AddComponent<SpeedController>();
             gameObject.AddComponent<SuperBoostController>();
             gameObject.AddComponent<FloatyPhysicsController>();
@@ -162,17 +162,17 @@ namespace HikersMod
         public static void OnCharacterControllerStart()
         {
             // Get vars
-            Instance._characterController = Locator.GetPlayerController();
-            Instance._animController = FindObjectOfType<PlayerAnimController>();
+            s_instance._characterController = Locator.GetPlayerController();
+            s_instance._animController = FindObjectOfType<PlayerAnimController>();
 
-            Instance.ApplyChanges();
+            s_instance.ApplyChanges();
         }
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.UpdateAirControl))]
         public static bool UpdateAirControl(PlayerCharacterController __instance)
         {
-            if (!Instance._enhancedAirControlEnabled) return true;
+            if (!s_instance._enhancedAirControlEnabled) return true;
             if (__instance == null) return true;
             if (__instance._lastGroundBody != null)
             {
@@ -193,10 +193,10 @@ namespace HikersMod
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerCloneController), nameof(PlayerCloneController.Start))]
-        public static void EyeCloneStart(PlayerCloneController __instance) => Instance._cloneController = __instance;
+        public static void EyeCloneStart(PlayerCloneController __instance) => s_instance._cloneController = __instance;
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(EyeMirrorController), nameof(EyeMirrorController.Start))]
-        public static void EyeMirrorStart(EyeMirrorController __instance) => Instance._mirrorController = __instance;
+        public static void EyeMirrorStart(EyeMirrorController __instance) => s_instance._mirrorController = __instance;
     }
 }

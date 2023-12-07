@@ -5,7 +5,7 @@ namespace HikersMod.Components
 {
     public class WallJumpController : MonoBehaviour
     {
-        public static WallJumpController Instance;
+        public static WallJumpController s_instance;
         public PlayerCharacterController _characterController;
         public PlayerAnimController _animController;
         public PlayerImpactAudio _impactAudio;
@@ -15,7 +15,7 @@ namespace HikersMod.Components
 
         public void Awake()
         {
-            Instance = this;
+            s_instance = this;
             Harmony.CreateAndPatchAll(typeof(WallJumpController));
         }
 
@@ -31,7 +31,7 @@ namespace HikersMod.Components
         public void UpdateWallJump()
         {
             _characterController.UpdatePushable();
-            if (((HikersMod.Instance._wallJumpEnabledMode == "When Unsuited" && !PlayerState.IsWearingSuit()) || HikersMod.Instance._wallJumpEnabledMode == "Always") &&
+            if (((HikersMod.s_instance._wallJumpEnabledMode == "When Unsuited" && !PlayerState.IsWearingSuit()) || HikersMod.s_instance._wallJumpEnabledMode == "Always") &&
                 _characterController._isPushable &&
                 !PlayerState.InZeroG() &&
                 !_characterController._isGrounded &&
@@ -41,9 +41,9 @@ namespace HikersMod.Components
                 OWRigidbody pushBody = _characterController._pushableBody;
                 Vector3 pushPoint = _characterController._pushContactPt;
                 Vector3 pointVelocity = pushBody.GetPointVelocity(pushPoint);
-                Vector3 climbVelocity = new Vector3(0, HikersMod.Instance._jumpPower * (_wallJumpsLeft / HikersMod.Instance._wallJumpsPerJump), 0);
+                Vector3 climbVelocity = new Vector3(0, HikersMod.s_instance._jumpPower * (_wallJumpsLeft / HikersMod.s_instance._wallJumpsPerJump), 0);
 
-                if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20) HikersMod.Instance.DebugLog("Can't Wall-Jump; going too fast");
+                if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20) HikersMod.s_instance.DebugLog("Can't Wall-Jump; going too fast");
                 else
                 {
                     _characterController._owRigidbody.SetVelocity(pointVelocity);
@@ -51,12 +51,12 @@ namespace HikersMod.Components
                     _wallJumpsLeft -= 1;
                     _impactAudio._impactAudioSrc.PlayOneShot(AudioType.ImpactLowSpeed);
                     _lastWallJumpTime = _lastWallJumpRefill = Time.time;
-                    HikersMod.Instance.DebugLog("Wall-Jumped");
+                    HikersMod.s_instance.DebugLog("Wall-Jumped");
                 }
             }
 
             // Replenish 1 wall jump if the player hasn't done one for five seconds
-            if (Time.time - _lastWallJumpRefill > 5 && _wallJumpsLeft < HikersMod.Instance._wallJumpsPerJump)
+            if (Time.time - _lastWallJumpRefill > 5 && _wallJumpsLeft < HikersMod.s_instance._wallJumpsPerJump)
             {
                 _wallJumpsLeft += 1;
                 _lastWallJumpRefill = Time.time;
@@ -72,10 +72,10 @@ namespace HikersMod.Components
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
         public static void CharacterControllerStart()
         {
-            Instance._characterController = FindObjectOfType<PlayerCharacterController>();
-            Instance._animController = FindObjectOfType<PlayerAnimController>();
-            Instance._impactAudio = FindObjectOfType<PlayerImpactAudio>();
-            Instance._characterController.OnBecomeGrounded += () => Instance._wallJumpsLeft = HikersMod.Instance._wallJumpsPerJump; 
+            s_instance._characterController = FindObjectOfType<PlayerCharacterController>();
+            s_instance._animController = FindObjectOfType<PlayerAnimController>();
+            s_instance._impactAudio = FindObjectOfType<PlayerImpactAudio>();
+            s_instance._characterController.OnBecomeGrounded += () => s_instance._wallJumpsLeft = HikersMod.s_instance._wallJumpsPerJump; 
         }
     }
 }

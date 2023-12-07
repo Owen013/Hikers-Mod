@@ -5,7 +5,7 @@ namespace HikersMod.Components
 {
     public class SuperBoostController : MonoBehaviour
     {
-        public static SuperBoostController Instance;
+        public static SuperBoostController s_instance;
         public float _lastBoostInputTime;
         public float _lastBoostTime;
         public float _lastBoostPower;
@@ -20,7 +20,7 @@ namespace HikersMod.Components
 
         public void Awake()
         {
-            Instance = this;
+            s_instance = this;
             Harmony.CreateAndPatchAll(typeof(SuperBoostController));
         }
 
@@ -30,16 +30,16 @@ namespace HikersMod.Components
             bool isInputting = OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && !OWInput.IsPressed(InputLibrary.thrustUp, InputMode.Character);
             bool meetsCriteria = _characterController._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
             if (!meetsCriteria) _isSuperBoosting = false;
-            else if (isInputting && meetsCriteria && _jetpackController._resources.GetFuel() > 0f && Time.time - _lastBoostInputTime < 0.25f && HikersMod.Instance._isSuperBoostEnabled && !_isSuperBoosting)
+            else if (isInputting && meetsCriteria && _jetpackController._resources.GetFuel() > 0f && Time.time - _lastBoostInputTime < 0.25f && HikersMod.s_instance._isSuperBoostEnabled && !_isSuperBoosting)
             {
                 // Apply superboost
                 _lastBoostTime = Time.time;
                 _isSuperBoosting = true;
                 _jetpackModel._boostChargeFraction = 0f;
-                float powerPercent = Mathf.Min(HikersMod.Instance._superBoostCost, _jetpackController._resources.GetFuel()) / HikersMod.Instance._superBoostCost;
-                float boostPower = HikersMod.Instance._superBoostPower * powerPercent;
+                float powerPercent = Mathf.Min(HikersMod.s_instance._superBoostCost, _jetpackController._resources.GetFuel()) / HikersMod.s_instance._superBoostCost;
+                float boostPower = HikersMod.s_instance._superBoostPower * powerPercent;
                 _lastBoostPower = boostPower;
-                float boostCost = HikersMod.Instance._superBoostCost * powerPercent;
+                float boostCost = HikersMod.s_instance._superBoostCost * powerPercent;
                 _jetpackController._resources._currentFuel -= boostCost;
                 Vector3 pointVelocity = _characterController._transform.InverseTransformDirection(_characterController._lastGroundBody.GetPointVelocity(_characterController._transform.position));
                 Vector3 localVelocity = _characterController._transform.InverseTransformDirection(_characterController._owRigidbody.GetVelocity()) - pointVelocity;
@@ -47,7 +47,7 @@ namespace HikersMod.Components
                 _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, Mathf.Min(boostPower * 0.05f, 50));
                 _helmetAnimator.OnInstantDamage(boostPower, InstantDamageType.Impact);
                 NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "EMERGENCY BOOST ACTIVATED", 5f), false);
-                HikersMod.Instance.DebugLog("Super-Boosted");
+                HikersMod.s_instance.DebugLog("Super-Boosted");
             }
             if (isInputting && meetsCriteria) _lastBoostInputTime = Time.time;
             if (_isSuperBoosting)
@@ -70,17 +70,17 @@ namespace HikersMod.Components
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
         public static void OnCharacterControllerStart()
         {
-            Instance._characterController = FindObjectOfType<PlayerCharacterController>();
-            Instance._audioController = FindObjectOfType<PlayerAudioController>();
-            Instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
-            Instance._jetpackController = FindObjectOfType<JetpackThrusterController>();
-            Instance._helmetAnimator = FindObjectOfType<HUDHelmetAnimator>();
-            Instance._superBoostAudio = new GameObject("HikersMod_SuperBoostAudioSrc").AddComponent<OWAudioSource>();
-            Instance._superBoostAudio.transform.parent = Instance._audioController.transform;
-            Instance._superBoostAudio.transform.localPosition = new Vector3(0, 0, 1);
+            s_instance._characterController = FindObjectOfType<PlayerCharacterController>();
+            s_instance._audioController = FindObjectOfType<PlayerAudioController>();
+            s_instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
+            s_instance._jetpackController = FindObjectOfType<JetpackThrusterController>();
+            s_instance._helmetAnimator = FindObjectOfType<HUDHelmetAnimator>();
+            s_instance._superBoostAudio = new GameObject("HikersMod_SuperBoostAudioSrc").AddComponent<OWAudioSource>();
+            s_instance._superBoostAudio.transform.parent = s_instance._audioController.transform;
+            s_instance._superBoostAudio.transform.localPosition = new Vector3(0, 0, 1);
             var thrusters = Resources.FindObjectsOfTypeAll<ThrusterFlameController>();
-            for (int i = 0; i < thrusters.Length; i++) if (thrusters[i]._thruster == Thruster.Up_LeftThruster) Instance._downThrustFlame = thrusters[i];
-            Instance._characterController.OnBecomeGrounded += () => Instance._isSuperBoosting = false;
+            for (int i = 0; i < thrusters.Length; i++) if (thrusters[i]._thruster == Thruster.Up_LeftThruster) s_instance._downThrustFlame = thrusters[i];
+            s_instance._characterController.OnBecomeGrounded += () => s_instance._isSuperBoosting = false;
         }
     }
 }
