@@ -7,6 +7,7 @@ namespace HikersMod.Components
     {
         public static SpeedController Instance;
         public PlayerCharacterController _characterController;
+        public JetpackThrusterController _jetpackController;
         public JetpackThrusterModel _jetpackModel;
         public ThrusterFlameController _forward_left_thruster, _forward_right_thruster, _backward_left_thruster, _backward_right_thruster, _left_thruster, _right_thruster;
         public string _moveSpeed;
@@ -32,18 +33,16 @@ namespace HikersMod.Components
             if (rollInputChanged || downInputChanged || upInputChanged || boostedInMidair || _hasDreamLanternFocusChanged) ChangeMoveSpeed();
 
             _hasDreamLanternFocusChanged = false;
-            if (_jetpackModel._translationalInput.magnitude == 0)
-            {
-                Vector2 _thrusterVector;
-                if (_moveSpeed == "sprinting") _thrusterVector = OWInput.GetAxisValue(InputLibrary.moveXZ);
-                else _thrusterVector = Vector2.zero;
-                SetThrusterIntensity(_forward_left_thruster, _thrusterVector.y > 0 ? _thrusterVector.y : 0);
-                SetThrusterIntensity(_forward_right_thruster, _thrusterVector.y > 0 ? _thrusterVector.y : 0);
-                SetThrusterIntensity(_backward_left_thruster, _thrusterVector.y < 0 ? -_thrusterVector.y : 0);
-                SetThrusterIntensity(_backward_right_thruster, _thrusterVector.y < 0 ? -_thrusterVector.y : 0);
-                SetThrusterIntensity(_left_thruster, _thrusterVector.x > 0 ? _thrusterVector.x : 0);
-                SetThrusterIntensity(_right_thruster, _thrusterVector.x < 0 ? -_thrusterVector.x : 0);
-            }
+            //if (_moveSpeed == "sprinting" || _jetpackController.GetRawInput().magnitude == 0)
+            //{
+            //    Vector2 _thrusterVector = OWInput.GetAxisValue(InputLibrary.moveXZ);
+            //    SetThrusterIntensity(_forward_left_thruster, _thrusterVector.y > 0 ? _thrusterVector.y : 0);
+            //    SetThrusterIntensity(_forward_right_thruster, _thrusterVector.y > 0 ? _thrusterVector.y : 0);
+            //    SetThrusterIntensity(_backward_left_thruster, _thrusterVector.y < 0 ? -_thrusterVector.y : 0);
+            //    SetThrusterIntensity(_backward_right_thruster, _thrusterVector.y < 0 ? -_thrusterVector.y : 0);
+            //    SetThrusterIntensity(_left_thruster, _thrusterVector.x > 0 ? _thrusterVector.x : 0);
+            //    SetThrusterIntensity(_right_thruster, _thrusterVector.x < 0 ? -_thrusterVector.x : 0);
+            //}
         }
 
         public void ApplyChanges()
@@ -95,20 +94,21 @@ namespace HikersMod.Components
             if (_moveSpeed != oldSpeed) HikersMod.Instance.DebugLog($"Changed movement speed to {_moveSpeed}");
         }
 
-        public void SetThrusterIntensity(ThrusterFlameController thruster, float intensity)
-        {
-            intensity = thruster._scaleSpring.Update(thruster.transform.localScale.magnitude, intensity, Time.deltaTime);
-            thruster.transform.localScale = Vector3.one * intensity;
-            thruster._light.range = thruster._baseLightRadius * intensity;
-            thruster._thrusterRenderer.enabled = (intensity > 0f);
-            thruster._light.enabled = (intensity > 0f);
-        }
+        //public void SetThrusterIntensity(ThrusterFlameController thruster, float intensity)
+        //{
+        //    intensity = thruster._scaleSpring.Update(thruster.transform.localScale.magnitude, intensity, Time.deltaTime);
+        //    thruster.transform.localScale = Vector3.one * intensity;
+        //    thruster._light.range = thruster._baseLightRadius * intensity;
+        //    thruster._thrusterRenderer.enabled = (intensity > 0f);
+        //    thruster._light.enabled = (intensity > 0f);
+        //}
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
         public static void OnCharacterControllerStart()
         {
             Instance._characterController = FindObjectOfType<PlayerCharacterController>();
+            Instance._jetpackController = FindObjectOfType<JetpackThrusterController>();
             Instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
             Instance._characterController.OnBecomeGrounded += Instance.ChangeMoveSpeed;
             //Instance._isDreaming = false;
