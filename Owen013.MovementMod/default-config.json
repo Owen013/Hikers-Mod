@@ -3,19 +3,14 @@
 	"enabled": true,
 	"settings": {
 
-		"Air Control": {
+		"Jumping": {
 			"type": "separator"
 		},
 		"Jump Style": {
 			"type": "selector",
 			"value": "Instant",
 			"options": [ "Charge", "Instant" ],
-			"tooltip": "Charge: you have to hold space to charge a jump and release space to perform the jump. Instant: the player will jump immediately upon pressing space. Vanilla: Charge"
-		},
-		"Enable Enhanced Air Control": {
-			"type": "toggle",
-			"value": true,
-			"tooltip": "Makes the character more maneuverable in midair; allows changing direction during a jump. Vanilla: Disabled"
+			"tooltip": "Charge: you have to hold space to charge a jump and release space to perform the jump. Instant: you will jump immediately upon pressing space. Vanilla: Charge"
 		},
 
 		"Sprinting": {
@@ -25,17 +20,17 @@
 			"type": "selector",
 			"value": "When Suited",
 			"options": [ "No", "When Suited", "Always" ],
-			"tooltip": "Allows the player to sprint. Vanilla: No"
+			"tooltip": "Allows you to sprint. Recommended: When Suited"
 		},
 		"Sprint Speed": {
 			"type": "number",
-			"value": 9,
-			"tooltip": "How quickly the player moves while sprinting. Recommended: 9"
+			"value": 12,
+			"tooltip": "How quickly you move while sprinting. Recommended: 12"
 		},
 		"Sprint Strafe Speed": {
 			"type": "number",
-			"value": 6,
-			"tooltip": "How quickly the player moves when sprinting backwards or to the side. Recommended: 6"
+			"value": 4,
+			"tooltip": "How quickly you move when sprinting backwards or to the side. Recommended: 4"
 		},
 		"Sprint Button": {
 			"type": "selector",
@@ -46,7 +41,7 @@
 		"Allow Thrusting on Ground with Sprinting Enabled": {
 			"type": "toggle",
 			"value": true,
-			"tooltip": "With this enabled, the player can start thrusting on the ground as long as they aren't actively moving. Recommended: Enabled"
+			"tooltip": "With this enabled, you can use your jetpack on the ground by pressing the thrust button while standing still. Recommended: Enabled"
 		},
 
 		"Emergency Boost": {
@@ -55,7 +50,7 @@
 		"Enable Emergency Boost": {
 			"type": "toggle",
 			"value": true,
-			"tooltip": "Allows the player to shoot up into the air by pressing space twice. Recommended: Enabled"
+			"tooltip": "Allows you to shoot up into the air by pressing space twice. Recommended: Enabled"
 		},
 		"Emergency Boost Power": {
 			"type": "number",
@@ -74,66 +69,71 @@
 		"Normal Speed": {
 			"type": "number",
 			"value": 6,
-			"tooltip": "How quickly the player moves. Vanilla: 6"
+			"tooltip": "How quickly you moves. Vanilla: 6"
 		},
 		"Strafe Speed": {
 			"type": "number",
 			"value": 4,
-			"tooltip": "How quickly the player moves when walking backwards or to the side. Vanilla: 4"
+			"tooltip": "How quickly you move when walking backwards or to the side. Vanilla: 4"
 		},
 		"Walk Speed": {
 			"type": "number",
 			"value": 3,
-			"tooltip": "How quickly the player moves when holding the walk (roll mode) button. Vanilla: 3"
+			"tooltip": "How quickly you move when holding the walk (roll mode) button. Vanilla: 3"
 		},
 		"Focused Lantern Speed": {
 			"type": "number",
 			"value": 2,
-			"tooltip": "How quickly the player moves while focusing a lantern. Vanilla: 2"
+			"tooltip": "How quickly you move while focusing a lantern. Vanilla: 2"
 		},
 		"Ground Acceleration": {
 			"type": "number",
 			"value": 0.5,
-			"tooltip": "How quickly the player reaches their maximum speed. Vanilla: 0.5"
+			"tooltip": "How quickly you reach your maximum speed. Vanilla: 0.5"
 		},
 		"Jump Power": {
 			"type": "number",
 			"value": 7,
-			"tooltip": "How high the player jumps. Vanilla: 7"
+			"tooltip": "How high you jump. Vanilla: 7"
 		},
 		"Air Speed": {
 			"type": "number",
 			"value": 3,
-			"tooltip": "How quickly the player can move in midair. Vanilla: 3"
+			"tooltip": "How quickly you can move in midair. Vanilla: 3"
 		},
 		"Air Acceleration": {
 			"type": "number",
 			"value": 0.09,
-			"tooltip": "How quickly the player reaches their maximum speed while in midair. Vanilla: 0.09"
+			"tooltip": "How quickly you reach your maximum speed while in midair. Vanilla: 0.09"
 		},
 		"Jetpack Acceleration": {
 			"type": "number",
 			"value": 6,
-			"tooltip": "How powerful the player's jetpack is. Vanilla: 6"
+			"tooltip": "How powerful your jetpack is. Vanilla: 6"
 		},
 		"Jetpack Boost Acceleration": {
 			"type": "number",
 			"value": 23,
-			"tooltip": "How powerful the player's jetpack is while boosting. Vanilla: 23"
+			"tooltip": "How powerful your jetpack is while boosting. Vanilla: 23"
 		},
 		"Max Jetpack Boost Time": {
 			"type": "number",
 			"value": 1,
-			"tooltip": "How long the player can use their jetpack boost, in seconds. Vanilla: 1"
+			"tooltip": "How long you can use your jetpack boost, in seconds. Vanilla: 1"
 		},
 
 		"Other": {
 			"type": "separator"
 		},
+		"Enable Midair Turning": {
+			"type": "toggle",
+			"value": false,
+			"tooltip": "Allows you to change direction and/or slow down in midiar, even without your jetpack. Recommended: Disabled"
+		},
 		"Floaty Physics in Low-Gravity": {
 			"type": "toggle",
 			"value": false,
-			"tooltip": "Lowers the player's acceleration in low gravity, making movement floatier. Recommended: Disabled"
+			"tooltip": "Lowers your acceleration in low gravity, making movement floatier. Recommended: Disabled"
 		},
 		"Floaty Physics Power": {
 			"type": "number",
@@ -144,12 +144,12 @@
 			"type": "selector",
 			"value": "No",
 			"options": [ "No", "When Unsuited", "Always" ],
-			"tooltip": "Allows the player to climb up walls by jumping off of them. Recommended: Disabled"
+			"tooltip": "Allows you to climb up walls by jumping off of them. Recommended: Disabled"
 		},
 		"Wall Jumps per Jump": {
 			"type": "number",
 			"value": 5,
-			"tooltip": "How many times the player can Wall Jump without touching the ground. Recommended: 5"
+			"tooltip": "How many times you can Wall Jump without touching the ground. Recommended: 5"
 		},
 		"Enable Debug Log": {
 			"type": "toggle",
