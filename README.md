@@ -2,11 +2,8 @@
 ### Instant Jump
 No longer do you have to hold down the button before you jump! With this enabled, you will immediately jump upon pressing the jump button.
 
-### Midair Turning
-Allows you to slightly change course or slow down in midair without your jetpack. Has limited use, but feels good to have and would have saved me from falling to my death on my very first playthrough!
-
 ### Sprinting
-Hold the vertical thrust button while moving to start sprinting. Hold the button while standing still to use your jetpack as normal.
+Your jetpack thrusters will now assist you in moving faster! Hold the vertical thrust button while moving to start sprinting. Hold the button while standing still to use your jetpack as normal.
 
 ### Emergency Boost
 For those tough situations where you need a quick burst of upward movement. In midair, let go of your jetpack controls and press the jump button twice to shoot up into the air, but be wary! It uses a lot of fuel.
@@ -14,7 +11,10 @@ For those tough situations where you need a quick burst of upward movement. In m
 ## Miscellaneous Features
 
 ### Modify your movement attributes
-Change your speed, jump height, and more in the config menu.
+Change your speed, jump height, sprint speed, jetpack power, and more in the config menu.
+
+### Midair Turning
+Allows you to slightly change course or slow down in midair without your jetpack. Has limited use, but feels good to have and would have saved me from falling to my death on my very first playthrough! **Disabled by default.**
 
 ### Floaty Physics
 This feature makes your movement floatier on low-gravity bodies! The lower the gravity is, the lower your acceleration is, which means you'll take longer to reach your top speed. **Disabled by default.**
