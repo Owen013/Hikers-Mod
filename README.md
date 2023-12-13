@@ -20,7 +20,7 @@ Change your speed, jump height, and more in the config menu!
 This feature makes your movement floatier on low-gravity bodies! The lower the gravity is, the lower your acceleration is, which means you'll take longer to reach your top speed. **Disabled by default.**
 
 ### Wall-Jumping
-Want to get up to the observatory quickly? Press space in midair while facing a wall to jump off of it, and repeat to climb up walls! **Disabled by default.**
+Scale short walls, no jetpack required! Press space in midair while facing a wall to jump off of it, and repeat to climb up walls! **Disabled by default.**
 
 ### Don't like it? Turn it off!
 Any of Hiker's Mod's features can be enabled or disabled so that you can use the features that you want without being forced to use the ones that you don't like! Go to the config menu to customize your experience.
