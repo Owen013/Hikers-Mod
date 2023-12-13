@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using Steamworks;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,6 +10,7 @@ public class SpeedController : MonoBehaviour
     private PlayerCharacterController _characterController;
     private JetpackThrusterModel _jetpackModel;
     private JetpackThrusterAudio _jetpackAudio;
+    private GameObject _playerVFX;
     private List<ThrusterFlameController> _thrusters;
     private string _moveSpeed;
     private bool _isDreamLanternFocused;
@@ -55,7 +55,7 @@ public class SpeedController : MonoBehaviour
         flameVector.x = Mathf.Clamp(flameVector.x, -20, 20);
         flameVector.y = Mathf.Clamp(flameVector.y, -20, 20);
 
-        if (!_jetpackAudio.isActiveAndEnabled) _jetpackAudio.UpdateTranslationalSource(_jetpackAudio._translationalSource, flameVector.magnitude, -flameVector.x, true);
+        if (_playerVFX.activeSelf) _jetpackAudio.UpdateTranslationalSource(_jetpackAudio._translationalSource, flameVector.magnitude, -flameVector.x, true);
         foreach (ThrusterFlameController thruster in _thrusters)
         {
             switch (thruster._thruster)
@@ -147,6 +147,7 @@ public class SpeedController : MonoBehaviour
         s_instance._characterController = Locator.GetPlayerController();
         s_instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
         s_instance._jetpackAudio = FindObjectOfType<JetpackThrusterAudio>();
+        s_instance._playerVFX = s_instance._characterController.GetComponentInChildren<PlayerParticlesController>(includeInactive: true).gameObject;
         s_instance._characterController.OnBecomeGrounded += s_instance.ChangeMoveSpeed;
         s_instance._thrusters = new(s_instance._characterController.gameObject.GetComponentsInChildren<ThrusterFlameController>(includeInactive: true));
         s_instance._thrusterVector = Vector2.zero;
@@ -174,24 +175,6 @@ public class SpeedController : MonoBehaviour
         if (__instance._focusing) ModController.s_instance.DebugLog("Focused Dream Lantern", OWML.Common.MessageType.Info);
         else ModController.s_instance.DebugLog("Unfocused Dream Lantern", OWML.Common.MessageType.Info);
     }
-
-    //[HarmonyPostfix]
-    //[HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.OnEnterDreamWorld))]
-    //public static void OnEnteredDreamWorld()
-    //{
-    //    s_instance._isDreaming = true;
-    //    s_instance.ChangeMoveSpeed();
-    //    HikersMod.s_instance.DebugLog("Entered Dream World", OWML.Common.MessageType.Info);
-    //}
-
-    //[HarmonyPostfix]
-    //[HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.OnExitDreamWorld))]
-    //public static void OnExitedDreamWorld()
-    //{
-    //    s_instance._isDreaming = false;
-    //    s_instance.ChangeMoveSpeed();
-    //    HikersMod.s_instance.DebugLog("Left Dream World", OWML.Common.MessageType.Info);
-    //}
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Update))]

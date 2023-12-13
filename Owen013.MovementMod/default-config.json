@@ -130,7 +130,7 @@
 			"value": false,
 			"tooltip": "Allows you to change direction and/or slow down in midiar, even without your jetpack. Recommended: Disabled"
 		},
-		"Floaty Physics in Low-Gravity": {
+		"Floaty Physics": {
 			"type": "toggle",
 			"value": false,
 			"tooltip": "Lowers your acceleration in low gravity, making movement floatier. Recommended: Disabled"

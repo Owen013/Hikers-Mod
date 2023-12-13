@@ -11,10 +11,10 @@ public class ModController : ModBehaviour
     public ISmolHatchling SmolHatchlingAPI;
     public delegate void ConfigureEvent();
     public event ConfigureEvent OnConfigure;
-    private PlayerAnimController _animController;
     private PlayerCharacterController _characterController;
-    private PlayerCloneController _cloneController;
+    private PlayerAnimController _animController;
     private JetpackThrusterModel _jetpackModel;
+    private PlayerCloneController _cloneController;
     private EyeMirrorController _mirrorController;
     private float _animSpeed;
 
@@ -68,10 +68,7 @@ public class ModController : ModBehaviour
 
     public void Update()
     {
-        // Make sure that the scene is the SS or Eye and that everything is loaded
         if (!_characterController) return;
-        
-        // Update everthing else
         UpdateAnimSpeed();
     }
 
@@ -79,7 +76,7 @@ public class ModController : ModBehaviour
     {
         base.Configure(config);
 
-        // Get all settings values
+        // Get all config options
         JumpStyle = config.GetSettingsValue<string>("Jump Style");
         IsMidairTurningEnabled = config.GetSettingsValue<bool>("Enable Midair Turning");
         SprintMode = config.GetSettingsValue<string>("Enable Sprinting");
@@ -100,7 +97,7 @@ public class ModController : ModBehaviour
         JetpackAccel = config.GetSettingsValue<float>("Jetpack Acceleration");
         JetpackBoostAccel = config.GetSettingsValue<float>("Jetpack Boost Acceleration");
         JetpackBoostTime = config.GetSettingsValue<float>("Max Jetpack Boost Time");
-        IsFloatyPhysicsEnabled = config.GetSettingsValue<bool>("Floaty Physics in Low-Gravity");
+        IsFloatyPhysicsEnabled = config.GetSettingsValue<bool>("Floaty Physics");
         FloatyPhysicsPower = config.GetSettingsValue<float>("Floaty Physics Power");
         WallJumpMode = config.GetSettingsValue<string>("Enable Wall Jumping");
         WallJumpsPerJump = config.GetSettingsValue<float>("Wall Jumps per Jump");
@@ -160,8 +157,8 @@ public class ModController : ModBehaviour
     public static void OnCharacterControllerStart()
     {
         // Get vars
-        s_instance._animController = FindObjectOfType<PlayerAnimController>();
         s_instance._characterController = Locator.GetPlayerController();
+        s_instance._animController = FindObjectOfType<PlayerAnimController>();
         s_instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
 
         s_instance.ApplyChanges();

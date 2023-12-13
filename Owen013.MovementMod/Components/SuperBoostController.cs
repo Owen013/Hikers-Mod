@@ -8,7 +8,6 @@ public class SuperBoostController : MonoBehaviour
     public static SuperBoostController s_instance;
     private float _lastBoostInputTime;
     private float _lastBoostTime;
-    private float _lastBoostPower;
     private bool _isSuperBoosting;
     private OWAudioSource _superBoostAudio;
     private JetpackThrusterModel _jetpackModel;
@@ -44,7 +43,7 @@ public class SuperBoostController : MonoBehaviour
     {
         if (!_characterController) return;
         float timeSinceBoost = Time.time - _lastBoostTime;
-        float thrusterScale = Mathf.Clamp(Mathf.Max((-Mathf.Pow(4f * timeSinceBoost - 1f, 2f) + 1f) * _lastBoostPower, 0f), _downThrustFlame._currentScale, 20f);
+        float thrusterScale = Mathf.Clamp(Mathf.Max((-Mathf.Pow(5f * timeSinceBoost - 1f, 2f) + 1f) * ModController.s_instance.SuperBoostPower, 0f), _downThrustFlame._currentScale, 20f);
         _downThrustFlame.transform.localScale = Vector3.one * Mathf.Min(thrusterScale, 100f);
         _downThrustFlame._light.range = _downThrustFlame._baseLightRadius * thrusterScale;
         _downThrustFlame._thrusterRenderer.enabled = thrusterScale > 0f;
@@ -56,16 +55,12 @@ public class SuperBoostController : MonoBehaviour
         _isSuperBoosting = true;
         _lastBoostTime = Time.time;
         _jetpackModel._boostChargeFraction = 0f;
-        float powerPercent = Mathf.Min(ModController.s_instance.SuperBoostCost, _jetpackController._resources.GetFuel()) / ModController.s_instance.SuperBoostCost;
-        float boostPower = ModController.s_instance.SuperBoostPower * powerPercent;
-        _lastBoostPower = boostPower;
-        float boostCost = ModController.s_instance.SuperBoostCost * powerPercent;
-        _jetpackController._resources._currentFuel -= boostCost;
+        _jetpackController._resources._currentFuel = Mathf.Max(0f, _jetpackController._resources.GetFuel() - ModController.s_instance.SuperBoostCost);
         Vector3 pointVelocity = _characterController._transform.InverseTransformDirection(_characterController._lastGroundBody.GetPointVelocity(_characterController._transform.position));
         Vector3 localVelocity = _characterController._transform.InverseTransformDirection(_characterController._owRigidbody.GetVelocity()) - pointVelocity;
-        _characterController._owRigidbody.AddLocalVelocityChange(new Vector3(-localVelocity.x * 0.5f, boostPower - localVelocity.y * 0.5f, -localVelocity.z * 0.5f));
-        _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, Mathf.Min(boostPower * 0.05f, 20));
-        _helmetAnimator.OnInstantDamage(boostPower, InstantDamageType.Impact);
+        _characterController._owRigidbody.AddLocalVelocityChange(new Vector3(-localVelocity.x * 0.5f, ModController.s_instance.SuperBoostPower - localVelocity.y * 0.75f, -localVelocity.z * 0.5f));
+        _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, Mathf.Min(ModController.s_instance.SuperBoostPower * 0.05f, 20));
+        _helmetAnimator.OnInstantDamage(ModController.s_instance.SuperBoostPower, InstantDamageType.Impact);
         NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "EMERGENCY BOOST ACTIVATED", 5f), false);
         ModController.s_instance.DebugLog("Super-Boosted");
     }
