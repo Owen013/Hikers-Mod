@@ -42,7 +42,7 @@ public class SpeedController : MonoBehaviour
     {
         if (!_characterController) return;
 
-        // get thruster vector IF the player is sprinting, otherwise move towards zero
+        // get thruster vector IF the player is sprinting and the jetpack is visible. Otherwise, move towards zero
         _thrusterVector = Vector2.MoveTowards(_thrusterVector, _moveSpeed == "sprinting" && _playerVFX.activeSelf ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
         Vector2 flameVector = _thrusterVector;
 
@@ -56,10 +56,20 @@ public class SpeedController : MonoBehaviour
         flameVector.y = Mathf.Clamp(flameVector.y, -20, 20);
 
         // update thruster sound, as long as it's not being set by the actual audio controller
+        bool underwater = _jetpackAudio._underwater;
         bool overrideAudio = _jetpackAudio.isActiveAndEnabled == false;
-        float soundVolume = flameVector.magnitude;
-        float soundPan = -flameVector.x * 0.4f;
-        if (overrideAudio) _jetpackAudio.UpdateTranslationalSource(_jetpackAudio._translationalSource, soundVolume, soundPan, true);
+        if (overrideAudio)
+        {
+            float soundVolume = flameVector.magnitude;
+            float soundPan = -flameVector.x * 0.4f;
+            bool hasFuel = _jetpackAudio._playerResources.GetFuel() > 0f;
+            _jetpackAudio.UpdateTranslationalSource(_jetpackAudio._translationalSource, soundVolume, soundPan, !underwater && hasFuel);
+            _jetpackAudio.UpdateTranslationalSource(_jetpackAudio._underwaterSource, soundVolume, soundPan, underwater);
+            _jetpackAudio.UpdateTranslationalSource(_jetpackAudio._oxygenSource, soundVolume, soundPan, !underwater && !hasFuel);
+        }
+
+        // after setting sound volume, check if underwater and if so, set flameVector to zero
+        if (underwater) flameVector = Vector2.zero;
 
         // set all of the thruster scales
         foreach (ThrusterFlameController thruster in _thrusters)

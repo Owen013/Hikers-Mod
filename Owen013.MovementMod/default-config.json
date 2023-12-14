@@ -29,8 +29,8 @@
 		},
 		"Sprint Strafe Speed": {
 			"type": "number",
-			"value": 4,
-			"tooltip": "How quickly you move when sprinting backwards or to the side. Recommended: 4"
+			"value": 8,
+			"tooltip": "How quickly you move when sprinting backwards or to the side. Recommended: 8"
 		},
 		"Sprint Button": {
 			"type": "selector",
