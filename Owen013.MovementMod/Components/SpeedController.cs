@@ -43,11 +43,11 @@ public class SpeedController : MonoBehaviour
         if (!_characterController) return;
 
         // get thruster vector IF the player is sprinting, otherwise move towards zero
-        _thrusterVector = Vector2.MoveTowards(_thrusterVector, _moveSpeed == "sprinting" && _characterController._isWearingSuit ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
+        _thrusterVector = Vector2.MoveTowards(_thrusterVector, _moveSpeed == "sprinting" && _playerVFX.activeSelf ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
         Vector2 flameVector = _thrusterVector;
 
         // adjust vector based on how fast sprinting is compared to normal speed
-        flameVector.x *= (ModController.s_instance.StrafeSpeed / ModController.s_instance.StrafeSpeed) - 1;
+        flameVector.x *= (ModController.s_instance.SprintStrafeSpeed / ModController.s_instance.StrafeSpeed) - 1;
         if (flameVector.y < 0f) flameVector.y *= (ModController.s_instance.SprintStrafeSpeed / ModController.s_instance.StrafeSpeed) - 1;
         else flameVector.y *= (ModController.s_instance.SprintSpeed / ModController.s_instance.DefaultSpeed) - 1;
 
@@ -55,7 +55,13 @@ public class SpeedController : MonoBehaviour
         flameVector.x = Mathf.Clamp(flameVector.x, -20, 20);
         flameVector.y = Mathf.Clamp(flameVector.y, -20, 20);
 
-        if (_playerVFX.activeSelf) _jetpackAudio.UpdateTranslationalSource(_jetpackAudio._translationalSource, flameVector.magnitude, -flameVector.x, true);
+        // update thruster sound, as long as it's not being set by the actual audio controller
+        bool overrideAudio = _jetpackAudio.isActiveAndEnabled == false;
+        float soundVolume = flameVector.magnitude;
+        float soundPan = -flameVector.x * 0.4f;
+        if (overrideAudio) _jetpackAudio.UpdateTranslationalSource(_jetpackAudio._translationalSource, soundVolume, soundPan, true);
+
+        // set all of the thruster scales
         foreach (ThrusterFlameController thruster in _thrusters)
         {
             switch (thruster._thruster)
