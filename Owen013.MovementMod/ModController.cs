@@ -2,6 +2,7 @@
 using OWML.ModHelper;
 using OWML.Common;
 using UnityEngine;
+using HikersMod.APIs;
 
 namespace HikersMod;
 
@@ -9,6 +10,7 @@ public class ModController : ModBehaviour
 {
     public static ModController s_instance;
     public ISmolHatchling SmolHatchlingAPI;
+    public ICameraShaker CameraShakerAPI;
     public delegate void ConfigureEvent();
     public event ConfigureEvent OnConfigure;
     private PlayerCharacterController _characterController;
@@ -46,7 +48,7 @@ public class ModController : ModBehaviour
     public float WallJumpsPerJump;
     public bool DebugLogEnabled;
 
-    public void Awake()
+    private void Awake()
     {
         // Static reference to HikersMod so it can be used in patches.
         s_instance = this;
@@ -57,16 +59,18 @@ public class ModController : ModBehaviour
         gameObject.AddComponent<Components.WallJumpController>();
     }
 
-    public void Start()
+    private void Start()
     {
+        // Get APIs
         SmolHatchlingAPI = ModHelper.Interaction.TryGetModApi<ISmolHatchling>("Owen013.TeenyHatchling");
         SmolHatchlingAPI?.SetHikersModEnabled();
+        CameraShakerAPI = ModHelper.Interaction.TryGetModApi<ICameraShaker>("SBtT.CameraShake");
 
         // Ready!
         ModHelper.Console.WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
     }
 
-    public void Update()
+    private void Update()
     {
         if (!_characterController) return;
         UpdateAnimSpeed();
@@ -107,7 +111,7 @@ public class ModController : ModBehaviour
         OnConfigure();
     }
 
-    public void ApplyChanges()
+    private void ApplyChanges()
     {
         if (!_characterController) return;
 
@@ -121,7 +125,7 @@ public class ModController : ModBehaviour
         _jetpackModel._boostSeconds = JetpackBoostTime;
     }
 
-    public void UpdateAnimSpeed()
+    private void UpdateAnimSpeed()
     {
         float gravMultiplier = Mathf.Sqrt(_characterController._acceleration / GroundAccel);
         float sizeMultiplier = SmolHatchlingAPI != null ? SmolHatchlingAPI.GetAnimSpeed() : 1;

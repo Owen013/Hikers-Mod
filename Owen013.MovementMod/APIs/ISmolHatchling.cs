@@ -1,4 +1,4 @@
-﻿namespace HikersMod
+﻿namespace HikersMod.APIs
 {
     public interface ISmolHatchling
     {

@@ -8,21 +8,21 @@ public class FloatyPhysicsController : MonoBehaviour
     public static FloatyPhysicsController s_instance;
     private PlayerCharacterController _characterController;
 
-    public void Awake()
+    private void Awake()
     {
         s_instance = this;
         Harmony.CreateAndPatchAll(typeof(FloatyPhysicsController));
     }
 
-    public void Update()
+    private void Update()
     {
         if (ModController.s_instance.IsFloatyPhysicsEnabled) UpdateAcceleration();
     }
 
-    public void UpdateAcceleration()
+    private void UpdateAcceleration()
     {
         if (!_characterController) return;
-        float gravMultiplier = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce() ? Mathf.Min(Mathf.Pow(_characterController.GetNormalAccelerationScalar() / 12, ModController.s_instance.FloatyPhysicsPower), 1) : 1;
+        float gravMultiplier = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce() ? Mathf.Clamp(Mathf.Pow(_characterController.GetNormalAccelerationScalar() / 12, ModController.s_instance.FloatyPhysicsPower), 0.25f, 1f) : 1f;
         _characterController._acceleration = ModController.s_instance.GroundAccel * gravMultiplier;
     }
 

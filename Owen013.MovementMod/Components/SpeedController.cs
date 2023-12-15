@@ -68,31 +68,30 @@ public class SpeedController : MonoBehaviour
             _jetpackAudio.UpdateTranslationalSource(_jetpackAudio._oxygenSource, soundVolume, soundPan, !underwater && !hasFuel);
         }
 
-        // after setting sound volume, check if underwater and if so, set flameVector to zero
-        if (underwater) flameVector = Vector2.zero;
-
-        // set all of the thruster scales
-        foreach (ThrusterFlameController thruster in _thrusters)
+        // update thruster visuals as long as their controllers are inactive
+        for (int i = 0; i < _thrusters.Count; i++)
         {
-            switch (thruster._thruster)
+            if (_thrusters[i].isActiveAndEnabled) break;
+
+            switch (_thrusters[i]._thruster)
             {
                 case Thruster.Forward_LeftThruster:
-                    SetThrusterScale(thruster, flameVector.y);
+                    SetThrusterScale(_thrusters[i], flameVector.y);
                     break;
                 case Thruster.Forward_RightThruster:
-                    SetThrusterScale(thruster, flameVector.y);
+                    SetThrusterScale(_thrusters[i], flameVector.y);
                     break;
                 case Thruster.Left_Thruster:
-                    SetThrusterScale(thruster, -flameVector.x);
+                    SetThrusterScale(_thrusters[i], -flameVector.x);
                     break;
                 case Thruster.Right_Thruster:
-                    SetThrusterScale(thruster, flameVector.x);
+                    SetThrusterScale(_thrusters[i], flameVector.x);
                     break;
                 case Thruster.Backward_LeftThruster:
-                    SetThrusterScale(thruster, -flameVector.y);
+                    SetThrusterScale(_thrusters[i], -flameVector.y);
                     break;
                 case Thruster.Backward_RightThruster:
-                    SetThrusterScale(thruster, -flameVector.y);
+                    SetThrusterScale(_thrusters[i], -flameVector.y);
                     break;
             }
         }
@@ -146,14 +145,26 @@ public class SpeedController : MonoBehaviour
         if (_moveSpeed != oldSpeed) ModController.s_instance.DebugLog($"Changed movement speed to {_moveSpeed}");
     }
 
-    public void SetThrusterScale(ThrusterFlameController thruster, float scale)
+    public void SetThrusterScale(ThrusterFlameController thruster, float targetScale)
     {
-        // don't let the custom scale be smaller than the actual thruster scale or a
-        scale = Mathf.Clamp(scale, thruster._currentScale, 100f);
-        thruster.transform.localScale = Vector3.one * scale;
-        thruster._light.range = thruster._baseLightRadius * scale;
-        thruster._thrusterRenderer.enabled = scale > 0f;
-        thruster._light.enabled = scale > 0f;
+        float scale = thruster._underwater ? 0f : targetScale;
+        if (thruster._currentScale < 0f)
+        {
+            thruster._currentScale = 0f;
+            thruster._scaleSpring.ResetVelocity();
+        }
+        if (thruster._currentScale <= 0.001f)
+        {
+            thruster._currentScale = 0f;
+            thruster._scaleSpring.ResetVelocity();
+        }
+        thruster._currentScale = thruster._scaleSpring.Update(thruster._currentScale, scale, Time.deltaTime);
+
+        // set the actual values according to _currentScale
+        thruster.transform.localScale = Vector3.one * thruster._currentScale;
+        thruster._light.range = thruster._baseLightRadius * thruster._currentScale;
+        thruster._thrusterRenderer.enabled = thruster._currentScale > 0f;
+        thruster._light.enabled = thruster._currentScale > 0f;
     }
 
     [HarmonyPostfix]

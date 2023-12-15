@@ -56,12 +56,21 @@ public class SuperBoostController : MonoBehaviour
         _lastBoostTime = Time.time;
         _jetpackModel._boostChargeFraction = 0f;
         _jetpackController._resources._currentFuel = Mathf.Max(0f, _jetpackController._resources.GetFuel() - ModController.s_instance.SuperBoostCost);
+        float boostPower = ModController.s_instance.SuperBoostPower;
+
+        // set player velocity
         Vector3 pointVelocity = _characterController._transform.InverseTransformDirection(_characterController._lastGroundBody.GetPointVelocity(_characterController._transform.position));
         Vector3 localVelocity = _characterController._transform.InverseTransformDirection(_characterController._owRigidbody.GetVelocity()) - pointVelocity;
-        _characterController._owRigidbody.AddLocalVelocityChange(new Vector3(-localVelocity.x * 0.5f, ModController.s_instance.SuperBoostPower - localVelocity.y * 0.75f, -localVelocity.z * 0.5f));
-        _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, Mathf.Min(ModController.s_instance.SuperBoostPower * 0.05f, 20));
-        _helmetAnimator.OnInstantDamage(ModController.s_instance.SuperBoostPower, InstantDamageType.Impact);
+        _characterController._owRigidbody.AddLocalVelocityChange(new Vector3(-localVelocity.x * 0.5f, boostPower - localVelocity.y * 0.75f, -localVelocity.z * 0.5f));
+
+        // sound and visual effects
+        _superBoostAudio.pitch = Random.Range(1.0f, 1.4f);
+        _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, Mathf.Min(boostPower * 0.05f, 20));
+        _helmetAnimator.OnInstantDamage(boostPower, InstantDamageType.Impact);
         NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "EMERGENCY BOOST ACTIVATED", 5f), false);
+        // if camerashaker is installed, do a camera shake
+        ModController.s_instance.CameraShakerAPI?.ExplosionShake(strength: boostPower);
+
         ModController.s_instance.DebugLog("Super-Boosted");
     }
 
