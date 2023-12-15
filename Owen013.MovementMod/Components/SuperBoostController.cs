@@ -17,13 +17,13 @@ public class SuperBoostController : MonoBehaviour
     private ThrusterFlameController _downThrustFlame;
     private HUDHelmetAnimator _helmetAnimator;
 
-    public void Awake()
+    private void Awake()
     {
         s_instance = this;
         Harmony.CreateAndPatchAll(typeof(SuperBoostController));
     }
 
-    public void Update()
+    private void Update()
     {
         if (!_characterController) return;
         bool isInputting = OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && !OWInput.IsPressed(InputLibrary.thrustUp, InputMode.Character);
@@ -39,7 +39,7 @@ public class SuperBoostController : MonoBehaviour
         if (_isSuperBoosting) _jetpackModel._chargeSeconds = float.PositiveInfinity;
     }
 
-    public void LateUpdate()
+    private void LateUpdate()
     {
         if (!_characterController) return;
         float timeSinceBoost = Time.time - _lastBoostTime;
@@ -50,7 +50,7 @@ public class SuperBoostController : MonoBehaviour
         _downThrustFlame._light.enabled = thrusterScale > 0f;
     }
 
-    public void ApplySuperBoost()
+    private void ApplySuperBoost()
     {
         _isSuperBoosting = true;
         _lastBoostTime = Time.time;
@@ -74,7 +74,7 @@ public class SuperBoostController : MonoBehaviour
         ModController.s_instance.DebugLog("Super-Boosted");
     }
 
-    public void EndSuperBoost()
+    private void EndSuperBoost()
     {
         _isSuperBoosting = false;
         _jetpackModel._chargeSeconds = _characterController.IsGrounded() ? _jetpackModel._chargeSecondsGround : _jetpackModel._chargeSecondsAir;
@@ -82,7 +82,7 @@ public class SuperBoostController : MonoBehaviour
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
-    public static void OnCharacterControllerStart()
+    private static void OnCharacterControllerStart()
     {
         s_instance._characterController = FindObjectOfType<PlayerCharacterController>();
         s_instance._audioController = FindObjectOfType<PlayerAudioController>();

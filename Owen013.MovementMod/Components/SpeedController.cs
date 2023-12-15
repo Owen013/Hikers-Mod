@@ -12,20 +12,19 @@ public class SpeedController : MonoBehaviour
     private JetpackThrusterAudio _jetpackAudio;
     private GameObject _playerVFX;
     private List<ThrusterFlameController> _thrusters;
-    private string _moveSpeed;
-    private bool _isDreamLanternFocused;
-    private bool _hasDreamLanternFocusChanged;
-    private IInputCommands _sprintButton;
     private Vector2 _thrusterVector;
+    private IInputCommands _sprintButton;
+    private bool _isSprinting;
+    private bool _isDreamLanternFocused;
 
-    public void Awake()
+    private void Awake()
     {
         s_instance = this;
         Harmony.CreateAndPatchAll(typeof(SpeedController));
         ModController.s_instance.OnConfigure += ApplyChanges;
     }
 
-    public void Update()
+    private void Update()
     {
         if (!_characterController) return;
 
@@ -33,17 +32,20 @@ public class SpeedController : MonoBehaviour
         bool downInputChanged = OWInput.IsNewlyPressed(InputLibrary.thrustDown) || OWInput.IsNewlyReleased(InputLibrary.thrustDown);
         bool upInputChanged = OWInput.IsNewlyPressed(InputLibrary.thrustUp) || OWInput.IsNewlyReleased(InputLibrary.thrustUp);
         bool boostedInMidair = OWInput.IsNewlyPressed(InputLibrary.boost) && !_characterController.IsGrounded();
-        if (rollInputChanged || downInputChanged || upInputChanged || boostedInMidair || _hasDreamLanternFocusChanged) ChangeMoveSpeed();
 
-        _hasDreamLanternFocusChanged = false;
+        DreamLanternItem heldLantern = _characterController._heldLanternItem;
+        bool dreamLanternFocusChanged = heldLantern ? heldLantern._focusing != _isDreamLanternFocused : false;
+        if (dreamLanternFocusChanged) _isDreamLanternFocused = heldLantern ? heldLantern._focusing : false;
+
+        if (rollInputChanged || downInputChanged || upInputChanged || boostedInMidair || dreamLanternFocusChanged) UpdateSprinting();
     }
 
-    public void LateUpdate()
+    private void LateUpdate()
     {
         if (!_characterController) return;
 
         // get thruster vector IF the player is sprinting and the jetpack is visible. Otherwise, move towards zero
-        _thrusterVector = Vector2.MoveTowards(_thrusterVector, _moveSpeed == "sprinting" && _playerVFX.activeSelf ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
+        _thrusterVector = Vector2.MoveTowards(_thrusterVector, _isSprinting && _playerVFX.activeSelf ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
         Vector2 flameVector = _thrusterVector;
 
         // adjust vector based on how fast sprinting is compared to normal speed
@@ -97,7 +99,7 @@ public class SpeedController : MonoBehaviour
         }
     }
 
-    public void ApplyChanges()
+    private void ApplyChanges()
     {
         if (!_characterController) return;
 
@@ -110,55 +112,43 @@ public class SpeedController : MonoBehaviour
 
         _sprintButton = (ModController.s_instance.SprintButtonMode == "Down Thrust") ? InputLibrary.thrustDown : InputLibrary.thrustUp;
 
-        ChangeMoveSpeed();
+        UpdateSprinting();
     }
 
-    public void ChangeMoveSpeed()
+    private void UpdateSprinting()
     {
-        string oldSpeed = _moveSpeed;
-        bool holdingLantern = _characterController._heldLanternItem != null;
-        bool walking = OWInput.IsPressed(InputLibrary.rollMode) && !holdingLantern;
-        bool grounded = _characterController._isGrounded && !_characterController.IsSlidingOnIce();
-        bool notInDifferentMoveState = !walking && !_isDreamLanternFocused;
-        bool sprintAllowed = ModController.s_instance.SprintMode == "Always" || (ModController.s_instance.SprintMode == "When Suited" && PlayerState.IsWearingSuit());
+        bool isOnValidGround = _characterController._isGrounded && !_characterController.IsSlidingOnIce();
+        bool isWalking = (OWInput.IsPressed(InputLibrary.rollMode) && _characterController._heldLanternItem == null) || _isDreamLanternFocused;
+        bool isSprintAllowed = ModController.s_instance.SprintMode == "Always" || (ModController.s_instance.SprintMode == "When Suited" && PlayerState.IsWearingSuit());
 
-        if (OWInput.IsPressed(_sprintButton) && grounded && notInDifferentMoveState && sprintAllowed && (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 || _moveSpeed == "sprinting"))
+        if (OWInput.IsPressed(_sprintButton) && isOnValidGround && !isWalking && isSprintAllowed && (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 || _isSprinting))
         {
-            _moveSpeed = "sprinting";
+            _isSprinting = true;
             _characterController._runSpeed = ModController.s_instance.SprintSpeed;
             _characterController._strafeSpeed = ModController.s_instance.SprintStrafeSpeed;
-        }
-        else if (walking)
-        {
-            _moveSpeed = "walking";
-        }
-        else if (_isDreamLanternFocused)
-        {
-            _moveSpeed = "dream_lantern";
+            ModController.s_instance.DebugLog($"Started sprinting");
         }
         else
         {
-            _moveSpeed = "normal";
+            _isSprinting = false;
             _characterController._runSpeed = ModController.s_instance.DefaultSpeed;
             _characterController._strafeSpeed = ModController.s_instance.StrafeSpeed;
+            ModController.s_instance.DebugLog($"Stopped sprinting");
         }
-        if (_moveSpeed != oldSpeed) ModController.s_instance.DebugLog($"Changed movement speed to {_moveSpeed}");
     }
 
-    public void SetThrusterScale(ThrusterFlameController thruster, float targetScale)
+    private void SetThrusterScale(ThrusterFlameController thruster, float thrusterScale)
     {
-        float scale = thruster._underwater ? 0f : targetScale;
-        if (thruster._currentScale < 0f)
-        {
-            thruster._currentScale = 0f;
-            thruster._scaleSpring.ResetVelocity();
-        }
+        if (thruster._underwater) thrusterScale = 0f;
+
+        // turn off thruster if it's rly small so it doesn't bounce back
         if (thruster._currentScale <= 0.001f)
         {
             thruster._currentScale = 0f;
             thruster._scaleSpring.ResetVelocity();
         }
-        thruster._currentScale = thruster._scaleSpring.Update(thruster._currentScale, scale, Time.deltaTime);
+
+        thruster._currentScale = thruster._scaleSpring.Update(thruster._currentScale, thrusterScale, Time.deltaTime);
 
         // set the actual values according to _currentScale
         thruster.transform.localScale = Vector3.one * thruster._currentScale;
@@ -169,49 +159,42 @@ public class SpeedController : MonoBehaviour
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
-    public static void OnCharacterControllerStart()
+    private static void OnCharacterControllerStart()
     {
         s_instance._characterController = Locator.GetPlayerController();
         s_instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
         s_instance._jetpackAudio = FindObjectOfType<JetpackThrusterAudio>();
         s_instance._playerVFX = s_instance._characterController.GetComponentInChildren<PlayerParticlesController>(includeInactive: true).gameObject;
-        s_instance._characterController.OnBecomeGrounded += s_instance.ChangeMoveSpeed;
         s_instance._thrusters = new(s_instance._characterController.gameObject.GetComponentsInChildren<ThrusterFlameController>(includeInactive: true));
         s_instance._thrusterVector = Vector2.zero;
+
+        // might make this a config option some day
+        s_instance._characterController.OnBecomeGrounded += s_instance.UpdateSprinting;
+        s_instance._isDreamLanternFocused = false;
+
         s_instance.ApplyChanges();
     }
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
-    public static void OnGetJetpackInput(ref Vector3 __result)
+    private static void OnGetJetpackInput(ref Vector3 __result)
     {
-        if (s_instance._moveSpeed == "sprinting" && __result.y != 0)
+        if (s_instance._isSprinting && __result.y != 0f)
         {
-            __result.y = 0;
+            __result.y = 0f;
             s_instance._jetpackModel._boostActivated = false;
         }
     }
 
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(DreamLanternItem), nameof(DreamLanternItem.UpdateFocus))]
-    public static void OnDreamLanternFocusChanged(DreamLanternItem __instance)
-    {
-        if (__instance._wasFocusing == __instance._focusing) return;
-        s_instance._isDreamLanternFocused = __instance._focusing;
-        s_instance._hasDreamLanternFocusChanged = true;
-        if (__instance._focusing) ModController.s_instance.DebugLog("Focused Dream Lantern", OWML.Common.MessageType.Info);
-        else ModController.s_instance.DebugLog("Unfocused Dream Lantern", OWML.Common.MessageType.Info);
-    }
-
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Update))]
-    public static bool CharacterControllerUpdate(PlayerCharacterController __instance)
+    private static bool CharacterControllerUpdate(PlayerCharacterController __instance)
     {
         if (!__instance._isAlignedToForce && !__instance._isZeroGMovementEnabled)
         {
             return false;
         }
-        if ((OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f) || (s_instance._sprintButton == InputLibrary.thrustUp && s_instance._moveSpeed == "sprinting"))
+        if ((OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f) || (s_instance._sprintButton == InputLibrary.thrustUp && s_instance._isSprinting))
         {
             __instance.UpdateJumpInput();
         }
@@ -230,15 +213,15 @@ public class SpeedController : MonoBehaviour
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
-    public static bool IsBoosterAllowed(ref bool __result, PlayerResources __instance)
+    private static bool IsBoosterAllowed(ref bool __result, PlayerResources __instance)
     {
-        __result = !PlayerState.InZeroG() && !Locator.GetPlayerSuit().IsTrainingSuit() && !__instance._cameraFluidDetector.InFluidType(FluidVolume.Type.WATER) && __instance._currentFuel > 0f && s_instance._moveSpeed != "sprinting";
+        __result = !PlayerState.InZeroG() && !Locator.GetPlayerSuit().IsTrainingSuit() && !__instance._cameraFluidDetector.InFluidType(FluidVolume.Type.WATER) && __instance._currentFuel > 0f && !s_instance._isSprinting;
         return false;
     }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerMovementAudio), nameof(PlayerMovementAudio.PlayFootstep))]
-    public static bool PlayFootstep(PlayerMovementAudio __instance)
+    private static bool PlayFootstep(PlayerMovementAudio __instance)
     {
         AudioType audioType = (!PlayerState.IsCameraUnderwater() && __instance._fluidDetector.InFluidType(FluidVolume.Type.WATER)) ? AudioType.MovementShallowWaterFootstep : PlayerMovementAudio.GetFootstepAudioType(__instance._playerController.GetGroundSurface());
         if (audioType != AudioType.None)
@@ -251,12 +234,12 @@ public class SpeedController : MonoBehaviour
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(DreamLanternItem), nameof(DreamLanternItem.OverrideMaxRunSpeed))]
-    public static bool OverrideMaxRunSpeed(ref float maxSpeedX, ref float maxSpeedZ, DreamLanternItem __instance)
+    private static bool OverrideMaxRunSpeed(ref float maxSpeedX, ref float maxSpeedZ, DreamLanternItem __instance)
     {
-        float num = 1f - __instance._lanternController.GetFocus();
-        num *= num;
-        maxSpeedX = Mathf.Lerp(ModController.s_instance.DreamLanternSpeed, maxSpeedX, num);
-        maxSpeedZ = Mathf.Lerp(ModController.s_instance.DreamLanternSpeed, maxSpeedZ, num);
+        float lerpPosition = 1f - __instance._lanternController.GetFocus();
+        lerpPosition *= lerpPosition;
+        maxSpeedX = Mathf.Lerp(ModController.s_instance.DreamLanternSpeed, maxSpeedX, lerpPosition);
+        maxSpeedZ = Mathf.Lerp(ModController.s_instance.DreamLanternSpeed, maxSpeedZ, lerpPosition);
         return false;
     }
 }

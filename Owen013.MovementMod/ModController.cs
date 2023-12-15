@@ -1,8 +1,9 @@
 ﻿using HarmonyLib;
-using OWML.ModHelper;
-using OWML.Common;
-using UnityEngine;
 using HikersMod.APIs;
+using HikersMod.Components;
+using OWML.Common;
+using OWML.ModHelper;
+using UnityEngine;
 
 namespace HikersMod;
 
@@ -22,7 +23,6 @@ public class ModController : ModBehaviour
 
     // Config
     public string JumpStyle;
-    public bool IsMidairTurningEnabled;
     public string SprintMode;
     public string SprintButtonMode;
     public bool CanSprintBackwards;
@@ -42,6 +42,7 @@ public class ModController : ModBehaviour
     public float JetpackAccel;
     public float JetpackBoostAccel;
     public float JetpackBoostTime;
+    public bool IsMidairTurningEnabled;
     public bool IsFloatyPhysicsEnabled;
     public float FloatyPhysicsPower;
     public string WallJumpMode;
@@ -53,10 +54,10 @@ public class ModController : ModBehaviour
         // Static reference to HikersMod so it can be used in patches.
         s_instance = this;
         Harmony.CreateAndPatchAll(typeof(ModController));
-        gameObject.AddComponent<Components.SpeedController>();
-        gameObject.AddComponent<Components.SuperBoostController>();
-        gameObject.AddComponent<Components.FloatyPhysicsController>();
-        gameObject.AddComponent<Components.WallJumpController>();
+        gameObject.AddComponent<SpeedController>();
+        gameObject.AddComponent<SuperBoostController>();
+        gameObject.AddComponent<FloatyPhysicsController>();
+        gameObject.AddComponent<WallJumpController>();
     }
 
     private void Start()
@@ -73,6 +74,7 @@ public class ModController : ModBehaviour
     private void Update()
     {
         if (!_characterController) return;
+
         UpdateAnimSpeed();
     }
 
@@ -82,7 +84,6 @@ public class ModController : ModBehaviour
 
         // Get all config options
         JumpStyle = config.GetSettingsValue<string>("Jump Style");
-        IsMidairTurningEnabled = config.GetSettingsValue<bool>("Enable Midair Turning");
         SprintMode = config.GetSettingsValue<string>("Enable Sprinting");
         SprintButtonMode = config.GetSettingsValue<string>("Sprint Button");
         SprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
@@ -101,6 +102,7 @@ public class ModController : ModBehaviour
         JetpackAccel = config.GetSettingsValue<float>("Jetpack Acceleration");
         JetpackBoostAccel = config.GetSettingsValue<float>("Jetpack Boost Acceleration");
         JetpackBoostTime = config.GetSettingsValue<float>("Max Jetpack Boost Time");
+        IsMidairTurningEnabled = config.GetSettingsValue<bool>("Enable Midair Turning");
         IsFloatyPhysicsEnabled = config.GetSettingsValue<bool>("Floaty Physics");
         FloatyPhysicsPower = config.GetSettingsValue<float>("Floaty Physics Power");
         WallJumpMode = config.GetSettingsValue<string>("Enable Wall Jumping");
@@ -158,7 +160,7 @@ public class ModController : ModBehaviour
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
-    public static void OnCharacterControllerStart()
+    private static void OnCharacterControllerStart()
     {
         // Get vars
         s_instance._characterController = Locator.GetPlayerController();
@@ -170,7 +172,7 @@ public class ModController : ModBehaviour
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.UpdateAirControl))]
-    public static bool UpdateAirControl(PlayerCharacterController __instance)
+    private static bool UpdateAirControl(PlayerCharacterController __instance)
     {
         if (!s_instance.IsMidairTurningEnabled) return true;
         if (__instance == null) return true;
@@ -193,9 +195,9 @@ public class ModController : ModBehaviour
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCloneController), nameof(PlayerCloneController.Start))]
-    public static void EyeCloneStart(PlayerCloneController __instance) => s_instance._cloneController = __instance;
+    private static void EyeCloneStart(PlayerCloneController __instance) => s_instance._cloneController = __instance;
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(EyeMirrorController), nameof(EyeMirrorController.Start))]
-    public static void EyeMirrorStart(EyeMirrorController __instance) => s_instance._mirrorController = __instance;
+    private static void EyeMirrorStart(EyeMirrorController __instance) => s_instance._mirrorController = __instance;
 }

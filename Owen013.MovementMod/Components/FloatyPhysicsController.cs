@@ -28,7 +28,7 @@ public class FloatyPhysicsController : MonoBehaviour
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
-    public static void OnCharacterControllerStart()
+    private static void OnCharacterControllerStart()
     {
         s_instance._characterController = Locator.GetPlayerController();
     }

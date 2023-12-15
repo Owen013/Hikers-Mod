@@ -13,22 +13,20 @@ public class WallJumpController : MonoBehaviour
     private float _lastWallJumpTime;
     private float _lastWallJumpRefill;
 
-    public void Awake()
+    private void Awake()
     {
         s_instance = this;
         Harmony.CreateAndPatchAll(typeof(WallJumpController));
     }
 
-    public void Update()
+    private void Update()
     {
-        // Make sure that the scene is the SS or Eye and that everything is loaded
         if (!_characterController) return;
 
-        // Update everthing else
         UpdateWallJump();
     }
 
-    public void UpdateWallJump()
+    private void UpdateWallJump()
     {
         _characterController.UpdatePushable();
         if (((ModController.s_instance.WallJumpMode == "When Unsuited" && !PlayerState.IsWearingSuit()) || ModController.s_instance.WallJumpMode == "Always") &&
@@ -70,7 +68,7 @@ public class WallJumpController : MonoBehaviour
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
-    public static void CharacterControllerStart()
+    private static void CharacterControllerStart()
     {
         s_instance._characterController = FindObjectOfType<PlayerCharacterController>();
         s_instance._animController = FindObjectOfType<PlayerAnimController>();
