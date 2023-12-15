@@ -25,7 +25,7 @@ public class SuperBoostController : MonoBehaviour
 
     private void Update()
     {
-        if (!_characterController) return;
+        if (_characterController == null) return;
         bool isInputting = OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && !OWInput.IsPressed(InputLibrary.thrustUp, InputMode.Character);
         bool canSuperBoost = _characterController._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
         if (!canSuperBoost) EndSuperBoost();
@@ -41,7 +41,7 @@ public class SuperBoostController : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (!_characterController) return;
+        if (_characterController == null) return;
         float timeSinceBoost = Time.time - _lastBoostTime;
         float thrusterScale = Mathf.Clamp(Mathf.Max((-Mathf.Pow(5f * timeSinceBoost - 1f, 2f) + 1f) * ModController.s_instance.SuperBoostPower, 0f), _downThrustFlame._currentScale, 20f);
         _downThrustFlame.transform.localScale = Vector3.one * Mathf.Min(thrusterScale, 100f);

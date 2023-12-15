@@ -26,13 +26,14 @@ public class SpeedController : MonoBehaviour
 
     private void Update()
     {
-        if (!_characterController) return;
+        if (_characterController == null) return;
 
         bool rollInputChanged = OWInput.IsNewlyPressed(InputLibrary.rollMode) || OWInput.IsNewlyReleased(InputLibrary.rollMode);
         bool downInputChanged = OWInput.IsNewlyPressed(InputLibrary.thrustDown) || OWInput.IsNewlyReleased(InputLibrary.thrustDown);
         bool upInputChanged = OWInput.IsNewlyPressed(InputLibrary.thrustUp) || OWInput.IsNewlyReleased(InputLibrary.thrustUp);
         bool boostedInMidair = OWInput.IsNewlyPressed(InputLibrary.boost) && !_characterController.IsGrounded();
 
+        // if holding a dream lantern, find out if the focus has changed since last frame
         DreamLanternItem heldLantern = _characterController._heldLanternItem;
         bool dreamLanternFocusChanged = heldLantern ? heldLantern._focusing != _isDreamLanternFocused : false;
         if (dreamLanternFocusChanged) _isDreamLanternFocused = heldLantern ? heldLantern._focusing : false;
@@ -42,16 +43,22 @@ public class SpeedController : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (!_characterController) return;
+        if (_characterController == null) return;
 
         // get thruster vector IF the player is sprinting and the jetpack is visible. Otherwise, move towards zero
         _thrusterVector = Vector2.MoveTowards(_thrusterVector, _isSprinting && _playerVFX.activeSelf ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
         Vector2 flameVector = _thrusterVector;
 
-        // adjust vector based on how fast sprinting is compared to normal speed
+        // adjust vector based on sprinting and strafe speed
         flameVector.x *= (ModController.s_instance.SprintStrafeSpeed / ModController.s_instance.StrafeSpeed) - 1;
-        if (flameVector.y < 0f) flameVector.y *= (ModController.s_instance.SprintStrafeSpeed / ModController.s_instance.StrafeSpeed) - 1;
-        else flameVector.y *= (ModController.s_instance.SprintSpeed / ModController.s_instance.DefaultSpeed) - 1;
+        if (flameVector.y < 0f)
+        {
+            flameVector.y *= (ModController.s_instance.SprintStrafeSpeed / ModController.s_instance.StrafeSpeed) - 1;
+        }
+        else
+        {
+            flameVector.y *= (ModController.s_instance.SprintSpeed / ModController.s_instance.DefaultSpeed) - 1;
+        }
 
         // clamp the vector so it doesn't become too big
         flameVector.x = Mathf.Clamp(flameVector.x, -20, 20);
@@ -101,7 +108,7 @@ public class SpeedController : MonoBehaviour
 
     private void ApplyChanges()
     {
-        if (!_characterController) return;
+        if (_characterController == null) return;
 
         // Change built-in character attributes
         _characterController._runSpeed = ModController.s_instance.DefaultSpeed;
@@ -117,11 +124,11 @@ public class SpeedController : MonoBehaviour
 
     private void UpdateSprinting()
     {
-        bool isOnValidGround = _characterController._isGrounded && !_characterController.IsSlidingOnIce();
-        bool isWalking = (OWInput.IsPressed(InputLibrary.rollMode) && _characterController._heldLanternItem == null) || _isDreamLanternFocused;
         bool isSprintAllowed = ModController.s_instance.SprintMode == "Always" || (ModController.s_instance.SprintMode == "When Suited" && PlayerState.IsWearingSuit());
+        bool isOnValidGround = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce();
+        bool isWalking = _isDreamLanternFocused || (OWInput.IsPressed(InputLibrary.rollMode) && _characterController._heldLanternItem == null);
 
-        if (OWInput.IsPressed(_sprintButton) && isOnValidGround && !isWalking && isSprintAllowed && (OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0 || _isSprinting))
+        if (isSprintAllowed && isOnValidGround && !isWalking && OWInput.IsPressed(_sprintButton) && (_isSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0))
         {
             _isSprinting = true;
             _characterController._runSpeed = ModController.s_instance.SprintSpeed;
@@ -141,7 +148,7 @@ public class SpeedController : MonoBehaviour
     {
         if (thruster._underwater) thrusterScale = 0f;
 
-        // turn off thruster if it's rly small so it doesn't bounce back
+        // reset scale spring if it's rly small so it doesn't bounce back up
         if (thruster._currentScale <= 0.001f)
         {
             thruster._currentScale = 0f;
@@ -149,8 +156,6 @@ public class SpeedController : MonoBehaviour
         }
 
         thruster._currentScale = thruster._scaleSpring.Update(thruster._currentScale, thrusterScale, Time.deltaTime);
-
-        // set the actual values according to _currentScale
         thruster.transform.localScale = Vector3.one * thruster._currentScale;
         thruster._light.range = thruster._baseLightRadius * thruster._currentScale;
         thruster._thrusterRenderer.enabled = thruster._currentScale > 0f;
@@ -167,9 +172,7 @@ public class SpeedController : MonoBehaviour
         s_instance._playerVFX = s_instance._characterController.GetComponentInChildren<PlayerParticlesController>(includeInactive: true).gameObject;
         s_instance._thrusters = new(s_instance._characterController.gameObject.GetComponentsInChildren<ThrusterFlameController>(includeInactive: true));
         s_instance._thrusterVector = Vector2.zero;
-
-        // might make this a config option some day
-        s_instance._characterController.OnBecomeGrounded += s_instance.UpdateSprinting;
+        s_instance._characterController.OnBecomeGrounded += s_instance.UpdateSprinting; // maybe make this optional in the config?
         s_instance._isDreamLanternFocused = false;
 
         s_instance.ApplyChanges();
@@ -190,10 +193,8 @@ public class SpeedController : MonoBehaviour
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Update))]
     private static bool CharacterControllerUpdate(PlayerCharacterController __instance)
     {
-        if (!__instance._isAlignedToForce && !__instance._isZeroGMovementEnabled)
-        {
-            return false;
-        }
+        if (!__instance._isAlignedToForce && !__instance._isZeroGMovementEnabled) return false;
+
         if ((OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f) || (s_instance._sprintButton == InputLibrary.thrustUp && s_instance._isSprinting))
         {
             __instance.UpdateJumpInput();
@@ -204,10 +205,12 @@ public class SpeedController : MonoBehaviour
             __instance._jumpNextFixedUpdate = false;
             __instance._jumpPressedInOtherMode = false;
         }
+
         if (__instance._isZeroGMovementEnabled)
         {
             __instance._pushPrompt.SetVisibility(OWInput.IsInputMode(InputMode.Character | InputMode.NomaiRemoteCam) && __instance._isPushable);
         }
+
         return false;
     }
 

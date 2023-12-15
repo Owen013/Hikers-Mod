@@ -73,7 +73,7 @@ public class ModController : ModBehaviour
 
     private void Update()
     {
-        if (!_characterController) return;
+        if (_characterController == null) return;
 
         UpdateAnimSpeed();
     }
@@ -115,7 +115,7 @@ public class ModController : ModBehaviour
 
     private void ApplyChanges()
     {
-        if (!_characterController) return;
+        if (_characterController == null) return;
 
         // Change built-in character attributes
         _characterController._useChargeJump = JumpStyle == "Charge";

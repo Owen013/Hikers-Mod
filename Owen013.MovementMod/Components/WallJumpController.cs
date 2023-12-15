@@ -21,7 +21,7 @@ public class WallJumpController : MonoBehaviour
 
     private void Update()
     {
-        if (!_characterController) return;
+        if (_characterController == null) return;
 
         UpdateWallJump();
     }
@@ -29,19 +29,18 @@ public class WallJumpController : MonoBehaviour
     private void UpdateWallJump()
     {
         _characterController.UpdatePushable();
-        if (((ModController.s_instance.WallJumpMode == "When Unsuited" && !PlayerState.IsWearingSuit()) || ModController.s_instance.WallJumpMode == "Always") &&
-            _characterController._isPushable &&
-            !PlayerState.InZeroG() &&
-            !_characterController._isGrounded &&
-            OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) &&
-            _wallJumpsLeft > 0)
+        bool isWallJumpAllowed = (ModController.s_instance.WallJumpMode == "When Unsuited" && !PlayerState.IsWearingSuit()) || ModController.s_instance.WallJumpMode == "Always";
+        if (isWallJumpAllowed && _characterController._isPushable && !PlayerState.InZeroG() && !_characterController._isGrounded && OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && _wallJumpsLeft > 0)
         {
             OWRigidbody pushBody = _characterController._pushableBody;
             Vector3 pushPoint = _characterController._pushContactPt;
             Vector3 pointVelocity = pushBody.GetPointVelocity(pushPoint);
             Vector3 climbVelocity = new Vector3(0, ModController.s_instance.JumpPower * (_wallJumpsLeft / ModController.s_instance.WallJumpsPerJump), 0);
 
-            if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20) ModController.s_instance.DebugLog("Can't Wall-Jump; going too fast");
+            if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20)
+            {
+                ModController.s_instance.DebugLog("Can't Wall-Jump; going too fast");
+            }
             else
             {
                 _characterController._owRigidbody.SetVelocity(pointVelocity);
