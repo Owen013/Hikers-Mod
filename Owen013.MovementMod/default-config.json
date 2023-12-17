@@ -63,6 +63,40 @@
 			"tooltip": "The amount of fuel an emergency boost uses. Recommended: 20"
 		},
 
+		"April Fools": {
+			"type": "separator"
+		},
+		"Trip Duration": {
+			"type": "number",
+			"value": 5,
+			"tooltip": ""
+		},
+		"Chance of Tripping Randomly": {
+			"type": "number",
+			"value": 0.01,
+			"tooltip": ""
+		},
+		"Chance of Tripping while Sprinting": {
+			"type": "number",
+			"value": 0.1,
+			"tooltip": ""
+		},
+		"Trip when Damaged": {
+			"type": "toggle",
+			"value": true,
+			"tooltip": ""
+		},
+		"Reverse Boost Chance": {
+			"type": "number",
+			"value": 0.1,
+			"tooltip": ""
+		},
+		"Emergency Boost Misfire Chance": {
+			"type": "number",
+			"value": 0.1,
+			"tooltip": ""
+		},
+
 		"Character Attributes": {
 			"type": "separator"
 		},
