@@ -31,6 +31,12 @@ public class ModController : ModBehaviour
     public bool IsSuperBoostEnabled;
     public float SuperBoostPower;
     public float SuperBoostCost;
+    public float TripChance;
+    public float SprintingTripChance;
+    public float TripDuration;
+    public bool TripWhenDamaged;
+    public float ReverseBoostChance;
+    public float SuperBoostMisfireChance;
     public float DefaultSpeed;
     public float StrafeSpeed;
     public float WalkSpeed;
@@ -58,6 +64,8 @@ public class ModController : ModBehaviour
         gameObject.AddComponent<SuperBoostController>();
         gameObject.AddComponent<FloatyPhysicsController>();
         gameObject.AddComponent<WallJumpController>();
+        gameObject.AddComponent<TrippingController>();
+        gameObject.AddComponent<ReverseBoostController>();
     }
 
     private void Start()
@@ -91,6 +99,12 @@ public class ModController : ModBehaviour
         IsSuperBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
         SuperBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");
         SuperBoostCost = config.GetSettingsValue<float>("Emergency Boost Cost");
+        TripDuration = config.GetSettingsValue<float>("Trip Duration");
+        TripChance = config.GetSettingsValue<float>("Chance of Tripping Randomly");
+        SprintingTripChance = config.GetSettingsValue<float>("Chance of Tripping while Sprinting");
+        TripWhenDamaged = config.GetSettingsValue<bool>("Trip when Damaged");
+        ReverseBoostChance = config.GetSettingsValue<float>("Reverse Boost Chance");
+        SuperBoostMisfireChance = config.GetSettingsValue<float>("Emergency Boost Misfire Chance");
         DefaultSpeed = config.GetSettingsValue<float>("Normal Speed");
         StrafeSpeed = config.GetSettingsValue<float>("Strafe Speed");
         WalkSpeed = config.GetSettingsValue<float>("Walk Speed");

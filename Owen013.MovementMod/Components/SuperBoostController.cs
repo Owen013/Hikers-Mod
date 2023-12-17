@@ -58,6 +58,19 @@ public class SuperBoostController : MonoBehaviour
         _jetpackController._resources._currentFuel = Mathf.Max(0f, _jetpackController._resources.GetFuel() - ModController.s_instance.SuperBoostCost);
         float boostPower = ModController.s_instance.SuperBoostPower;
 
+        // April Fools
+        if (Random.Range(0.0001f, 1.0000f) <= ModController.s_instance.SuperBoostMisfireChance)
+        {
+            NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "ERROR: EMERGENCY BOOST MISFIRE", 5f), false);
+            TrippingController.s_instance.StartTripping();
+            _characterController._owRigidbody.AddAngularVelocityChange(new(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360)));
+            _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, Mathf.Min(boostPower * 0.05f, 20));
+            _helmetAnimator.OnInstantDamage(boostPower, InstantDamageType.Impact);
+            ModController.s_instance.CameraShakerAPI?.ExplosionShake(strength: boostPower);
+            ModController.s_instance.DebugLog("Super boost misfired!");
+            return;
+        }
+
         // set player velocity
         Vector3 pointVelocity = _characterController._transform.InverseTransformDirection(_characterController._lastGroundBody.GetPointVelocity(_characterController._transform.position));
         Vector3 localVelocity = _characterController._transform.InverseTransformDirection(_characterController._owRigidbody.GetVelocity()) - pointVelocity;
