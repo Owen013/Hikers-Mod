@@ -14,7 +14,7 @@ public class SpeedController : MonoBehaviour
     private List<ThrusterFlameController> _thrusters;
     private Vector2 _thrusterVector;
     private IInputCommands _sprintButton;
-    public bool _isSprinting;
+    private bool _isSprinting;
     private bool _isDreamLanternFocused;
 
     private void Awake()
