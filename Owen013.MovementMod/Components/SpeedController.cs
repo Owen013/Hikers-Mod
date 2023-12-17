@@ -7,7 +7,6 @@ namespace HikersMod.Components;
 public class SpeedController : MonoBehaviour
 {
     public static SpeedController s_instance;
-    public bool IsSprinting;
     private PlayerCharacterController _characterController;
     private JetpackThrusterModel _jetpackModel;
     private JetpackThrusterAudio _jetpackAudio;
@@ -15,6 +14,7 @@ public class SpeedController : MonoBehaviour
     private List<ThrusterFlameController> _thrusters;
     private Vector2 _thrusterVector;
     private IInputCommands _sprintButton;
+    public bool _isSprinting;
     private bool _isDreamLanternFocused;
 
     private void Awake()
@@ -46,7 +46,7 @@ public class SpeedController : MonoBehaviour
         if (_characterController == null) return;
 
         // get thruster vector IF the player is sprinting and the jetpack is visible. Otherwise, move towards zero
-        _thrusterVector = Vector2.MoveTowards(_thrusterVector, IsSprinting && _playerVFX.activeSelf ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
+        _thrusterVector = Vector2.MoveTowards(_thrusterVector, _isSprinting && _playerVFX.activeSelf ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
         Vector2 flameVector = _thrusterVector;
 
         // adjust vector based on sprinting and strafe speed
@@ -129,15 +129,15 @@ public class SpeedController : MonoBehaviour
         bool isWalking = _isDreamLanternFocused || (OWInput.IsPressed(InputLibrary.rollMode) && _characterController._heldLanternItem == null);
         bool wasSprinting = _isSprinting;
 
-        if (isSprintAllowed && isOnValidGround && !isWalking && OWInput.IsPressed(_sprintButton) && (IsSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0))
+        if (isSprintAllowed && isOnValidGround && !isWalking && OWInput.IsPressed(_sprintButton) && (_isSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0))
         {
-            IsSprinting = true;
+            _isSprinting = true;
             _characterController._runSpeed = ModController.s_instance.SprintSpeed;
             _characterController._strafeSpeed = ModController.s_instance.SprintStrafeSpeed;
         }
         else
         {
-            IsSprinting = false;
+            _isSprinting = false;
             _characterController._runSpeed = ModController.s_instance.DefaultSpeed;
             _characterController._strafeSpeed = ModController.s_instance.StrafeSpeed;
         }
@@ -167,6 +167,11 @@ public class SpeedController : MonoBehaviour
         thruster._light.enabled = thruster._currentScale > 0f;
     }
 
+    public bool IsSprinting()
+    {
+        return _isSprinting;
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
     private static void OnCharacterControllerStart()
@@ -187,7 +192,7 @@ public class SpeedController : MonoBehaviour
     [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
     private static void OnGetJetpackInput(ref Vector3 __result)
     {
-        if (s_instance.IsSprinting && __result.y != 0f)
+        if (s_instance._isSprinting && __result.y != 0f)
         {
             __result.y = 0f;
             s_instance._jetpackModel._boostActivated = false;
@@ -200,7 +205,7 @@ public class SpeedController : MonoBehaviour
     {
         if (!__instance._isAlignedToForce && !__instance._isZeroGMovementEnabled) return false;
 
-        if ((OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f) || (s_instance._sprintButton == InputLibrary.thrustUp && s_instance.IsSprinting))
+        if ((OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f) || (s_instance._sprintButton == InputLibrary.thrustUp && s_instance._isSprinting))
         {
             __instance.UpdateJumpInput();
         }
@@ -223,7 +228,7 @@ public class SpeedController : MonoBehaviour
     [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
     private static bool IsBoosterAllowed(ref bool __result, PlayerResources __instance)
     {
-        __result = !PlayerState.InZeroG() && !Locator.GetPlayerSuit().IsTrainingSuit() && !__instance._cameraFluidDetector.InFluidType(FluidVolume.Type.WATER) && __instance._currentFuel > 0f && !s_instance.IsSprinting;
+        __result = !PlayerState.InZeroG() && !Locator.GetPlayerSuit().IsTrainingSuit() && !__instance._cameraFluidDetector.InFluidType(FluidVolume.Type.WATER) && __instance._currentFuel > 0f && !s_instance._isSprinting;
         return false;
     }
 

@@ -18,7 +18,7 @@ public class ReverseBoostController : MonoBehaviour
     [HarmonyPatch(typeof(JetpackThrusterModel), nameof(JetpackThrusterModel.ActivateBoost))]
     private static void OnStartBoosting(JetpackThrusterModel __instance)
     {
-        if (Random.Range(0.0001f, 1.0000f) <= ModController.s_instance.ReverseBoostChance)
+        if (ModController.s_instance.ReverseBoostChance != 0f && Random.Range(0f, 1f) <= ModController.s_instance.ReverseBoostChance)
         {
             s_instance._isBoostReversed = true;
             __instance._boostThrust = -__instance._boostThrust;

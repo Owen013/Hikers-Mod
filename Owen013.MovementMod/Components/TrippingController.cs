@@ -30,8 +30,9 @@ public class TrippingController : MonoBehaviour
             StopTripping();
         }
 
-        float trippingChance = SpeedController.s_instance.IsSprinting ? ModController.s_instance.SprintingTripChance : ModController.s_instance.TripChance;
-        if (_tripTimeLeft <= 0 && _characterController.IsGrounded() && Random.Range(0.0001f, 1.0000f) <= 1f - Mathf.Pow(1f - trippingChance, Time.fixedDeltaTime))
+        float trippingChance = SpeedController.s_instance.IsSprinting() ? ModController.s_instance.SprintingTripChance : ModController.s_instance.TripChance;
+        bool canTrip = _tripTimeLeft <= 0 && _characterController.IsGrounded();
+        if (trippingChance != 0f && canTrip && Random.Range(0f, 1f) <= 1f - Mathf.Pow(1f - trippingChance, Time.fixedDeltaTime))
         {
             StartTripping();
         }

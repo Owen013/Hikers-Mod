@@ -78,7 +78,7 @@
 		},
 		"Chance of Tripping while Sprinting": {
 			"type": "number",
-			"value": 0.1,
+			"value": 0.05,
 			"tooltip": ""
 		},
 		"Trip when Damaged": {
@@ -92,6 +92,11 @@
 			"tooltip": ""
 		},
 		"Emergency Boost Misfire Chance": {
+			"type": "number",
+			"value": 0.1,
+			"tooltip": ""
+		},
+		"Scout Misfire Chance": {
 			"type": "number",
 			"value": 0.1,
 			"tooltip": ""

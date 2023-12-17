@@ -59,13 +59,14 @@ public class SuperBoostController : MonoBehaviour
         float boostPower = ModController.s_instance.SuperBoostPower;
 
         // April Fools
-        if (Random.Range(0.0001f, 1.0000f) <= ModController.s_instance.SuperBoostMisfireChance)
+        if (ModController.s_instance.SuperBoostMisfireChance != 0f && Random.Range(0f, 1f) <= ModController.s_instance.SuperBoostMisfireChance)
         {
-            NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "ERROR: EMERGENCY BOOST MISFIRE", 5f), false);
             TrippingController.s_instance.StartTripping();
-            _characterController._owRigidbody.AddAngularVelocityChange(new(Random.Range(0, 360), Random.Range(0, 360), Random.Range(0, 360)));
+            _characterController._owRigidbody.AddAngularVelocityChange(new(Random.Range(-360, 360), Random.Range(-10f, 10f), Random.Range(-10f, 10f)));
+            _superBoostAudio.pitch = Random.Range(2.0f, 2.4f);
             _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, Mathf.Min(boostPower * 0.05f, 20));
             _helmetAnimator.OnInstantDamage(boostPower, InstantDamageType.Impact);
+            NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "ERROR: EMERGENCY BOOST MISFIRE", 5f), false);
             ModController.s_instance.CameraShakerAPI?.ExplosionShake(strength: boostPower);
             ModController.s_instance.DebugLog("Super boost misfired!");
             return;

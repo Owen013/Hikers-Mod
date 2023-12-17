@@ -37,6 +37,7 @@ public class ModController : ModBehaviour
     public bool TripWhenDamaged;
     public float ReverseBoostChance;
     public float SuperBoostMisfireChance;
+    public float ScoutMisfireChance;
     public float DefaultSpeed;
     public float StrafeSpeed;
     public float WalkSpeed;
@@ -66,6 +67,7 @@ public class ModController : ModBehaviour
         gameObject.AddComponent<WallJumpController>();
         gameObject.AddComponent<TrippingController>();
         gameObject.AddComponent<ReverseBoostController>();
+        gameObject.AddComponent<ScoutMisfireController>();
     }
 
     private void Start()
@@ -105,6 +107,7 @@ public class ModController : ModBehaviour
         TripWhenDamaged = config.GetSettingsValue<bool>("Trip when Damaged");
         ReverseBoostChance = config.GetSettingsValue<float>("Reverse Boost Chance");
         SuperBoostMisfireChance = config.GetSettingsValue<float>("Emergency Boost Misfire Chance");
+        ScoutMisfireChance = config.GetSettingsValue<float>("Scout Misfire Chance");
         DefaultSpeed = config.GetSettingsValue<float>("Normal Speed");
         StrafeSpeed = config.GetSettingsValue<float>("Strafe Speed");
         WalkSpeed = config.GetSettingsValue<float>("Walk Speed");
