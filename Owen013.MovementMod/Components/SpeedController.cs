@@ -167,6 +167,11 @@ public class SpeedController : MonoBehaviour
         thruster._light.enabled = thruster._currentScale > 0f;
     }
 
+    public bool IsSprinting()
+    {
+        return _isSprinting;
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
     private static void OnCharacterControllerStart()

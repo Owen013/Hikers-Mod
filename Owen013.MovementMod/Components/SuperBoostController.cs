@@ -80,6 +80,11 @@ public class SuperBoostController : MonoBehaviour
         _jetpackModel._chargeSeconds = _characterController.IsGrounded() ? _jetpackModel._chargeSecondsGround : _jetpackModel._chargeSecondsAir;
     }
 
+    public bool IsSuperBoosting()
+    {
+        return _isSuperBoosting;
+    }
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
     private static void OnCharacterControllerStart()
