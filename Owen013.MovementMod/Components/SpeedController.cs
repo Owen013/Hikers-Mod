@@ -127,20 +127,25 @@ public class SpeedController : MonoBehaviour
         bool isSprintAllowed = ModController.s_instance.SprintMode == "Always" || (ModController.s_instance.SprintMode == "When Suited" && PlayerState.IsWearingSuit());
         bool isOnValidGround = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce();
         bool isWalking = _isDreamLanternFocused || (OWInput.IsPressed(InputLibrary.rollMode) && _characterController._heldLanternItem == null);
+        bool wasSprinting = _isSprinting;
 
         if (isSprintAllowed && isOnValidGround && !isWalking && OWInput.IsPressed(_sprintButton) && (_isSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0))
         {
             _isSprinting = true;
             _characterController._runSpeed = ModController.s_instance.SprintSpeed;
             _characterController._strafeSpeed = ModController.s_instance.SprintStrafeSpeed;
-            ModController.s_instance.DebugLog($"Started sprinting");
         }
         else
         {
             _isSprinting = false;
             _characterController._runSpeed = ModController.s_instance.DefaultSpeed;
             _characterController._strafeSpeed = ModController.s_instance.StrafeSpeed;
-            ModController.s_instance.DebugLog($"Stopped sprinting");
+        }
+
+        // log it
+        if (_isSprinting != wasSprinting)
+        {
+            ModController.s_instance.DebugLog($"{(_isSprinting ? "Started" : "Stopped")} sprinting");
         }
     }
 
