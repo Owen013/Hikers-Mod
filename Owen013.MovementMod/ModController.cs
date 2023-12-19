@@ -146,17 +146,18 @@ public class ModController : ModBehaviour
 
     private void UpdateAnimSpeed()
     {
-        float gravMultiplier = Mathf.Sqrt(_characterController._acceleration / GroundAccel);
         float sizeMultiplier = SmolHatchlingAPI != null ? SmolHatchlingAPI.GetAnimSpeed() : 1;
-        float groundSpeedMultiplier = Mathf.Pow(_characterController.GetRelativeGroundVelocity().magnitude / 6 * sizeMultiplier, 0.5f);
-        _animSpeed = _characterController.IsGrounded() ? Mathf.Max(groundSpeedMultiplier * gravMultiplier, gravMultiplier) : 1f;
+        float speedMultiplier = Mathf.Pow(_characterController.GetRelativeGroundVelocity().magnitude / 6 * sizeMultiplier, 0.5f);
+        float gravMultiplier = Mathf.Sqrt(_characterController._acceleration / GroundAccel);
+
+        _animSpeed = _characterController.IsGrounded() ? Mathf.Max(speedMultiplier * gravMultiplier, gravMultiplier) : 1f;
         _animController._animator.speed = _animSpeed;
 
+        // mirror the new anim speed to the clone and mirror reflection
         if (_cloneController != null)
         {
             _cloneController._playerVisuals.GetComponent<PlayerAnimController>()._animator.speed = _animSpeed;
         }
-
         if (_mirrorController != null)
         {
             _mirrorController._mirrorPlayer.GetComponentInChildren<PlayerAnimController>()._animator.speed = _animSpeed;
@@ -192,20 +193,26 @@ public class ModController : ModBehaviour
     private static bool UpdateAirControl(PlayerCharacterController __instance)
     {
         if (!s_instance.IsMidairTurningEnabled) return true;
-        if (__instance == null) return true;
+
         if (__instance._lastGroundBody != null)
         {
+            // get player's horizontal velocity
             Vector3 pointVelocity = __instance._transform.InverseTransformDirection(__instance._lastGroundBody.GetPointVelocity(__instance._transform.position));
             Vector3 localVelocity = __instance._transform.InverseTransformDirection(__instance._owRigidbody.GetVelocity()) - pointVelocity;
             localVelocity.y = 0f;
+
             float physicsTime = Time.fixedDeltaTime * 60f;
             float maxChange = __instance._airAcceleration * physicsTime;
+
             Vector2 axisValue = OWInput.GetAxisValue(InputLibrary.moveXZ, InputMode.Character | InputMode.NomaiRemoteCam);
-            Vector3 localVelocityChange = new Vector3(maxChange * axisValue.x, 0f, maxChange * axisValue.y);
-            Vector3 newLocalVelocity = localVelocity + localVelocityChange;
-            if (newLocalVelocity.magnitude > __instance._airSpeed && newLocalVelocity.magnitude > localVelocity.magnitude)
-                __instance._owRigidbody.AddLocalVelocityChange(-localVelocity + Vector3.ClampMagnitude(newLocalVelocity, localVelocity.magnitude));
-            else __instance._owRigidbody.AddLocalVelocityChange(localVelocityChange);
+            Vector3 localVelocityChange = new(maxChange * axisValue.x, 0f, maxChange * axisValue.y);
+
+            // new velocity can't be more than old velocity and airspeed
+            float maxSpeed = Mathf.Max(localVelocity.magnitude, __instance._airSpeed);
+            Vector3 newLocalVelocity = Vector3.ClampMagnitude(localVelocity + localVelocityChange, maxSpeed);
+
+            // cancel out old velocity, add new one
+            __instance._owRigidbody.AddLocalVelocityChange(-localVelocity + newLocalVelocity);
         }
         return false;
     }
