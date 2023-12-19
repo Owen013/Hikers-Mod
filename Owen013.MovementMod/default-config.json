@@ -73,12 +73,12 @@
 		},
 		"Chance of Tripping Randomly": {
 			"type": "number",
-			"value": 0.01,
+			"value": 0.02,
 			"tooltip": ""
 		},
 		"Chance of Tripping while Sprinting": {
 			"type": "number",
-			"value": 0.05,
+			"value": 0.04,
 			"tooltip": ""
 		},
 		"Trip when Damaged": {
@@ -99,6 +99,11 @@
 		"Scout Misfire Chance": {
 			"type": "number",
 			"value": 0.1,
+			"tooltip": ""
+		},
+		"Reverse Repair Chance": {
+			"type": "number",
+			"value": 0.25,
 			"tooltip": ""
 		},
 

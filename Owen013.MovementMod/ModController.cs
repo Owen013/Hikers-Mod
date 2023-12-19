@@ -38,6 +38,7 @@ public class ModController : ModBehaviour
     public float ReverseBoostChance;
     public float SuperBoostMisfireChance;
     public float ScoutMisfireChance;
+    public float ReverseRepairChance;
     public float DefaultSpeed;
     public float StrafeSpeed;
     public float WalkSpeed;
@@ -68,6 +69,7 @@ public class ModController : ModBehaviour
         gameObject.AddComponent<TrippingController>();
         gameObject.AddComponent<ReverseBoostController>();
         gameObject.AddComponent<ScoutMisfireController>();
+        gameObject.AddComponent<ReverseRepairController>();
     }
 
     private void Start()
@@ -108,6 +110,7 @@ public class ModController : ModBehaviour
         ReverseBoostChance = config.GetSettingsValue<float>("Reverse Boost Chance");
         SuperBoostMisfireChance = config.GetSettingsValue<float>("Emergency Boost Misfire Chance");
         ScoutMisfireChance = config.GetSettingsValue<float>("Scout Misfire Chance");
+        ReverseRepairChance = config.GetSettingsValue<float>("Reverse Repair Chance");
         DefaultSpeed = config.GetSettingsValue<float>("Normal Speed");
         StrafeSpeed = config.GetSettingsValue<float>("Strafe Speed");
         WalkSpeed = config.GetSettingsValue<float>("Walk Speed");

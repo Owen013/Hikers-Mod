@@ -62,7 +62,7 @@ public class SuperBoostController : MonoBehaviour
         if (ModController.s_instance.SuperBoostMisfireChance != 0f && Random.Range(0f, 1f) <= ModController.s_instance.SuperBoostMisfireChance)
         {
             TrippingController.s_instance.StartTripping();
-            _characterController._owRigidbody.AddAngularVelocityChange(new(Random.Range(-360, 360), Random.Range(-10f, 10f), Random.Range(-10f, 10f)));
+            _characterController._owRigidbody.AddAngularVelocityChange(new(Random.Range(-10f, 10f), Random.Range(-10f, 10f), Random.Range(-10f, 10f)));
             _superBoostAudio.pitch = Random.Range(2.0f, 2.4f);
             _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, Mathf.Min(boostPower * 0.05f, 20));
             _helmetAnimator.OnInstantDamage(boostPower, InstantDamageType.Impact);
