@@ -64,8 +64,8 @@
 		},
 		"Emergency Boost Volume": {
 			"type": "number",
-			"value": 15,
-			"tooltip": "The volume of the explosion sound that plays when you do an emergency boost. Recommended: 15"
+			"value": 0.75,
+			"tooltip": "The volume of the explosion sound that plays when you do an emergency boost. Recommended: 0.75"
 		},
 
 		"Character Attributes": {
