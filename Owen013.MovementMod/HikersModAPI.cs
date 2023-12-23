@@ -8,8 +8,8 @@ public class HikersModAPI
     {
         return SpeedController.s_instance.IsSprinting();
     }
-    public bool IsSuperBoosting()
+    public bool IsEmergencyBoosting()
     {
-        return SuperBoostController.s_instance.IsSuperBoosting();
+        return EmergencyBoostController.s_instance.IsEmergencyBoosting();
     }
 }

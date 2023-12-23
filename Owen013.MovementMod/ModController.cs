@@ -28,9 +28,10 @@ public class ModController : ModBehaviour
     public bool CanSprintBackwards;
     public float SprintSpeed;
     public float SprintStrafeSpeed;
-    public bool IsSuperBoostEnabled;
-    public float SuperBoostPower;
-    public float SuperBoostCost;
+    public bool IsEmergencyBoostEnabled;
+    public float EmergencyBoostPower;
+    public float EmergencyBoostCost;
+    public float EmergencyBoostVolume;
     public float DefaultSpeed;
     public float StrafeSpeed;
     public float WalkSpeed;
@@ -55,7 +56,7 @@ public class ModController : ModBehaviour
         s_instance = this;
         Harmony.CreateAndPatchAll(typeof(ModController));
         gameObject.AddComponent<SpeedController>();
-        gameObject.AddComponent<SuperBoostController>();
+        gameObject.AddComponent<EmergencyBoostController>();
         gameObject.AddComponent<FloatyPhysicsController>();
         gameObject.AddComponent<WallJumpController>();
     }
@@ -88,9 +89,10 @@ public class ModController : ModBehaviour
         SprintButtonMode = config.GetSettingsValue<string>("Sprint Button");
         SprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
         SprintStrafeSpeed = config.GetSettingsValue<float>("Sprint Strafe Speed");
-        IsSuperBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
-        SuperBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");
-        SuperBoostCost = config.GetSettingsValue<float>("Emergency Boost Cost");
+        IsEmergencyBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
+        EmergencyBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");
+        EmergencyBoostCost = config.GetSettingsValue<float>("Emergency Boost Cost");
+        EmergencyBoostVolume = config.GetSettingsValue<float>("Emergency Boost Volume");
         DefaultSpeed = config.GetSettingsValue<float>("Normal Speed");
         StrafeSpeed = config.GetSettingsValue<float>("Strafe Speed");
         WalkSpeed = config.GetSettingsValue<float>("Walk Speed");
