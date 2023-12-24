@@ -43,7 +43,7 @@ public class EmergencyBoostController : MonoBehaviour
     {
         if (_characterController == null) return;
         float timeSinceBoost = Time.time - _lastBoostTime;
-        float thrusterScale = Mathf.Clamp(Mathf.Max((-Mathf.Pow(5f * timeSinceBoost - 1f, 2f) + 1f) * ModController.s_instance.EmergencyBoostPower, 0f), _downThrustFlame._currentScale, 20f);
+        float thrusterScale = Mathf.Max(10f * (-Mathf.Pow(5f * timeSinceBoost - 1f, 2f) + 1f), _downThrustFlame._currentScale);
         _downThrustFlame.transform.localScale = Vector3.one * Mathf.Min(thrusterScale, 100f);
         _downThrustFlame._light.range = _downThrustFlame._baseLightRadius * thrusterScale;
         _downThrustFlame._thrusterRenderer.enabled = thrusterScale > 0f;
