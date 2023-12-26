@@ -32,6 +32,7 @@ public class ModController : ModBehaviour
     public float EmergencyBoostPower;
     public float EmergencyBoostCost;
     public float EmergencyBoostVolume;
+    public float EmergencyBoostCameraShakeAmount;
     public float DefaultSpeed;
     public float StrafeSpeed;
     public float WalkSpeed;
@@ -93,6 +94,7 @@ public class ModController : ModBehaviour
         EmergencyBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");
         EmergencyBoostCost = config.GetSettingsValue<float>("Emergency Boost Cost");
         EmergencyBoostVolume = config.GetSettingsValue<float>("Emergency Boost Volume");
+        EmergencyBoostCameraShakeAmount = config.GetSettingsValue<float>("Emergency Boost Camera Shake Amount");
         DefaultSpeed = config.GetSettingsValue<float>("Normal Speed");
         StrafeSpeed = config.GetSettingsValue<float>("Strafe Speed");
         WalkSpeed = config.GetSettingsValue<float>("Walk Speed");

@@ -64,8 +64,13 @@
 		},
 		"Emergency Boost Volume": {
 			"type": "number",
-			"value": 0.75,
-			"tooltip": "The volume of the explosion sound that plays when you do an emergency boost. Recommended: 0.75"
+			"value": 1,
+			"tooltip": "How loud the emergency boost sound is compared to the default volume. Recommended: 1"
+		},
+		"Emergency Boost Camera Shake Amount": {
+			"type": "number",
+			"value": 1,
+			"tooltip": "How much the camera shakes when doing an emergency boost. Only works if Camera Shake mod is installed and enabled. Recommended: 1"
 		},
 
 		"Character Attributes": {

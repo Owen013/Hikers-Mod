@@ -42,9 +42,11 @@ public class EmergencyBoostController : MonoBehaviour
     private void LateUpdate()
     {
         if (_characterController == null) return;
+
         float timeSinceBoost = Time.time - _lastBoostTime;
-        float thrusterScale = Mathf.Max(10f * (-Mathf.Pow(5f * timeSinceBoost - 1f, 2f) + 1f), _downThrustFlame._currentScale);
-        _downThrustFlame.transform.localScale = Vector3.one * Mathf.Min(thrusterScale, 100f);
+        float thrusterCurve = -Mathf.Pow(5f * timeSinceBoost - 1f, 2f) + 1f;
+        float thrusterScale = Mathf.Max(10f * thrusterCurve, _downThrustFlame._currentScale);
+        _downThrustFlame.transform.localScale = Vector3.one * thrusterScale;
         _downThrustFlame._light.range = _downThrustFlame._baseLightRadius * thrusterScale;
         _downThrustFlame._thrusterRenderer.enabled = thrusterScale > 0f;
         _downThrustFlame._light.enabled = thrusterScale > 0f;
@@ -65,11 +67,15 @@ public class EmergencyBoostController : MonoBehaviour
 
         // sound and visual effects
         _superBoostAudio.pitch = Random.Range(1.0f, 1.4f);
-        _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, ModController.s_instance.EmergencyBoostVolume);
+        _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, ModController.s_instance.EmergencyBoostVolume * 0.75f);
         _helmetAnimator.OnInstantDamage(boostPower, InstantDamageType.Impact);
         NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "EMERGENCY BOOST ACTIVATED", 5f), false);
-        // if camerashaker is installed, do a camera shake
-        ModController.s_instance.CameraShakerAPI?.ExplosionShake(strength: boostPower);
+
+        // if camerashaker is installed and camera shake is enabled, do a camera shake
+        if (ModController.s_instance.EmergencyBoostCameraShakeAmount > 0)
+        {
+            ModController.s_instance.CameraShakerAPI?.ExplosionShake(strength: boostPower * ModController.s_instance.EmergencyBoostCameraShakeAmount);
+        }
 
         ModController.s_instance.DebugLog("Super-Boosted");
     }
@@ -94,11 +100,20 @@ public class EmergencyBoostController : MonoBehaviour
         s_instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
         s_instance._jetpackController = FindObjectOfType<JetpackThrusterController>();
         s_instance._helmetAnimator = FindObjectOfType<HUDHelmetAnimator>();
+
         s_instance._superBoostAudio = new GameObject("HikersMod_EmergencyBoostAudioSrc").AddComponent<OWAudioSource>();
         s_instance._superBoostAudio.transform.parent = s_instance._audioController.transform;
         s_instance._superBoostAudio.transform.localPosition = new Vector3(0, 0, 1);
+
         var thrusters = Resources.FindObjectsOfTypeAll<ThrusterFlameController>();
-        for (int i = 0; i < thrusters.Length; i++) if (thrusters[i]._thruster == Thruster.Up_LeftThruster) s_instance._downThrustFlame = thrusters[i];
+        for (int i = 0; i < thrusters.Length; i++)
+        {
+            if (thrusters[i].GetComponentInParent<PlayerBody>() && thrusters[i]._thruster == Thruster.Up_LeftThruster)
+            {
+                s_instance._downThrustFlame = thrusters[i];
+            }
+        }
+
         s_instance._characterController.OnBecomeGrounded += s_instance.EndEmergencyBoost;
     }
 }
