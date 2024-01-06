@@ -62,6 +62,16 @@
 			"value": 20,
 			"tooltip": "The amount of fuel an emergency boost uses. Recommended: 20"
 		},
+		"Emergency Boost Volume": {
+			"type": "number",
+			"value": 1,
+			"tooltip": "How loud the emergency boost sound is compared to the default volume. Recommended: 1"
+		},
+		"Emergency Boost Camera Shake Amount": {
+			"type": "number",
+			"value": 1,
+			"tooltip": "How much the camera shakes when doing an emergency boost. Only works if Camera Shake mod is installed and enabled. Recommended: 1"
+		},
 
 		"April Fools": {
 			"type": "separator"

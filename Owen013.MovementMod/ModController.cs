@@ -28,9 +28,11 @@ public class ModController : ModBehaviour
     public bool CanSprintBackwards;
     public float SprintSpeed;
     public float SprintStrafeSpeed;
-    public bool IsSuperBoostEnabled;
-    public float SuperBoostPower;
-    public float SuperBoostCost;
+    public bool IsEmergencyBoostEnabled;
+    public float EmergencyBoostPower;
+    public float EmergencyBoostCost;
+    public float EmergencyBoostVolume;
+    public float EmergencyBoostCameraShakeAmount;
     public float TripChance;
     public float SprintingTripChance;
     public float TripDuration;
@@ -63,7 +65,7 @@ public class ModController : ModBehaviour
         s_instance = this;
         Harmony.CreateAndPatchAll(typeof(ModController));
         gameObject.AddComponent<SpeedController>();
-        gameObject.AddComponent<SuperBoostController>();
+        gameObject.AddComponent<EmergencyBoostController>();
         gameObject.AddComponent<FloatyPhysicsController>();
         gameObject.AddComponent<WallJumpController>();
         gameObject.AddComponent<TrippingController>();
@@ -100,9 +102,11 @@ public class ModController : ModBehaviour
         SprintButtonMode = config.GetSettingsValue<string>("Sprint Button");
         SprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
         SprintStrafeSpeed = config.GetSettingsValue<float>("Sprint Strafe Speed");
-        IsSuperBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
-        SuperBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");
-        SuperBoostCost = config.GetSettingsValue<float>("Emergency Boost Cost");
+        IsEmergencyBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
+        EmergencyBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");
+        EmergencyBoostCost = config.GetSettingsValue<float>("Emergency Boost Cost");
+        EmergencyBoostVolume = config.GetSettingsValue<float>("Emergency Boost Volume");
+        EmergencyBoostCameraShakeAmount = config.GetSettingsValue<float>("Emergency Boost Camera Shake Amount");
         TripDuration = config.GetSettingsValue<float>("Trip Duration");
         TripChance = config.GetSettingsValue<float>("Chance of Tripping Randomly");
         SprintingTripChance = config.GetSettingsValue<float>("Chance of Tripping while Sprinting");
