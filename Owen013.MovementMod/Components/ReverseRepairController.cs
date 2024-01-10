@@ -11,44 +11,47 @@ public class ReverseRepairController : MonoBehaviour
     private void Awake()
     {
         s_instance = this;
-        GlobalMessenger.AddListener("StartRepairing", OnStartRepairing);
         Harmony.CreateAndPatchAll(typeof(ReverseRepairController));
     }
 
-    private void OnStartRepairing()
+    private void Update()
     {
-        if (ModController.s_instance.ReverseRepairChance != 0f && Random.Range(0f, 1f) <= ModController.s_instance.ReverseRepairChance)
+        if (OWInput.IsNewlyPressed(InputLibrary.interact))
         {
-            _isRepairReversed = true;
-        }
-        else
-        {
-            _isRepairReversed = false;
+            if (ModController.s_instance.ReverseRepairChance != 0f && Random.Range(0f, 1f) <= ModController.s_instance.ReverseRepairChance)
+            {
+                ModController.s_instance.DebugLog("Repair reversed!");
+                _isRepairReversed = true;
+            }
+            else
+            {
+                _isRepairReversed = false;
+            }
         }
     }
 
     [HarmonyPrefix]
-    [HarmonyPatch(typeof(ShipComponent), nameof(ShipComponent.RepairTick))]
-    public static bool RepairTick(ShipComponent __instance)
+    [HarmonyPatch(typeof(ShipHull), nameof(ShipHull.RepairTick))]
+    public static bool RepairTick(ShipHull __instance)
     {
-        if (!__instance._damaged) return false;
-
-        float repairAmount = Time.deltaTime / __instance._repairTime;
-        if (s_instance._isRepairReversed) repairAmount = -repairAmount;
-        __instance._repairFraction = Mathf.Clamp01(__instance._repairFraction + repairAmount);
-
-        if (__instance._repairFraction >= 1f)
+        if (!s_instance._isRepairReversed)
         {
-            __instance.SetDamaged(false);
-        }
-        else if (__instance._repairFraction <= 0f)
-        {
-            __instance.TriggerSystemFailure();
+            return true;
         }
 
-        if (__instance._damageEffect)
+        if (!__instance._damaged)
         {
-            __instance._damageEffect.SetEffectBlend(1f - __instance._repairFraction);
+            return false;
+        }
+
+        __instance._integrity = Mathf.Min(__instance._integrity - Time.deltaTime / __instance._repairTime, 1f);
+        if (__instance._integrity <= 0f)
+        {
+            __instance.GetComponent<ShipDetachableModule>().Detach();
+        }
+        if (__instance._damageEffect != null)
+        {
+            __instance._damageEffect.SetEffectBlend(1f - __instance._integrity);
         }
 
         return false;
