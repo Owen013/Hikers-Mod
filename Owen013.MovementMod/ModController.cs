@@ -36,7 +36,7 @@ public class ModController : ModBehaviour
     public float TripChance;
     public float SprintingTripChance;
     public float TripDuration;
-    public bool TripWhenDamaged;
+    public float DamagedTripChance;
     public float ReverseBoostChance;
     public float SuperBoostMisfireChance;
     public float ScoutMisfireChance;
@@ -110,7 +110,7 @@ public class ModController : ModBehaviour
         TripDuration = config.GetSettingsValue<float>("Trip Duration");
         TripChance = config.GetSettingsValue<float>("Chance of Tripping Randomly");
         SprintingTripChance = config.GetSettingsValue<float>("Chance of Tripping while Sprinting");
-        TripWhenDamaged = config.GetSettingsValue<bool>("Trip when Damaged");
+        DamagedTripChance = config.GetSettingsValue<float>("Chance of Tripping when Damaged");
         ReverseBoostChance = config.GetSettingsValue<float>("Reverse Boost Chance");
         SuperBoostMisfireChance = config.GetSettingsValue<float>("Emergency Boost Misfire Chance");
         ScoutMisfireChance = config.GetSettingsValue<float>("Scout Misfire Chance");
