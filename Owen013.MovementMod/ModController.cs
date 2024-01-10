@@ -151,15 +151,9 @@ public class ModController : ModBehaviour
         }
     }
 
-    public void DebugLog(string text)
+    public void DebugLog(string text, MessageType type = MessageType.Message, bool forceMessage = false)
     {
-        if (!DebugLogEnabled) return;
-        ModHelper.Console.WriteLine(text);
-    }
-
-    public void DebugLog(string text, MessageType type)
-    {
-        if (!DebugLogEnabled) return;
+        if (!DebugLogEnabled && !forceMessage) return;
         ModHelper.Console.WriteLine(text, type);
     }
 
