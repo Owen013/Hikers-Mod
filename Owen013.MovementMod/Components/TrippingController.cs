@@ -67,9 +67,9 @@ public class TrippingController : MonoBehaviour
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.OnInstantDamage))]
-    private static void OnCharacterControllerDamaged()
+    private static void OnCharacterControllerDamaged(float instantDamage)
     {
-        if (ModController.s_instance.TripWhenDamaged)
+        if (Random.Range(0f, 1f) <= ModController.s_instance.DamagedTripChance * instantDamage)
         {
             s_instance.StartTripping();
         }

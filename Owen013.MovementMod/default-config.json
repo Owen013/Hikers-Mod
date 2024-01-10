@@ -91,9 +91,9 @@
 			"value": 0.04,
 			"tooltip": ""
 		},
-		"Trip when Damaged": {
-			"type": "toggle",
-			"value": true,
+		"Chance of Tripping when Damaged": {
+			"type": "number",
+			"value": 0.01,
 			"tooltip": ""
 		},
 		"Reverse Boost Chance": {
