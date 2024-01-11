@@ -10,7 +10,7 @@ public class SpeedController : MonoBehaviour
     private PlayerCharacterController _characterController;
     private JetpackThrusterModel _jetpackModel;
     private JetpackThrusterAudio _jetpackAudio;
-    private GameObject _playerVFX;
+    private GameObject _playerJetpack;
     private List<ThrusterFlameController> _thrusters;
     private Vector2 _thrusterVector;
     private IInputCommands _sprintButton;
@@ -46,7 +46,7 @@ public class SpeedController : MonoBehaviour
         if (_characterController == null) return;
 
         // get thruster vector IF the player is sprinting and the jetpack is visible. Otherwise, move towards zero
-        _thrusterVector = Vector2.MoveTowards(_thrusterVector, _isSprinting && _playerVFX.activeSelf ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
+        _thrusterVector = Vector2.MoveTowards(_thrusterVector, _isSprinting && _playerJetpack.activeSelf == true ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
         Vector2 flameVector = _thrusterVector;
 
         // adjust vector based on sprinting and strafe speed
@@ -179,7 +179,7 @@ public class SpeedController : MonoBehaviour
         s_instance._characterController = Locator.GetPlayerController();
         s_instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
         s_instance._jetpackAudio = FindObjectOfType<JetpackThrusterAudio>();
-        s_instance._playerVFX = s_instance._characterController.GetComponentInChildren<PlayerParticlesController>(includeInactive: true).gameObject;
+        s_instance._playerJetpack = GameObject.Find("Player_Body/Traveller_HEA_Player_v2/Traveller_Mesh_v01:Traveller_Geo");
         s_instance._thrusters = new(s_instance._characterController.gameObject.GetComponentsInChildren<ThrusterFlameController>(includeInactive: true));
         s_instance._thrusterVector = Vector2.zero;
         s_instance._characterController.OnBecomeGrounded += s_instance.UpdateSprinting; // maybe make this optional in the config?
