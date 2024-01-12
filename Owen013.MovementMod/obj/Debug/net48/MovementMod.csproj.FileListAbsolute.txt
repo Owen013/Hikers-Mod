@@ -1,0 +1,10 @@
+C:\Users\owen\AppData\Roaming\OuterWildsModManager\OWML\Mods\Owen013.MovementMod\default-config.json
+C:\Users\owen\AppData\Roaming\OuterWildsModManager\OWML\Mods\Owen013.MovementMod\manifest.json
+C:\Users\owen\AppData\Roaming\OuterWildsModManager\OWML\Mods\Owen013.MovementMod\MovementMod.dll
+C:\Users\owen\AppData\Roaming\OuterWildsModManager\OWML\Mods\Owen013.MovementMod\MovementMod.pdb
+C:\Users\owen\source\repos\Owen013.MovementMod\Owen013.MovementMod\obj\Debug\net48\MovementMod.csprojAssemblyReference.cache
+C:\Users\owen\source\repos\Owen013.MovementMod\Owen013.MovementMod\obj\Debug\net48\MovementMod.AssemblyInfoInputs.cache
+C:\Users\owen\source\repos\Owen013.MovementMod\Owen013.MovementMod\obj\Debug\net48\MovementMod.AssemblyInfo.cs
+C:\Users\owen\source\repos\Owen013.MovementMod\Owen013.MovementMod\obj\Debug\net48\MovementMod.csproj.CoreCompileInputs.cache
+C:\Users\owen\source\repos\Owen013.MovementMod\Owen013.MovementMod\obj\Debug\net48\MovementMod.dll
+C:\Users\owen\source\repos\Owen013.MovementMod\Owen013.MovementMod\obj\Debug\net48\MovementMod.pdb

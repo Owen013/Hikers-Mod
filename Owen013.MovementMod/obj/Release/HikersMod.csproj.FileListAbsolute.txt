@@ -1,0 +1,9 @@
+C:\Users\owen\AppData\Roaming\OuterWildsModManager\OWML\Mods\Owen013.MovementMod\default-config.json
+C:\Users\owen\AppData\Roaming\OuterWildsModManager\OWML\Mods\Owen013.MovementMod\manifest.json
+C:\Users\owen\AppData\Roaming\OuterWildsModManager\OWML\Mods\Owen013.MovementMod\HikersMod.dll
+C:\Users\owen\source\repos\Owen013.MovementMod\Owen013.MovementMod\obj\Release\HikersMod.csproj.AssemblyReference.cache
+C:\Users\owen\source\repos\Owen013.MovementMod\Owen013.MovementMod\obj\Release\HikersMod.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\owen\source\repos\Owen013.MovementMod\Owen013.MovementMod\obj\Release\HikersMod.AssemblyInfoInputs.cache
+C:\Users\owen\source\repos\Owen013.MovementMod\Owen013.MovementMod\obj\Release\HikersMod.AssemblyInfo.cs
+C:\Users\owen\source\repos\Owen013.MovementMod\Owen013.MovementMod\obj\Release\HikersMod.csproj.CoreCompileInputs.cache
+C:\Users\owen\source\repos\Owen013.MovementMod\Owen013.MovementMod\obj\Release\HikersMod.dll

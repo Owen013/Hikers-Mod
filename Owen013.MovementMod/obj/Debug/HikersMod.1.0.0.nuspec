@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>HikersMod</id>
+    <version>1.0.0</version>
+    <authors>HikersMod</authors>
+    <description>Package Description</description>
+    <copyright>Copyright © 2022 Owen_013</copyright>
+    <dependencies>
+      <group targetFramework=".NETFramework4.8">
+        <dependency id="OWML" version="2.9.8" exclude="Build,Analyzers" />
+        <dependency id="OuterWildsGameLibs" version="1.1.14.768" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="System.IO.Compression" targetFramework=".NETFramework4.8" />
+      <frameworkAssembly assemblyName="System.Net.Http" targetFramework=".NETFramework4.8" />
+      <frameworkAssembly assemblyName="System.Runtime.Serialization.Xml" targetFramework=".NETFramework4.8" />
+    </frameworkAssemblies>
+    <contentFiles>
+      <files include="any/net48/HikersMod.csproj.user" buildAction="Content" />
+    </contentFiles>
+  </metadata>
+  <files>
+    <file src="C:\Users\owen\AppData\Roaming\OuterWildsModManager\OWML\Mods\Owen013.MovementMod\HikersMod.dll" target="lib\net48\HikersMod.dll" />
+    <file src="C:\Users\owen\source\repos\Owen013.MovementMod\Owen013.MovementMod\HikersMod.csproj.user" target="content\HikersMod.csproj.user" />
+    <file src="C:\Users\owen\source\repos\Owen013.MovementMod\Owen013.MovementMod\HikersMod.csproj.user" target="contentFiles\any\net48\HikersMod.csproj.user" />
+  </files>
+</package>
