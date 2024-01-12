@@ -59,6 +59,11 @@ public class ModController : ModBehaviour
     public float WallJumpsPerJump;
     public bool DebugLogEnabled;
 
+    public override object GetApi()
+    {
+        return new HikersModAPI();
+    }
+
     private void Awake()
     {
         // Static reference to HikersMod so it can be used in patches.
@@ -169,6 +174,11 @@ public class ModController : ModBehaviour
         {
             _mirrorController._mirrorPlayer.GetComponentInChildren<PlayerAnimController>()._animator.speed = _animSpeed;
         }
+    }
+
+    public float GetAnimSpeed()
+    {
+        return _animSpeed;
     }
 
     public void DebugLog(string text, MessageType type = MessageType.Message, bool forceMessage = false)

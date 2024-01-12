@@ -10,7 +10,8 @@ public class SpeedController : MonoBehaviour
     private PlayerCharacterController _characterController;
     private JetpackThrusterModel _jetpackModel;
     private JetpackThrusterAudio _jetpackAudio;
-    private GameObject _playerVFX;
+    private GameObject _playerSuit;
+    private GameObject _playerJetpack;
     private List<ThrusterFlameController> _thrusters;
     private Vector2 _thrusterVector;
     private IInputCommands _sprintButton;
@@ -45,8 +46,10 @@ public class SpeedController : MonoBehaviour
     {
         if (_characterController == null) return;
 
+        bool jetpackVisible = _playerSuit.activeSelf && _playerJetpack.activeSelf;
+
         // get thruster vector IF the player is sprinting and the jetpack is visible. Otherwise, move towards zero
-        _thrusterVector = Vector2.MoveTowards(_thrusterVector, _isSprinting && _playerVFX.activeSelf ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
+        _thrusterVector = Vector2.MoveTowards(_thrusterVector, _isSprinting && jetpackVisible ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
         Vector2 flameVector = _thrusterVector;
 
         // adjust vector based on sprinting and strafe speed
@@ -167,9 +170,12 @@ public class SpeedController : MonoBehaviour
         thruster._light.enabled = thruster._currentScale > 0f;
     }
 
-    public bool IsSprinting()
+    public string GetMoveSpeed()
     {
-        return _isSprinting;
+        if (_isSprinting) return "sprinting";
+        else if (_isDreamLanternFocused) return "dreamLanternFocused";
+        else if (OWInput.IsPressed(InputLibrary.rollMode) && _characterController._heldLanternItem == null) return "walking";
+        else return "normal";
     }
 
     [HarmonyPostfix]
@@ -179,7 +185,8 @@ public class SpeedController : MonoBehaviour
         s_instance._characterController = Locator.GetPlayerController();
         s_instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
         s_instance._jetpackAudio = FindObjectOfType<JetpackThrusterAudio>();
-        s_instance._playerVFX = s_instance._characterController.GetComponentInChildren<PlayerParticlesController>(includeInactive: true).gameObject;
+        s_instance._playerSuit = GameObject.Find("Player_Body/Traveller_HEA_Player_v2/Traveller_Mesh_v01:Traveller_Geo");
+        s_instance._playerJetpack = GameObject.Find("Player_Body/Traveller_HEA_Player_v2/Traveller_Mesh_v01:Traveller_Geo/Traveller_Mesh_v01:Props_HEA_Jetpack");
         s_instance._thrusters = new(s_instance._characterController.gameObject.GetComponentsInChildren<ThrusterFlameController>(includeInactive: true));
         s_instance._thrusterVector = Vector2.zero;
         s_instance._characterController.OnBecomeGrounded += s_instance.UpdateSprinting; // maybe make this optional in the config?
