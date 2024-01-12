@@ -170,9 +170,12 @@ public class SpeedController : MonoBehaviour
         thruster._light.enabled = thruster._currentScale > 0f;
     }
 
-    public bool IsSprinting()
+    public string GetMoveSpeed()
     {
-        return _isSprinting;
+        if (_isSprinting) return "sprinting";
+        else if (_isDreamLanternFocused) return "dreamLanternFocused";
+        else if (OWInput.IsPressed(InputLibrary.rollMode) && _characterController._heldLanternItem == null) return "walking";
+        else return "normal";
     }
 
     [HarmonyPostfix]

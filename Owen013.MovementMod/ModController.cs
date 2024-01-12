@@ -51,6 +51,11 @@ public class ModController : ModBehaviour
     public float WallJumpsPerJump;
     public bool DebugLogEnabled;
 
+    public override object GetApi()
+    {
+        return new HikersModAPI();
+    }
+
     private void Awake()
     {
         // Static reference to HikersMod so it can be used in patches.
