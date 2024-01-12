@@ -151,6 +151,11 @@ public class ModController : ModBehaviour
         }
     }
 
+    public float GetAnimSpeed()
+    {
+        return _animSpeed;
+    }
+
     public void DebugLog(string text, MessageType type = MessageType.Message, bool forceMessage = false)
     {
         if (!DebugLogEnabled && !forceMessage) return;
