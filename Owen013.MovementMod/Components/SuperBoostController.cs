@@ -30,7 +30,7 @@ public class EmergencyBoostController : MonoBehaviour
         bool canEmergencyBoost = _characterController._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
         if (!canEmergencyBoost) EndEmergencyBoost();
 
-        else if (ModController.s_instance.IsEmergencyBoostEnabled && isInputting && Time.time - _lastBoostInputTime < 0.25f  && _jetpackController._resources.GetFuel() > 0f && !_isEmergencyBoosting)
+        else if (ModController.s_instance.IsEmergencyBoostEnabled && isInputting && Time.time - _lastBoostInputTime < ModController.s_instance.EmergencyBoostInputTime  && _jetpackController._resources.GetFuel() > 0f && !_isEmergencyBoosting)
         {
             ApplyEmergencyBoost();
         }

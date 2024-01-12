@@ -67,6 +67,11 @@
 			"value": 1,
 			"tooltip": "How loud the emergency boost sound is compared to the default volume. Recommended: 1"
 		},
+		"Emergency Boost Input Time": {
+			"type": "number",
+			"value": 0.25,
+			"tooltip": "The maximum amount of time in seconds between jump inputs that will trigger an emergency boost. Recommended: 0.25"
+		},
 		"Emergency Boost Camera Shake Amount": {
 			"type": "number",
 			"value": 1,
