@@ -1,4 +1,7 @@
 ﻿using HarmonyLib;
+using System.Dynamic;
+using System.Net.Security;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace HikersMod.Components
@@ -9,10 +12,10 @@ namespace HikersMod.Components
         private PlayerCharacterController _characterController;
         private PlayerCameraController _cameraController;
         private PlayerAnimController _animController;
-        private float _lastFootLiftTime;
-        private string _lastFootLifted;
-        private float _timePosition;
-        private float _intensity;
+        private GameObject _bobRoot;
+        private float _lastGroundedTime;
+        private float _bobTime;
+        private float _bobIntensity;
 
         public void Awake()
         {
@@ -24,34 +27,42 @@ namespace HikersMod.Components
         {
             if (!_characterController) return;
 
-            _timePosition += Time.fixedDeltaTime * _animController._animator.speed;
-            _intensity = Mathf.Lerp(_intensity, _characterController.GetRelativeGroundVelocity().magnitude / 6, 0.25f);
+            AnimatorStateInfo animInfo = _animController._animator.GetCurrentAnimatorStateInfo(0);
+            if (Time.fixedTime - _lastGroundedTime < 1f)
+            {
+                _bobIntensity = Mathf.Lerp(_bobIntensity, 0f, 0.5f);
+            }
+            else
+            {
+                _bobTime = animInfo.normalizedTime + 0.5f; // thank you Etherpod!
+                _bobIntensity = Mathf.Lerp(_bobIntensity, Mathf.Sqrt(Mathf.Pow(_animController._animator.GetFloat("RunSpeedX"), 2f) + Mathf.Pow(_animController._animator.GetFloat("RunSpeedY"), 2f)) * 0.02f, 0.5f);
+            }
+            float bobX = Mathf.Sin(2f * Mathf.PI * _bobTime);
+            float bobY = Mathf.Cos(4f * Mathf.PI * _bobTime);
 
-            float bobY = (Mathf.Cos(Mathf.PI * _timePosition) + 1) * 0.5f;
-
-            _cameraController._origLocalPosition = new Vector3(0f, 0.8496f + bobY * 0.5f, 0.15f);
+            _bobRoot.transform.localPosition = new Vector3(bobX * _bobIntensity * ModController.s_instance.viewBobXSensitivity, bobY * _bobIntensity * ModController.s_instance.viewBobYSensitivity, 0f);
         }
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
-        public static void OnCharacterControllerStart(PlayerCharacterController __instance)
+        public static void OnCharacterControllerStart()
         {
-            s_instance._characterController = __instance;
+            s_instance._characterController = Locator.GetPlayerController();
             s_instance._cameraController = FindObjectOfType<PlayerCameraController>();
-
             s_instance._animController = FindObjectOfType<PlayerAnimController>();
-            s_instance._animController.OnRightFootLift += () =>
-            {
-                s_instance._lastFootLiftTime = Time.fixedTime;
-                s_instance._lastFootLifted = "right";
-            };
-            s_instance._animController.OnLeftFootLift += () =>
-            {
-                s_instance._lastFootLiftTime = Time.fixedTime;
-                s_instance._lastFootLifted = "left";
-            };
 
-            s_instance._timePosition = 0f;
+            // create viewbob root and parent camera to it
+            s_instance._bobRoot = new();
+            s_instance._bobRoot.name = "ViewBobRoot";
+            s_instance._bobRoot.transform.parent = s_instance._cameraController._playerCamera.mainCamera.transform.parent;
+            s_instance._bobRoot.transform.localPosition = Vector3.zero;
+            s_instance._bobRoot.transform.localRotation = Quaternion.identity;
+            s_instance._cameraController._playerCamera.mainCamera.transform.parent = s_instance._bobRoot.transform;
+
+            s_instance._characterController.OnBecomeGrounded += () =>
+            {
+                s_instance._lastGroundedTime = Time.fixedTime;
+            };
         }
     }
 }

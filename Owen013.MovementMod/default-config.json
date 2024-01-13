@@ -78,6 +78,20 @@
 			"tooltip": "How much the camera shakes when doing an emergency boost. Only works if Camera Shake mod is installed and enabled. Recommended: 1"
 		},
 
+		"View Bobbing": {
+			"type": "separator"
+		},
+		"View Bob X Sensitivity": {
+			"type": "number",
+			"value": 1,
+			"tooltip": "How much the camera bobs from side to side. Recommended: 1"
+		},
+		"View Bob Y Sensitivity": {
+			"type": "number",
+			"value": 1,
+			"tooltip": "How much the camera bobs up and down. Recommended: 1"
+		},
+
 		"Character Attributes": {
 			"type": "separator"
 		},

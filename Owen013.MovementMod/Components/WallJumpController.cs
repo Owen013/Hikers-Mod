@@ -29,13 +29,13 @@ public class WallJumpController : MonoBehaviour
     private void UpdateWallJump()
     {
         _characterController.UpdatePushable();
-        bool isWallJumpAllowed = (ModController.s_instance.WallJumpMode == "When Unsuited" && !PlayerState.IsWearingSuit()) || ModController.s_instance.WallJumpMode == "Always";
+        bool isWallJumpAllowed = (ModController.s_instance.wallJumpMode == "When Unsuited" && !PlayerState.IsWearingSuit()) || ModController.s_instance.wallJumpMode == "Always";
         if (isWallJumpAllowed && _characterController._isPushable && !PlayerState.InZeroG() && !_characterController._isGrounded && OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && _wallJumpsLeft > 0)
         {
             OWRigidbody pushBody = _characterController._pushableBody;
             Vector3 pushPoint = _characterController._pushContactPt;
             Vector3 pointVelocity = pushBody.GetPointVelocity(pushPoint);
-            Vector3 climbVelocity = new Vector3(0, ModController.s_instance.JumpPower * (_wallJumpsLeft / ModController.s_instance.WallJumpsPerJump), 0);
+            Vector3 climbVelocity = new Vector3(0, ModController.s_instance.jumpPower * (_wallJumpsLeft / ModController.s_instance.wallJumpsPerJump), 0);
 
             if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20)
             {
@@ -53,7 +53,7 @@ public class WallJumpController : MonoBehaviour
         }
 
         // Replenish 1 wall jump if you hasn't done one for five seconds
-        if (Time.time - _lastWallJumpRefill > 5 && _wallJumpsLeft < ModController.s_instance.WallJumpsPerJump)
+        if (Time.time - _lastWallJumpRefill > 5 && _wallJumpsLeft < ModController.s_instance.wallJumpsPerJump)
         {
             _wallJumpsLeft += 1;
             _lastWallJumpRefill = Time.time;
@@ -72,6 +72,6 @@ public class WallJumpController : MonoBehaviour
         s_instance._characterController = FindObjectOfType<PlayerCharacterController>();
         s_instance._animController = FindObjectOfType<PlayerAnimController>();
         s_instance._impactAudio = FindObjectOfType<PlayerImpactAudio>();
-        s_instance._characterController.OnBecomeGrounded += () => s_instance._wallJumpsLeft = ModController.s_instance.WallJumpsPerJump;
+        s_instance._characterController.OnBecomeGrounded += () => s_instance._wallJumpsLeft = ModController.s_instance.wallJumpsPerJump;
     }
 }

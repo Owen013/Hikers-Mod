@@ -53,14 +53,14 @@ public class SpeedController : MonoBehaviour
         Vector2 flameVector = _thrusterVector;
 
         // adjust vector based on sprinting and strafe speed
-        flameVector.x *= (ModController.s_instance.SprintStrafeSpeed / ModController.s_instance.StrafeSpeed) - 1;
+        flameVector.x *= (ModController.s_instance.sprintStrafeSpeed / ModController.s_instance.strafeSpeed) - 1;
         if (flameVector.y < 0f)
         {
-            flameVector.y *= (ModController.s_instance.SprintStrafeSpeed / ModController.s_instance.StrafeSpeed) - 1;
+            flameVector.y *= (ModController.s_instance.sprintStrafeSpeed / ModController.s_instance.strafeSpeed) - 1;
         }
         else
         {
-            flameVector.y *= (ModController.s_instance.SprintSpeed / ModController.s_instance.DefaultSpeed) - 1;
+            flameVector.y *= (ModController.s_instance.sprintSpeed / ModController.s_instance.defaultSpeed) - 1;
         }
 
         // clamp the vector so it doesn't become too big
@@ -114,20 +114,20 @@ public class SpeedController : MonoBehaviour
         if (_characterController == null) return;
 
         // Change built-in character attributes
-        _characterController._runSpeed = ModController.s_instance.DefaultSpeed;
-        _characterController._strafeSpeed = ModController.s_instance.StrafeSpeed;
-        _characterController._walkSpeed = ModController.s_instance.WalkSpeed;
-        _characterController._airSpeed = ModController.s_instance.AirSpeed;
-        _characterController._airAcceleration = ModController.s_instance.AirAccel;
+        _characterController._runSpeed = ModController.s_instance.defaultSpeed;
+        _characterController._strafeSpeed = ModController.s_instance.strafeSpeed;
+        _characterController._walkSpeed = ModController.s_instance.walkSpeed;
+        _characterController._airSpeed = ModController.s_instance.airSpeed;
+        _characterController._airAcceleration = ModController.s_instance.airAccel;
 
-        _sprintButton = (ModController.s_instance.SprintButtonMode == "Down Thrust") ? InputLibrary.thrustDown : InputLibrary.thrustUp;
+        _sprintButton = (ModController.s_instance.sprintButtonMode == "Down Thrust") ? InputLibrary.thrustDown : InputLibrary.thrustUp;
 
         UpdateSprinting();
     }
 
     private void UpdateSprinting()
     {
-        bool isSprintAllowed = ModController.s_instance.SprintMode == "Always" || (ModController.s_instance.SprintMode == "When Suited" && PlayerState.IsWearingSuit());
+        bool isSprintAllowed = ModController.s_instance.sprintMode == "Always" || (ModController.s_instance.sprintMode == "When Suited" && PlayerState.IsWearingSuit());
         bool isOnValidGround = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce();
         bool isWalking = _isDreamLanternFocused || (OWInput.IsPressed(InputLibrary.rollMode) && _characterController._heldLanternItem == null);
         bool wasSprinting = _isSprinting;
@@ -135,14 +135,14 @@ public class SpeedController : MonoBehaviour
         if (isSprintAllowed && isOnValidGround && !isWalking && OWInput.IsPressed(_sprintButton) && (_isSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0))
         {
             _isSprinting = true;
-            _characterController._runSpeed = ModController.s_instance.SprintSpeed;
-            _characterController._strafeSpeed = ModController.s_instance.SprintStrafeSpeed;
+            _characterController._runSpeed = ModController.s_instance.sprintSpeed;
+            _characterController._strafeSpeed = ModController.s_instance.sprintStrafeSpeed;
         }
         else
         {
             _isSprinting = false;
-            _characterController._runSpeed = ModController.s_instance.DefaultSpeed;
-            _characterController._strafeSpeed = ModController.s_instance.StrafeSpeed;
+            _characterController._runSpeed = ModController.s_instance.defaultSpeed;
+            _characterController._strafeSpeed = ModController.s_instance.strafeSpeed;
         }
 
         // log it
@@ -193,7 +193,7 @@ public class SpeedController : MonoBehaviour
 
         s_instance._characterController.OnBecomeGrounded += () =>
         {
-            if (ModController.s_instance.SprintOnLanding)
+            if (ModController.s_instance.sprintOnLanding)
             {
                 s_instance.UpdateSprinting();
             }
@@ -242,8 +242,8 @@ public class SpeedController : MonoBehaviour
     {
         float lerpPosition = 1f - __instance._lanternController.GetFocus();
         lerpPosition *= lerpPosition;
-        maxSpeedX = Mathf.Lerp(ModController.s_instance.DreamLanternSpeed, maxSpeedX, lerpPosition);
-        maxSpeedZ = Mathf.Lerp(ModController.s_instance.DreamLanternSpeed, maxSpeedZ, lerpPosition);
+        maxSpeedX = Mathf.Lerp(ModController.s_instance.dreamLanternSpeed, maxSpeedX, lerpPosition);
+        maxSpeedZ = Mathf.Lerp(ModController.s_instance.dreamLanternSpeed, maxSpeedZ, lerpPosition);
         return false;
     }
 }

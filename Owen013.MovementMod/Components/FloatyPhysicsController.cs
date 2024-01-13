@@ -16,14 +16,14 @@ public class FloatyPhysicsController : MonoBehaviour
 
     private void Update()
     {
-        if (ModController.s_instance.IsFloatyPhysicsEnabled) UpdateAcceleration();
+        if (ModController.s_instance.isFloatyPhysicsEnabled) UpdateAcceleration();
     }
 
     private void UpdateAcceleration()
     {
         if (_characterController == null) return;
-        float gravMultiplier = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce() ? Mathf.Clamp(Mathf.Pow(_characterController.GetNormalAccelerationScalar() / 12, ModController.s_instance.FloatyPhysicsPower), 0.25f, 1f) : 1f;
-        _characterController._acceleration = ModController.s_instance.GroundAccel * gravMultiplier;
+        float gravMultiplier = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce() ? Mathf.Clamp(Mathf.Pow(_characterController.GetNormalAccelerationScalar() / 12, ModController.s_instance.floatyPhysicsPower), 0.25f, 1f) : 1f;
+        _characterController._acceleration = ModController.s_instance.groundAccel * gravMultiplier;
     }
 
     [HarmonyPostfix]

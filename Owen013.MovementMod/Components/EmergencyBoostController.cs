@@ -31,7 +31,7 @@ public class EmergencyBoostController : MonoBehaviour
         bool canEmergencyBoost = _characterController._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
         if (!canEmergencyBoost) EndEmergencyBoost();
 
-        else if (ModController.s_instance.IsEmergencyBoostEnabled && isInputting && Time.time - _lastBoostInputTime < ModController.s_instance.EmergencyBoostInputTime && _jetpackController._resources.GetFuel() > 0f && !_isEmergencyBoosting)
+        else if (ModController.s_instance.isEmergencyBoostEnabled && isInputting && Time.time - _lastBoostInputTime < ModController.s_instance.emergencyBoostInputTime && _jetpackController._resources.GetFuel() > 0f && !_isEmergencyBoosting)
         {
             ApplyEmergencyBoost();
         }
@@ -58,8 +58,8 @@ public class EmergencyBoostController : MonoBehaviour
         _isEmergencyBoosting = true;
         _lastBoostTime = Time.time;
         _jetpackModel._boostChargeFraction = 0f;
-        _jetpackController._resources._currentFuel = Mathf.Max(0f, _jetpackController._resources.GetFuel() - ModController.s_instance.EmergencyBoostCost);
-        float boostPower = ModController.s_instance.EmergencyBoostPower;
+        _jetpackController._resources._currentFuel = Mathf.Max(0f, _jetpackController._resources.GetFuel() - ModController.s_instance.emergencyBoostCost);
+        float boostPower = ModController.s_instance.emergencyBoostPower;
 
         // set player velocity
         Vector3 pointVelocity = _characterController._transform.InverseTransformDirection(_characterController._lastGroundBody.GetPointVelocity(_characterController._transform.position));
@@ -68,14 +68,14 @@ public class EmergencyBoostController : MonoBehaviour
 
         // sound and visual effects
         _superBoostAudio.pitch = Random.Range(1.0f, 1.4f);
-        _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, ModController.s_instance.EmergencyBoostVolume * 0.75f);
+        _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, ModController.s_instance.emergencyBoostVolume * 0.75f);
         _helmetAnimator.OnInstantDamage(boostPower, InstantDamageType.Impact);
         NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "EMERGENCY BOOST ACTIVATED", 5f), false);
 
         // if camerashaker is installed and camera shake is enabled, do a camera shake
-        if (ModController.s_instance.EmergencyBoostCameraShakeAmount > 0)
+        if (ModController.s_instance.emergencyBoostCameraShakeAmount > 0)
         {
-            ModController.s_instance.CameraShakerAPI?.ExplosionShake(strength: boostPower * ModController.s_instance.EmergencyBoostCameraShakeAmount);
+            ModController.s_instance.CameraShakerAPI?.ExplosionShake(strength: boostPower * ModController.s_instance.emergencyBoostCameraShakeAmount);
         }
 
         ModController.s_instance.DebugLog("Super-Boosted");
