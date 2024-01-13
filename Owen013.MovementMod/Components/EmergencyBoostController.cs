@@ -6,9 +6,6 @@ namespace HikersMod.Components;
 public class EmergencyBoostController : MonoBehaviour
 {
     public static EmergencyBoostController s_instance;
-    private float _lastBoostInputTime;
-    private float _lastBoostTime;
-    private bool _isEmergencyBoosting;
     private OWAudioSource _superBoostAudio;
     private JetpackThrusterModel _jetpackModel;
     private JetpackThrusterController _jetpackController;
@@ -16,6 +13,9 @@ public class EmergencyBoostController : MonoBehaviour
     private PlayerAudioController _audioController;
     private ThrusterFlameController _downThrustFlame;
     private HUDHelmetAnimator _helmetAnimator;
+    private float _lastBoostInputTime;
+    private float _lastBoostTime;
+    private bool _isEmergencyBoosting;
 
     private void Awake()
     {
@@ -26,11 +26,12 @@ public class EmergencyBoostController : MonoBehaviour
     private void Update()
     {
         if (_characterController == null) return;
+
         bool isInputting = OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && !OWInput.IsPressed(InputLibrary.thrustUp, InputMode.Character);
         bool canEmergencyBoost = _characterController._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
         if (!canEmergencyBoost) EndEmergencyBoost();
 
-        else if (ModController.s_instance.IsEmergencyBoostEnabled && isInputting && Time.time - _lastBoostInputTime < ModController.s_instance.EmergencyBoostInputTime  && _jetpackController._resources.GetFuel() > 0f && !_isEmergencyBoosting)
+        else if (ModController.s_instance.IsEmergencyBoostEnabled && isInputting && Time.time - _lastBoostInputTime < ModController.s_instance.EmergencyBoostInputTime && _jetpackController._resources.GetFuel() > 0f && !_isEmergencyBoosting)
         {
             ApplyEmergencyBoost();
         }
@@ -95,20 +96,22 @@ public class EmergencyBoostController : MonoBehaviour
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
     private static void OnCharacterControllerStart()
     {
-        s_instance._characterController = FindObjectOfType<PlayerCharacterController>();
-        s_instance._audioController = FindObjectOfType<PlayerAudioController>();
+        s_instance._characterController = Locator.GetPlayerController();
+        s_instance._audioController = Locator.GetPlayerAudioController();
         s_instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
         s_instance._jetpackController = FindObjectOfType<JetpackThrusterController>();
         s_instance._helmetAnimator = FindObjectOfType<HUDHelmetAnimator>();
 
+        // create super boost audio source
         s_instance._superBoostAudio = new GameObject("HikersMod_EmergencyBoostAudioSrc").AddComponent<OWAudioSource>();
         s_instance._superBoostAudio.transform.parent = s_instance._audioController.transform;
         s_instance._superBoostAudio.transform.localPosition = new Vector3(0, 0, 1);
 
-        var thrusters = Resources.FindObjectsOfTypeAll<ThrusterFlameController>();
+        // get player's downward thruster flame
+        var thrusters = s_instance._characterController.gameObject.GetComponentsInChildren<ThrusterFlameController>(includeInactive: true);
         for (int i = 0; i < thrusters.Length; i++)
         {
-            if (thrusters[i].GetComponentInParent<PlayerBody>() && thrusters[i]._thruster == Thruster.Up_LeftThruster)
+            if (thrusters[i]._thruster == Thruster.Up_LeftThruster)
             {
                 s_instance._downThrustFlame = thrusters[i];
             }

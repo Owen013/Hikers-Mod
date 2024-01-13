@@ -189,8 +189,15 @@ public class SpeedController : MonoBehaviour
         s_instance._playerJetpack = GameObject.Find("Player_Body/Traveller_HEA_Player_v2/Traveller_Mesh_v01:Traveller_Geo/Traveller_Mesh_v01:Props_HEA_Jetpack");
         s_instance._thrusters = new(s_instance._characterController.gameObject.GetComponentsInChildren<ThrusterFlameController>(includeInactive: true));
         s_instance._thrusterVector = Vector2.zero;
-        s_instance._characterController.OnBecomeGrounded += s_instance.UpdateSprinting; // maybe make this optional in the config?
         s_instance._isDreamLanternFocused = false;
+
+        s_instance._characterController.OnBecomeGrounded += () =>
+        {
+            if (ModController.s_instance.SprintOnLanding)
+            {
+                s_instance.UpdateSprinting();
+            }
+        };
 
         s_instance.ApplyChanges();
     }
@@ -206,37 +213,14 @@ public class SpeedController : MonoBehaviour
         }
     }
 
-    [HarmonyPrefix]
+    [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Update))]
-    private static bool CharacterControllerUpdate(PlayerCharacterController __instance)
+    private static void CharacterControllerUpdate(PlayerCharacterController __instance)
     {
-        if (!__instance._isAlignedToForce && !__instance._isZeroGMovementEnabled) return false;
-
-        if ((OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f) || (s_instance._sprintButton == InputLibrary.thrustUp && s_instance._isSprinting))
+        if (s_instance._isSprinting || !s_instance._characterController._isWearingSuit)
         {
             __instance.UpdateJumpInput();
         }
-        else
-        {
-            __instance._jumpChargeTime = 0f;
-            __instance._jumpNextFixedUpdate = false;
-            __instance._jumpPressedInOtherMode = false;
-        }
-
-        if (__instance._isZeroGMovementEnabled)
-        {
-            __instance._pushPrompt.SetVisibility(OWInput.IsInputMode(InputMode.Character | InputMode.NomaiRemoteCam) && __instance._isPushable);
-        }
-
-        return false;
-    }
-
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
-    private static bool IsBoosterAllowed(ref bool __result, PlayerResources __instance)
-    {
-        __result = !PlayerState.InZeroG() && !Locator.GetPlayerSuit().IsTrainingSuit() && !__instance._cameraFluidDetector.InFluidType(FluidVolume.Type.WATER) && __instance._currentFuel > 0f && !s_instance._isSprinting;
-        return false;
     }
 
     [HarmonyPrefix]

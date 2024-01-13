@@ -12,22 +12,22 @@ public class ModController : ModBehaviour
     public static ModController s_instance;
     public ISmolHatchling SmolHatchlingAPI;
     public ICameraShaker CameraShakerAPI;
-    public delegate void ConfigureEvent();
-    public event ConfigureEvent OnConfigure;
     private PlayerCharacterController _characterController;
     private PlayerAnimController _animController;
     private JetpackThrusterModel _jetpackModel;
     private PlayerCloneController _cloneController;
     private EyeMirrorController _mirrorController;
+    public delegate void ConfigureEvent();
+    public event ConfigureEvent OnConfigure;
     private float _animSpeed;
 
     // Config
     public string JumpStyle;
     public string SprintMode;
     public string SprintButtonMode;
-    public bool CanSprintBackwards;
     public float SprintSpeed;
     public float SprintStrafeSpeed;
+    public bool SprintOnLanding;
     public bool IsEmergencyBoostEnabled;
     public float EmergencyBoostPower;
     public float EmergencyBoostCost;
@@ -88,14 +88,13 @@ public class ModController : ModBehaviour
 
     public override void Configure(IModConfig config)
     {
-        base.Configure(config);
-
         // Get all config options
         JumpStyle = config.GetSettingsValue<string>("Jump Style");
         SprintMode = config.GetSettingsValue<string>("Enable Sprinting");
         SprintButtonMode = config.GetSettingsValue<string>("Sprint Button");
         SprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
         SprintStrafeSpeed = config.GetSettingsValue<float>("Sprint Strafe Speed");
+        SprintOnLanding = config.GetSettingsValue<bool>("Start Sprinting On Landing");
         IsEmergencyBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
         EmergencyBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");
         EmergencyBoostCost = config.GetSettingsValue<float>("Emergency Boost Cost");
@@ -140,14 +139,13 @@ public class ModController : ModBehaviour
 
     private void UpdateAnimSpeed()
     {
-        float sizeMultiplier = SmolHatchlingAPI != null ? SmolHatchlingAPI.GetAnimSpeed() : 1;
-        float speedMultiplier = Mathf.Pow(_characterController.GetRelativeGroundVelocity().magnitude / 6 * sizeMultiplier, 0.5f);
+        float speedMultiplier = Mathf.Pow(_characterController.GetRelativeGroundVelocity().magnitude / 6 * (SmolHatchlingAPI != null ? SmolHatchlingAPI.GetAnimSpeed() : 1), 0.5f);
         float gravMultiplier = Mathf.Sqrt(_characterController._acceleration / GroundAccel);
 
         _animSpeed = _characterController.IsGrounded() ? Mathf.Max(speedMultiplier * gravMultiplier, gravMultiplier) : 1f;
         _animController._animator.speed = _animSpeed;
 
-        // mirror the new anim speed to the clone and mirror reflection
+        // copy the new anim speed to the clone and mirror reflection
         if (_cloneController != null)
         {
             _cloneController._playerVisuals.GetComponent<PlayerAnimController>()._animator.speed = _animSpeed;
