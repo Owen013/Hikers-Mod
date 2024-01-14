@@ -13,6 +13,7 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Components\BodyTurningController.cs" />
     <Compile Remove="Components\CrouchController.cs" />
   </ItemGroup>
   <ItemGroup>

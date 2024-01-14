@@ -37,6 +37,7 @@ public class ModController : ModBehaviour
     public bool isViewBobbingEnabled;
     public float viewBobXSensitivity;
     public float viewBobYSensitivity;
+    public float toolBobSensitivity;
     public float defaultSpeed;
     public float strafeSpeed;
     public float walkSpeed;
@@ -107,6 +108,7 @@ public class ModController : ModBehaviour
         emergencyBoostCameraShakeAmount = config.GetSettingsValue<float>("Emergency Boost Camera Shake Amount");
         viewBobXSensitivity = config.GetSettingsValue<float>("View Bob X Sensitivity");
         viewBobYSensitivity = config.GetSettingsValue<float>("View Bob Y Sensitivity");
+        toolBobSensitivity = config.GetSettingsValue<float>("Tool Bob Sensitivity");
         defaultSpeed = config.GetSettingsValue<float>("Normal Speed");
         strafeSpeed = config.GetSettingsValue<float>("Strafe Speed");
         walkSpeed = config.GetSettingsValue<float>("Walk Speed");

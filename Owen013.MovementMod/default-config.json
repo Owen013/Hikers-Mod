@@ -91,6 +91,11 @@
 			"value": 1,
 			"tooltip": "How much the camera bobs up and down. Recommended: 1"
 		},
+		"Tool Bob Sensitivity": {
+			"type": "number",
+			"value": 1,
+			"tooltip": "How much the player's held item bobs.'. Recommended: 1"
+		},
 
 		"Character Attributes": {
 			"type": "separator"
