@@ -49,7 +49,7 @@ public class SpeedController : MonoBehaviour
         bool jetpackVisible = _playerSuit.activeSelf && _playerJetpack.activeSelf;
 
         // get thruster vector IF the player is sprinting and the jetpack is visible. Otherwise, move towards zero
-        _thrusterVector = Vector2.MoveTowards(_thrusterVector, _isSprinting && jetpackVisible ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
+        _thrusterVector = Vector2.MoveTowards(_thrusterVector, _isSprinting && jetpackVisible && ModController.s_instance.isSprintEffectEnabled ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
         Vector2 flameVector = _thrusterVector;
 
         // adjust vector based on sprinting and strafe speed
@@ -221,6 +221,14 @@ public class SpeedController : MonoBehaviour
         {
             __instance.UpdateJumpInput();
         }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
+    private static void IsBoosterAllowed(ref bool __result, PlayerResources __instance)
+    {
+        // prevents player from jumping higher when sprinting
+        if (s_instance._isSprinting) __result = false;
     }
 
     [HarmonyPrefix]

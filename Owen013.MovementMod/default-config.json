@@ -43,6 +43,11 @@
 			"value": true,
 			"tooltip": "If you're holding the sprint button when you land on the ground, you will stop thrusting and start sprinting. Recommended: Enabled"
 		},
+		"Show Thruster Effect while Sprinting": {
+			"type": "toggle",
+			"value": true,
+			"tooltip": "Makes your jetpack thrusters fire as you sprint, as if they're boosting you. No gameplay effect. Recommended: Enabled"
+		},
 
 		"Emergency Boost": {
 			"type": "separator"

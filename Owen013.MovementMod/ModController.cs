@@ -28,6 +28,7 @@ public class ModController : ModBehaviour
     public float sprintSpeed;
     public float sprintStrafeSpeed;
     public bool sprintOnLanding;
+    public bool isSprintEffectEnabled;
     public bool isEmergencyBoostEnabled;
     public float emergencyBoostPower;
     public float emergencyBoostCost;
@@ -99,6 +100,7 @@ public class ModController : ModBehaviour
         sprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
         sprintStrafeSpeed = config.GetSettingsValue<float>("Sprint Strafe Speed");
         sprintOnLanding = config.GetSettingsValue<bool>("Start Sprinting On Landing");
+        isSprintEffectEnabled = config.GetSettingsValue<bool>("Show Thruster Effect while Sprinting");
         isEmergencyBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
         emergencyBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");
         emergencyBoostCost = config.GetSettingsValue<float>("Emergency Boost Cost");
