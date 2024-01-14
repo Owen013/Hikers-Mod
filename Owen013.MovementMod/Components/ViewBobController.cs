@@ -1,7 +1,5 @@
 ﻿using HarmonyLib;
-using System.Dynamic;
-using System.Net.Security;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace HikersMod.Components
@@ -13,8 +11,11 @@ namespace HikersMod.Components
         private PlayerCameraController _cameraController;
         private PlayerAnimController _animController;
         private GameObject _bobRoot;
+        private GameObject _toolBobRoot;
         private float _lastGroundedTime;
         private float _bobTime;
+        private float _backupBobTime;
+        private bool _useBackupBob;
         private float _bobIntensity;
 
         public void Awake()
@@ -30,17 +31,24 @@ namespace HikersMod.Components
             AnimatorStateInfo animInfo = _animController._animator.GetCurrentAnimatorStateInfo(0);
             if (Time.fixedTime - _lastGroundedTime < 1f)
             {
-                _bobIntensity = Mathf.Lerp(_bobIntensity, 0f, 0.5f);
+                _useBackupBob = true;
             }
             else
             {
-                _bobTime = animInfo.normalizedTime + 0.5f; // thank you Etherpod!
-                _bobIntensity = Mathf.Lerp(_bobIntensity, Mathf.Sqrt(Mathf.Pow(_animController._animator.GetFloat("RunSpeedX"), 2f) + Mathf.Pow(_animController._animator.GetFloat("RunSpeedY"), 2f)) * 0.02f, 0.5f);
+                _useBackupBob = false;
             }
-            float bobX = Mathf.Sin(2f * Mathf.PI * _bobTime);
-            float bobY = Mathf.Cos(4f * Mathf.PI * _bobTime);
 
-            _bobRoot.transform.localPosition = new Vector3(bobX * _bobIntensity * ModController.s_instance.viewBobXSensitivity, bobY * _bobIntensity * ModController.s_instance.viewBobYSensitivity, 0f);
+            _backupBobTime += Time.fixedDeltaTime * _animController._animator.speed;
+            _bobTime = _useBackupBob ? _backupBobTime : animInfo.normalizedTime + 0.5f;
+            _bobIntensity = Mathf.Lerp(_bobIntensity, Mathf.Sqrt(Mathf.Pow(_animController._animator.GetFloat("RunSpeedX"), 2f) + Mathf.Pow(_animController._animator.GetFloat("RunSpeedY"), 2f)) * 0.02f, 0.25f);
+            float bobX = Mathf.Sin(2f * Mathf.PI * _bobTime) * _bobIntensity * ModController.s_instance.viewBobXSensitivity;
+            float bobY = Mathf.Cos(4f * Mathf.PI * _bobTime) * _bobIntensity * ModController.s_instance.viewBobYSensitivity;
+
+            // viewbob
+            _bobRoot.transform.localPosition = new Vector3(bobX, bobY, 0f);
+
+            // tool viewbob
+            _toolBobRoot.transform.localPosition = new Vector3(bobX * 0.5f, bobY * 0.25f, 0f);
         }
 
         [HarmonyPostfix]
@@ -58,6 +66,18 @@ namespace HikersMod.Components
             s_instance._bobRoot.transform.localPosition = Vector3.zero;
             s_instance._bobRoot.transform.localRotation = Quaternion.identity;
             s_instance._cameraController._playerCamera.mainCamera.transform.parent = s_instance._bobRoot.transform;
+
+            // create tool bob root and parent camera objects to it
+            s_instance._toolBobRoot = new();
+            s_instance._toolBobRoot.name = "ToolBobRoot";
+            s_instance._toolBobRoot.transform.parent = s_instance._cameraController._playerCamera.mainCamera.transform;
+            s_instance._toolBobRoot.transform.localPosition = Vector3.zero;
+            s_instance._toolBobRoot.transform.localRotation = Quaternion.identity;
+            GameObject.Find("Player_Body/ShakeRoot/ViewBobRoot/PlayerCamera/ItemCarryTool").transform.parent = s_instance._toolBobRoot.transform;
+            GameObject.Find("Player_Body/ShakeRoot/ViewBobRoot/PlayerCamera/ProbeLauncher").transform.parent = s_instance._toolBobRoot.transform;
+            GameObject.Find("Player_Body/ShakeRoot/ViewBobRoot/PlayerCamera/FlashlightRoot").transform.parent = s_instance._toolBobRoot.transform;
+            GameObject.Find("Player_Body/ShakeRoot/ViewBobRoot/PlayerCamera/Signalscope").transform.parent = s_instance._toolBobRoot.transform;
+            GameObject.Find("Player_Body/ShakeRoot/ViewBobRoot/PlayerCamera/NomaiTranslatorProp").transform.parent = s_instance._toolBobRoot.transform;
 
             s_instance._characterController.OnBecomeGrounded += () =>
             {
