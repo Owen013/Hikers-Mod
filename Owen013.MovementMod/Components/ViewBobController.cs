@@ -9,10 +9,10 @@ public class ViewBobController : MonoBehaviour
     private PlayerCharacterController _characterController;
     private PlayerCameraController _cameraController;
     private PlayerAnimController _animController;
-    private GameObject _bobRoot;
+    private GameObject _viewBobRoot;
     private GameObject _toolBobRoot;
-    private float _bobTime;
-    private float _bobIntensity;
+    private float _viewBobTimePosition;
+    private float _viewBobIntensity;
 
     public void Awake()
     {
@@ -24,17 +24,17 @@ public class ViewBobController : MonoBehaviour
     {
         if (_characterController == null) return;
 
-        _bobTime = Mathf.Repeat(_bobTime + Time.fixedDeltaTime * _animController._animator.speed, 1);
-        _bobIntensity = Mathf.Lerp(_bobIntensity, Mathf.Sqrt(Mathf.Pow(_animController._animator.GetFloat("RunSpeedX"), 2f) + Mathf.Pow(_animController._animator.GetFloat("RunSpeedY"), 2f)) * 0.02f, 0.25f);
+        _viewBobTimePosition = Mathf.Repeat(_viewBobTimePosition + Time.fixedDeltaTime * _animController._animator.speed, 1);
+        _viewBobIntensity = Mathf.Lerp(_viewBobIntensity, Mathf.Sqrt(Mathf.Pow(_animController._animator.GetFloat("RunSpeedX"), 2f) + Mathf.Pow(_animController._animator.GetFloat("RunSpeedY"), 2f)) * 0.02f, 0.25f);
 
         // camera bob
-        float bobX = Mathf.Sin(2f * Mathf.PI * _bobTime) * _bobIntensity * ModController.s_instance.viewBobXSensitivity;
-        float bobY = Mathf.Cos(4f * Mathf.PI * _bobTime) * _bobIntensity * ModController.s_instance.viewBobYSensitivity;
-        _bobRoot.transform.localPosition = new Vector3(bobX, bobY, 0f);
+        float bobX = Mathf.Sin(2f * Mathf.PI * _viewBobTimePosition) * _viewBobIntensity * ModController.s_instance.viewBobXSensitivity;
+        float bobY = Mathf.Cos(4f * Mathf.PI * _viewBobTimePosition) * _viewBobIntensity * ModController.s_instance.viewBobYSensitivity;
+        _viewBobRoot.transform.localPosition = new Vector3(bobX, bobY, 0f);
 
         // tool bob
-        float toolBobX = Mathf.Sin(2f * Mathf.PI * _bobTime) * _bobIntensity * ModController.s_instance.toolBobSensitivity * 0.5f;
-        float toolBobY = Mathf.Cos(4f * Mathf.PI * _bobTime) * _bobIntensity * ModController.s_instance.toolBobSensitivity * 0.25f;
+        float toolBobX = Mathf.Sin(2f * Mathf.PI * _viewBobTimePosition) * _viewBobIntensity * ModController.s_instance.toolBobSensitivity * 0.5f;
+        float toolBobY = Mathf.Cos(4f * Mathf.PI * _viewBobTimePosition) * _viewBobIntensity * ModController.s_instance.toolBobSensitivity * 0.25f;
         _toolBobRoot.transform.localPosition = new Vector3(toolBobX, toolBobY, 0f);
     }
 
@@ -47,12 +47,12 @@ public class ViewBobController : MonoBehaviour
         s_instance._animController = FindObjectOfType<PlayerAnimController>();
 
         // create viewbob root and parent camera to it
-        s_instance._bobRoot = new();
-        s_instance._bobRoot.name = "ViewBobRoot";
-        s_instance._bobRoot.transform.parent = s_instance._cameraController._playerCamera.mainCamera.transform.parent;
-        s_instance._bobRoot.transform.localPosition = Vector3.zero;
-        s_instance._bobRoot.transform.localRotation = Quaternion.identity;
-        s_instance._cameraController._playerCamera.mainCamera.transform.parent = s_instance._bobRoot.transform;
+        s_instance._viewBobRoot = new();
+        s_instance._viewBobRoot.name = "ViewBobRoot";
+        s_instance._viewBobRoot.transform.parent = s_instance._cameraController._playerCamera.mainCamera.transform.parent;
+        s_instance._viewBobRoot.transform.localPosition = Vector3.zero;
+        s_instance._viewBobRoot.transform.localRotation = Quaternion.identity;
+        s_instance._cameraController._playerCamera.mainCamera.transform.parent = s_instance._viewBobRoot.transform;
 
         // create tool bob root and parent camera objects to it
         s_instance._toolBobRoot = new();
@@ -60,10 +60,10 @@ public class ViewBobController : MonoBehaviour
         s_instance._toolBobRoot.transform.parent = s_instance._cameraController._playerCamera.mainCamera.transform;
         s_instance._toolBobRoot.transform.localPosition = Vector3.zero;
         s_instance._toolBobRoot.transform.localRotation = Quaternion.identity;
-        s_instance._cameraController._playerCamera.mainCamera.transform.Find("PlayerCamera/ItemCarryTool").transform.parent = s_instance._toolBobRoot.transform;
-        s_instance._cameraController._playerCamera.mainCamera.transform.Find("PlayerCamera/ProbeLauncher").transform.parent = s_instance._toolBobRoot.transform;
-        s_instance._cameraController._playerCamera.mainCamera.transform.Find("PlayerCamera/FlashlightRoot").transform.parent = s_instance._toolBobRoot.transform;
-        s_instance._cameraController._playerCamera.mainCamera.transform.Find("PlayerCamera/Signalscope").transform.parent = s_instance._toolBobRoot.transform;
-        s_instance._cameraController._playerCamera.mainCamera.transform.Find("PlayerCamera/NomaiTranslatorProp").transform.parent = s_instance._toolBobRoot.transform;
+        s_instance._cameraController._playerCamera.mainCamera.transform.Find("ItemCarryTool").transform.parent = s_instance._toolBobRoot.transform;
+        s_instance._cameraController._playerCamera.mainCamera.transform.Find("ProbeLauncher").transform.parent = s_instance._toolBobRoot.transform;
+        s_instance._cameraController._playerCamera.mainCamera.transform.Find("FlashlightRoot").transform.parent = s_instance._toolBobRoot.transform;
+        s_instance._cameraController._playerCamera.mainCamera.transform.Find("Signalscope").transform.parent = s_instance._toolBobRoot.transform;
+        s_instance._cameraController._playerCamera.mainCamera.transform.Find("NomaiTranslatorProp").transform.parent = s_instance._toolBobRoot.transform;
     }
 }

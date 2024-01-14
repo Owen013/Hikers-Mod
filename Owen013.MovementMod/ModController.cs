@@ -71,6 +71,7 @@ public class ModController : ModBehaviour
         gameObject.AddComponent<FloatyPhysicsController>();
         gameObject.AddComponent<WallJumpController>();
         gameObject.AddComponent<ViewBobController>();
+        gameObject.AddComponent<FlippingController>();
     }
 
     private void Start()
