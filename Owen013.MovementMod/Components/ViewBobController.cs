@@ -11,7 +11,6 @@ public class ViewBobController : MonoBehaviour
     private PlayerAnimController _animController;
     private GameObject _bobRoot;
     private GameObject _toolBobRoot;
-    private float _lastGroundedTime;
     private float _bobTime;
     private float _bobIntensity;
 
@@ -23,9 +22,9 @@ public class ViewBobController : MonoBehaviour
 
     public void FixedUpdate()
     {
-        if (!_characterController) return;
+        if (_characterController == null) return;
 
-        _bobTime += Time.fixedDeltaTime * _animController._animator.speed;
+        _bobTime = Mathf.Repeat(_bobTime + Time.fixedDeltaTime * _animController._animator.speed, 1);
         _bobIntensity = Mathf.Lerp(_bobIntensity, Mathf.Sqrt(Mathf.Pow(_animController._animator.GetFloat("RunSpeedX"), 2f) + Mathf.Pow(_animController._animator.GetFloat("RunSpeedY"), 2f)) * 0.02f, 0.25f);
 
         // camera bob
@@ -61,15 +60,10 @@ public class ViewBobController : MonoBehaviour
         s_instance._toolBobRoot.transform.parent = s_instance._cameraController._playerCamera.mainCamera.transform;
         s_instance._toolBobRoot.transform.localPosition = Vector3.zero;
         s_instance._toolBobRoot.transform.localRotation = Quaternion.identity;
-        GameObject.Find("Player_Body/ShakeRoot/ViewBobRoot/PlayerCamera/ItemCarryTool").transform.parent = s_instance._toolBobRoot.transform;
-        GameObject.Find("Player_Body/ShakeRoot/ViewBobRoot/PlayerCamera/ProbeLauncher").transform.parent = s_instance._toolBobRoot.transform;
-        GameObject.Find("Player_Body/ShakeRoot/ViewBobRoot/PlayerCamera/FlashlightRoot").transform.parent = s_instance._toolBobRoot.transform;
-        GameObject.Find("Player_Body/ShakeRoot/ViewBobRoot/PlayerCamera/Signalscope").transform.parent = s_instance._toolBobRoot.transform;
-        GameObject.Find("Player_Body/ShakeRoot/ViewBobRoot/PlayerCamera/NomaiTranslatorProp").transform.parent = s_instance._toolBobRoot.transform;
-
-        s_instance._characterController.OnBecomeGrounded += () =>
-        {
-            s_instance._lastGroundedTime = Time.fixedTime;
-        };
+        s_instance._cameraController._playerCamera.mainCamera.transform.Find("PlayerCamera/ItemCarryTool").transform.parent = s_instance._toolBobRoot.transform;
+        s_instance._cameraController._playerCamera.mainCamera.transform.Find("PlayerCamera/ProbeLauncher").transform.parent = s_instance._toolBobRoot.transform;
+        s_instance._cameraController._playerCamera.mainCamera.transform.Find("PlayerCamera/FlashlightRoot").transform.parent = s_instance._toolBobRoot.transform;
+        s_instance._cameraController._playerCamera.mainCamera.transform.Find("PlayerCamera/Signalscope").transform.parent = s_instance._toolBobRoot.transform;
+        s_instance._cameraController._playerCamera.mainCamera.transform.Find("PlayerCamera/NomaiTranslatorProp").transform.parent = s_instance._toolBobRoot.transform;
     }
 }
