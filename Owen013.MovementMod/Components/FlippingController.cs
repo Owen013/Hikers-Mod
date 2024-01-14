@@ -19,19 +19,20 @@ public class FlippingController : MonoBehaviour
     {
         if (_characterController == null) return;
 
-        if (!_characterController.IsGrounded() && !PlayerState.InZeroG() && OWInput.IsPressed(InputLibrary.rollMode, InputMode.Character))
+        if (!_characterController.IsGrounded()/* && !PlayerState.InZeroG()*/ && OWInput.IsPressed(InputLibrary.rollMode/*, InputMode.Character*/))
         {
             _isFlipping = true;
             _characterController._owRigidbody.UnfreezeRotation();
-            _characterController.GetComponent<AlignPlayerWithForce>().enabled = false;
             Vector2 mouseInput = OWInput.GetAxisValue(InputLibrary.look);
             _characterController._owRigidbody.AddLocalAngularVelocityChange(new Vector3(-mouseInput.y * Time.fixedDeltaTime * 5f, 0f, -mouseInput.x * 5f * Time.fixedDeltaTime));
         }
         else
         {
             _isFlipping = false;
-            _characterController._owRigidbody.FreezeRotation();
-            _characterController.GetComponent<AlignPlayerWithForce>().enabled = true;
+            if (!PlayerState.IsDead())
+            {
+                _characterController._owRigidbody.FreezeRotation();
+            }
         }
     }
 
@@ -62,5 +63,27 @@ public class FlippingController : MonoBehaviour
             return false;
         }
         return true;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
+    public static void IsBoosterAllowed(ref bool __result)
+    {
+        if (s_instance._isFlipping) __result = true;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(JetpackThrusterModel), nameof(JetpackThrusterModel.OnBreakAlignment))]
+    public static bool OnBreakAlignment()
+    {
+        if (s_instance._isFlipping) return false;
+        else return true;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(AlignPlayerWithForce), nameof(AlignPlayerWithForce.ManagedFixedUpdate))]
+    public static void OnBreakAlignment(AlignPlayerWithForce __instance)
+    {
+        if (s_instance._isFlipping) __instance.SkipNextFrame();
     }
 }
