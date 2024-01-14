@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using HikersMod.APIs;
 using UnityEngine;
 
 namespace HikersMod.Components;
@@ -34,7 +35,9 @@ public class ViewBobController : MonoBehaviour
 
         // tool bob
         float toolBobX = Mathf.Sin(2f * Mathf.PI * _viewBobTimePosition) * _viewBobIntensity * ModController.s_instance.toolBobSensitivity * 0.5f;
+        toolBobX *= ModController.s_instance.SmolHatchlingAPI != null ? ModController.s_instance.SmolHatchlingAPI.GetCurrentScale().x : 1f;
         float toolBobY = Mathf.Cos(4f * Mathf.PI * _viewBobTimePosition) * _viewBobIntensity * ModController.s_instance.toolBobSensitivity * 0.25f;
+        toolBobY *= ModController.s_instance.SmolHatchlingAPI != null ? ModController.s_instance.SmolHatchlingAPI.GetCurrentScale().y : 1f;
         _toolBobRoot.transform.localPosition = new Vector3(toolBobX, toolBobY, 0f);
     }
 

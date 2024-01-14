@@ -12,13 +12,13 @@ public class ModController : ModBehaviour
     public static ModController s_instance;
     public ISmolHatchling SmolHatchlingAPI;
     public ICameraShaker CameraShakerAPI;
+    public delegate void ConfigureEvent();
+    public event ConfigureEvent OnConfigure;
     private PlayerCharacterController _characterController;
     private PlayerAnimController _animController;
     private JetpackThrusterModel _jetpackModel;
     private PlayerCloneController _cloneController;
     private EyeMirrorController _mirrorController;
-    public delegate void ConfigureEvent();
-    public event ConfigureEvent OnConfigure;
     private float _animSpeed;
 
     // Config
@@ -77,7 +77,6 @@ public class ModController : ModBehaviour
     {
         // Get APIs
         SmolHatchlingAPI = ModHelper.Interaction.TryGetModApi<ISmolHatchling>("Owen013.TeenyHatchling");
-        SmolHatchlingAPI?.SetHikersModEnabled();
         CameraShakerAPI = ModHelper.Interaction.TryGetModApi<ICameraShaker>("SBtT.CameraShake");
 
         // Ready!
