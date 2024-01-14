@@ -13,8 +13,6 @@ public class ViewBobController : MonoBehaviour
     private GameObject _toolBobRoot;
     private float _lastGroundedTime;
     private float _bobTime;
-    private float _backupBobTime;
-    private bool _useBackupBob;
     private float _bobIntensity;
 
     public void Awake()
@@ -27,18 +25,7 @@ public class ViewBobController : MonoBehaviour
     {
         if (!_characterController) return;
 
-        AnimatorStateInfo animInfo = _animController._animator.GetCurrentAnimatorStateInfo(0);
-        if (Time.fixedTime - _lastGroundedTime < 1f)
-        {
-            _useBackupBob = true;
-        }
-        else
-        {
-            _useBackupBob = false;
-        }
-
-        _backupBobTime += Time.fixedDeltaTime * _animController._animator.speed;
-        _bobTime = Mathf.MoveTowards(_bobTime, _useBackupBob ? _backupBobTime : animInfo.normalizedTime + 0.5f, Time.fixedDeltaTime * _animController._animator.speed * 1.01f);
+        _bobTime += Time.fixedDeltaTime * _animController._animator.speed;
         _bobIntensity = Mathf.Lerp(_bobIntensity, Mathf.Sqrt(Mathf.Pow(_animController._animator.GetFloat("RunSpeedX"), 2f) + Mathf.Pow(_animController._animator.GetFloat("RunSpeedY"), 2f)) * 0.02f, 0.25f);
 
         // camera bob
