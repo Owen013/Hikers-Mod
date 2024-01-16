@@ -9,9 +9,9 @@ public class HikersModAPI
         return Main.Instance.GetAnimSpeed();
     }
 
-    public string GetMoveSpeed()
+    public bool IsSprinting()
     {
-        return SpeedController.Instance.GetMoveSpeed();
+        return SpeedController.Instance.IsSprinting();
     }
 
     public bool IsEmergencyBoosting()

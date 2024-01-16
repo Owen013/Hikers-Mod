@@ -16,6 +16,11 @@ public class EmergencyBoostController : MonoBehaviour
     private float _lastBoostTime;
     private bool _isEmergencyBoosting;
 
+    public bool IsEmergencyBoosting()
+    {
+        return _isEmergencyBoosting;
+    }
+
     private void Awake()
     {
         Instance = this;
@@ -109,10 +114,5 @@ public class EmergencyBoostController : MonoBehaviour
     {
         _isEmergencyBoosting = false;
         _jetpackModel._chargeSeconds = _characterController.IsGrounded() ? _jetpackModel._chargeSecondsGround : _jetpackModel._chargeSecondsAir;
-    }
-
-    public bool IsEmergencyBoosting()
-    {
-        return _isEmergencyBoosting;
     }
 }

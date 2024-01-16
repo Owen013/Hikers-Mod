@@ -57,30 +57,6 @@ public class Main : ModBehaviour
         return new HikersModAPI();
     }
 
-    private void Awake()
-    {
-        // Static reference to HikersMod so it can be used in patches.
-        Instance = this;
-        Harmony.CreateAndPatchAll(typeof(Main));
-    }
-
-    private void Start()
-    {
-        // Get APIs
-        SmolHatchlingAPI = ModHelper.Interaction.TryGetModApi<ISmolHatchling>("Owen013.TeenyHatchling");
-        CameraShakerAPI = ModHelper.Interaction.TryGetModApi<ICameraShaker>("SBtT.CameraShake");
-
-        // Ready!
-        ModHelper.Console.WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
-    }
-
-    private void Update()
-    {
-        if (_characterController == null) return;
-
-        UpdateAnimSpeed();
-    }
-
     public override void Configure(IModConfig config)
     {
         // Get all config options
@@ -122,6 +98,41 @@ public class Main : ModBehaviour
         }
     }
 
+    public void DebugLog(string text, MessageType type = MessageType.Message, bool forceMessage = false)
+    {
+        if (!debugLogEnabled && !forceMessage) return;
+        ModHelper.Console.WriteLine(text, type);
+    }
+
+    public float GetAnimSpeed()
+    {
+        return _animSpeed;
+    }
+
+    private void Awake()
+    {
+        // Static reference to HikersMod so it can be used in patches.
+        Instance = this;
+        Harmony.CreateAndPatchAll(typeof(Main));
+    }
+
+    private void Start()
+    {
+        // Get APIs
+        SmolHatchlingAPI = ModHelper.Interaction.TryGetModApi<ISmolHatchling>("Owen013.TeenyHatchling");
+        CameraShakerAPI = ModHelper.Interaction.TryGetModApi<ICameraShaker>("SBtT.CameraShake");
+
+        // Ready!
+        ModHelper.Console.WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
+    }
+
+    private void Update()
+    {
+        if (_characterController == null) return;
+
+        UpdateAnimSpeed();
+    }
+
     private void ApplyChanges()
     {
         if (_characterController == null) return;
@@ -153,17 +164,6 @@ public class Main : ModBehaviour
         {
             _mirrorController._mirrorPlayer.GetComponentInChildren<PlayerAnimController>()._animator.speed = _animSpeed;
         }
-    }
-
-    public float GetAnimSpeed()
-    {
-        return _animSpeed;
-    }
-
-    public void DebugLog(string text, MessageType type = MessageType.Message, bool forceMessage = false)
-    {
-        if (!debugLogEnabled && !forceMessage) return;
-        ModHelper.Console.WriteLine(text, type);
     }
 
     [HarmonyPostfix]

@@ -18,6 +18,11 @@ public class SpeedController : MonoBehaviour
     private bool _isSprinting;
     private bool _isDreamLanternFocused;
 
+    public bool IsSprinting()
+    {
+        return _isSprinting;
+    }
+
     private void Awake()
     {
         Instance = this;
@@ -190,13 +195,5 @@ public class SpeedController : MonoBehaviour
         thruster._light.range = thruster._baseLightRadius * thruster._currentScale;
         thruster._thrusterRenderer.enabled = thruster._currentScale > 0f;
         thruster._light.enabled = thruster._currentScale > 0f;
-    }
-
-    public string GetMoveSpeed()
-    {
-        if (_isSprinting) return "sprinting";
-        else if (_isDreamLanternFocused) return "dreamLanternFocused";
-        else if (OWInput.IsPressed(InputLibrary.rollMode) && _characterController._heldLanternItem == null) return "walking";
-        else return "normal";
     }
 }
