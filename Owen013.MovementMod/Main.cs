@@ -34,13 +34,6 @@ public class Main : ModBehaviour
     public float emergencyBoostVolume;
     public float emergencyBoostInputTime;
     public float emergencyBoostCameraShakeAmount;
-    public bool isViewBobbingEnabled;
-    public float viewBobXSensitivity;
-    public float viewBobYSensitivity;
-    public float toolBobSensitivity;
-    public bool isAirTricksEnabled;
-    public float airTrickSensitivity;
-    public float maxAirTrickMomentum;
     public float defaultSpeed;
     public float strafeSpeed;
     public float walkSpeed;
@@ -104,12 +97,6 @@ public class Main : ModBehaviour
         emergencyBoostVolume = config.GetSettingsValue<float>("Emergency Boost Volume");
         emergencyBoostInputTime = config.GetSettingsValue<float>("Emergency Boost Input Time");
         emergencyBoostCameraShakeAmount = config.GetSettingsValue<float>("Emergency Boost Camera Shake Amount");
-        viewBobXSensitivity = config.GetSettingsValue<float>("View Bob X Sensitivity");
-        viewBobYSensitivity = config.GetSettingsValue<float>("View Bob Y Sensitivity");
-        toolBobSensitivity = config.GetSettingsValue<float>("Tool Bob Sensitivity");
-        isAirTricksEnabled = config.GetSettingsValue<bool>("Enable Air Tricks");
-        airTrickSensitivity = config.GetSettingsValue<float>("Air Trick Mouse Sensitivity");
-        maxAirTrickMomentum = config.GetSettingsValue<float>("Maximum Trick Momentum");
         defaultSpeed = config.GetSettingsValue<float>("Normal Speed");
         strafeSpeed = config.GetSettingsValue<float>("Strafe Speed");
         walkSpeed = config.GetSettingsValue<float>("Walk Speed");
@@ -193,8 +180,6 @@ public class Main : ModBehaviour
         __instance.gameObject.AddComponent<Components.EmergencyBoostController>();
         __instance.gameObject.AddComponent<Components.FloatyPhysicsController>();
         __instance.gameObject.AddComponent<Components.WallJumpController>();
-        __instance.gameObject.AddComponent<Components.ViewBobController>();
-        __instance.gameObject.AddComponent<Components.AirTrickController>();
 
         Instance.ApplyChanges();
     }
