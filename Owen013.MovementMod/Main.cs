@@ -52,10 +52,10 @@ public class Main : ModBehaviour
     public float wallJumpsPerJump;
     public bool debugLogEnabled;
 
-    //public override object GetApi()
-    //{
-    //    return new HikersModAPI();
-    //}
+    public override object GetApi()
+    {
+        return new HikersModAPI();
+    }
 
     private void Awake()
     {
@@ -184,6 +184,14 @@ public class Main : ModBehaviour
         Instance.ApplyChanges();
     }
 
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PlayerCloneController), nameof(PlayerCloneController.Start))]
+    private static void EyeCloneStart(PlayerCloneController __instance) => Instance._cloneController = __instance;
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(EyeMirrorController), nameof(EyeMirrorController.Start))]
+    private static void EyeMirrorStart(EyeMirrorController __instance) => Instance._mirrorController = __instance;
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.UpdateAirControl))]
     private static bool UpdateAirControl(PlayerCharacterController __instance)
@@ -213,11 +221,56 @@ public class Main : ModBehaviour
         return false;
     }
 
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(PlayerCloneController), nameof(PlayerCloneController.Start))]
-    private static void EyeCloneStart(PlayerCloneController __instance) => Instance._cloneController = __instance;
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(PlayerMovementAudio), nameof(PlayerMovementAudio.PlayFootstep))]
+    private static bool PlayFootstep(PlayerMovementAudio __instance)
+    {
+        AudioType audioType = (!PlayerState.IsCameraUnderwater() && __instance._fluidDetector.InFluidType(FluidVolume.Type.WATER)) ? AudioType.MovementShallowWaterFootstep : PlayerMovementAudio.GetFootstepAudioType(__instance._playerController.GetGroundSurface());
+        if (audioType != AudioType.None)
+        {
+            __instance._footstepAudio.pitch = Random.Range(0.9f, 1.1f);
+            __instance._footstepAudio.PlayOneShot(audioType, 1.4f * Instance._characterController.GetRelativeGroundVelocity().magnitude / 6);
+        }
+        return false;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(DreamLanternItem), nameof(DreamLanternItem.OverrideMaxRunSpeed))]
+    private static bool OverrideMaxRunSpeed(ref float maxSpeedX, ref float maxSpeedZ, DreamLanternItem __instance)
+    {
+        float lerpPosition = 1f - __instance._lanternController.GetFocus();
+        lerpPosition *= lerpPosition;
+        maxSpeedX = Mathf.Lerp(Instance.dreamLanternSpeed, maxSpeedX, lerpPosition);
+        maxSpeedZ = Mathf.Lerp(Instance.dreamLanternSpeed, maxSpeedZ, lerpPosition);
+        return false;
+    }
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(EyeMirrorController), nameof(EyeMirrorController.Start))]
-    private static void EyeMirrorStart(EyeMirrorController __instance) => Instance._mirrorController = __instance;
+    [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
+    private static void OnGetJetpackInput(ref Vector3 __result)
+    {
+        if (Components.SpeedController.Instance.GetMoveSpeed() == "sprinting" && __result.y != 0f)
+        {
+            __result.y = 0f;
+            Instance._jetpackModel._boostActivated = false;
+        }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Update))]
+    private static void CharacterControllerUpdate(PlayerCharacterController __instance)
+    {
+        if (Components.SpeedController.Instance.GetMoveSpeed() == "sprinting" || !Instance._characterController._isWearingSuit)
+        {
+            __instance.UpdateJumpInput();
+        }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
+    private static void IsBoosterAllowed(ref bool __result, PlayerResources __instance)
+    {
+        // prevents player from jumping higher when sprinting
+        if (Components.SpeedController.Instance.GetMoveSpeed() == "sprinting") __result = false;
+    }
 }
