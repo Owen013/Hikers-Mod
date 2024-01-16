@@ -6,16 +6,16 @@ public class HikersModAPI
 {
     public float GetAnimSpeed()
     {
-        return ModController.s_instance.GetAnimSpeed();
+        return Main.Instance.GetAnimSpeed();
     }
 
     public string GetMoveSpeed()
     {
-        return SpeedController.s_instance.GetMoveSpeed();
+        return SpeedController.Instance.GetMoveSpeed();
     }
 
     public bool IsEmergencyBoosting()
     {
-        return EmergencyBoostController.s_instance.IsEmergencyBoosting();
+        return EmergencyBoostController.Instance.IsEmergencyBoosting();
     }
 }

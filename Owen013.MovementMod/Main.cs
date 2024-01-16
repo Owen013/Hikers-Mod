@@ -1,15 +1,14 @@
 ﻿using HarmonyLib;
 using HikersMod.APIs;
-using HikersMod.Components;
 using OWML.Common;
 using OWML.ModHelper;
 using UnityEngine;
 
 namespace HikersMod;
 
-public class ModController : ModBehaviour
+public class Main : ModBehaviour
 {
-    public static ModController s_instance;
+    public static Main Instance;
     public ISmolHatchling SmolHatchlingAPI;
     public ICameraShaker CameraShakerAPI;
     public delegate void ConfigureEvent();
@@ -39,6 +38,9 @@ public class ModController : ModBehaviour
     public float viewBobXSensitivity;
     public float viewBobYSensitivity;
     public float toolBobSensitivity;
+    public bool isAirTricksEnabled;
+    public float airTrickSensitivity;
+    public float maxAirTrickMomentum;
     public float defaultSpeed;
     public float strafeSpeed;
     public float walkSpeed;
@@ -57,21 +59,16 @@ public class ModController : ModBehaviour
     public float wallJumpsPerJump;
     public bool debugLogEnabled;
 
-    public override object GetApi()
-    {
-        return new HikersModAPI();
-    }
+    //public override object GetApi()
+    //{
+    //    return new HikersModAPI();
+    //}
 
     private void Awake()
     {
         // Static reference to HikersMod so it can be used in patches.
-        s_instance = this;
-        Harmony.CreateAndPatchAll(typeof(ModController));
-        gameObject.AddComponent<SpeedController>();
-        gameObject.AddComponent<EmergencyBoostController>();
-        gameObject.AddComponent<FloatyPhysicsController>();
-        gameObject.AddComponent<WallJumpController>();
-        gameObject.AddComponent<ViewBobController>();
+        Instance = this;
+        Harmony.CreateAndPatchAll(typeof(Main));
     }
 
     private void Start()
@@ -110,6 +107,9 @@ public class ModController : ModBehaviour
         viewBobXSensitivity = config.GetSettingsValue<float>("View Bob X Sensitivity");
         viewBobYSensitivity = config.GetSettingsValue<float>("View Bob Y Sensitivity");
         toolBobSensitivity = config.GetSettingsValue<float>("Tool Bob Sensitivity");
+        isAirTricksEnabled = config.GetSettingsValue<bool>("Enable Air Tricks");
+        airTrickSensitivity = config.GetSettingsValue<float>("Air Trick Mouse Sensitivity");
+        maxAirTrickMomentum = config.GetSettingsValue<float>("Maximum Trick Momentum");
         defaultSpeed = config.GetSettingsValue<float>("Normal Speed");
         strafeSpeed = config.GetSettingsValue<float>("Strafe Speed");
         walkSpeed = config.GetSettingsValue<float>("Walk Speed");
@@ -129,7 +129,10 @@ public class ModController : ModBehaviour
         debugLogEnabled = config.GetSettingsValue<bool>("Enable Debug Log");
 
         ApplyChanges();
-        OnConfigure();
+        if (OnConfigure != null)
+        {
+            OnConfigure();
+        }
     }
 
     private void ApplyChanges()
@@ -178,21 +181,29 @@ public class ModController : ModBehaviour
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
-    private static void OnCharacterControllerStart()
+    private static void OnCharacterControllerStart(PlayerCharacterController __instance)
     {
         // Get vars
-        s_instance._characterController = Locator.GetPlayerController();
-        s_instance._animController = FindObjectOfType<PlayerAnimController>();
-        s_instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
+        Instance._characterController = __instance;
+        Instance._animController = __instance.GetComponentInChildren<PlayerAnimController>();
+        Instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
 
-        s_instance.ApplyChanges();
+        // Add components to character
+        __instance.gameObject.AddComponent<Components.SpeedController>();
+        __instance.gameObject.AddComponent<Components.EmergencyBoostController>();
+        __instance.gameObject.AddComponent<Components.FloatyPhysicsController>();
+        __instance.gameObject.AddComponent<Components.WallJumpController>();
+        __instance.gameObject.AddComponent<Components.ViewBobController>();
+        __instance.gameObject.AddComponent<Components.AirTrickController>();
+
+        Instance.ApplyChanges();
     }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.UpdateAirControl))]
     private static bool UpdateAirControl(PlayerCharacterController __instance)
     {
-        if (!s_instance.isMidairTurningEnabled) return true;
+        if (!Instance.isMidairTurningEnabled) return true;
 
         if (__instance._lastGroundBody != null)
         {
@@ -219,9 +230,9 @@ public class ModController : ModBehaviour
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCloneController), nameof(PlayerCloneController.Start))]
-    private static void EyeCloneStart(PlayerCloneController __instance) => s_instance._cloneController = __instance;
+    private static void EyeCloneStart(PlayerCloneController __instance) => Instance._cloneController = __instance;
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(EyeMirrorController), nameof(EyeMirrorController.Start))]
-    private static void EyeMirrorStart(EyeMirrorController __instance) => s_instance._mirrorController = __instance;
+    private static void EyeMirrorStart(EyeMirrorController __instance) => Instance._mirrorController = __instance;
 }

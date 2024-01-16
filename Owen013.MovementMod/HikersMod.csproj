@@ -15,7 +15,8 @@
   <ItemGroup>
     <Compile Remove="Components\BodyTurningController.cs" />
     <Compile Remove="Components\CrouchController.cs" />
-    <Compile Remove="Components\FlippingController.cs" />
+    <Compile Remove="Components\FlippingController - Copy.cs" />
+    <Compile Remove="HikersModAPI.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="OWML" Version="2.9.8" />
@@ -31,5 +32,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="HikersMod.csproj.user" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Components\" />
   </ItemGroup>
 </Project>

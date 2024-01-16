@@ -6,7 +6,7 @@ namespace HikersMod.Components;
 
 public class SpeedController : MonoBehaviour
 {
-    public static SpeedController s_instance;
+    public static SpeedController Instance;
     private PlayerCharacterController _characterController;
     private JetpackThrusterModel _jetpackModel;
     private JetpackThrusterAudio _jetpackAudio;
@@ -20,9 +20,31 @@ public class SpeedController : MonoBehaviour
 
     private void Awake()
     {
-        s_instance = this;
+        Instance = this;
         Harmony.CreateAndPatchAll(typeof(SpeedController));
-        ModController.s_instance.OnConfigure += ApplyChanges;
+        Main.Instance.OnConfigure += ApplyChanges;
+    }
+
+    private void Start()
+    {
+        _characterController = GetComponent<PlayerCharacterController>();
+        _jetpackModel = FindObjectOfType<JetpackThrusterModel>();
+        _jetpackAudio = FindObjectOfType<JetpackThrusterAudio>();
+        _playerSuit = GameObject.Find("Player_Body/Traveller_HEA_Player_v2/Traveller_Mesh_v01:Traveller_Geo");
+        _playerJetpack = GameObject.Find("Player_Body/Traveller_HEA_Player_v2/Traveller_Mesh_v01:Traveller_Geo/Traveller_Mesh_v01:Props_HEA_Jetpack");
+        _thrusters = new(GetComponentsInChildren<ThrusterFlameController>(includeInactive: true));
+        _thrusterVector = Vector2.zero;
+        _isDreamLanternFocused = false;
+
+        _characterController.OnBecomeGrounded += () =>
+        {
+            if (Main.Instance.sprintOnLanding)
+            {
+                UpdateSprinting();
+            }
+        };
+
+        ApplyChanges();
     }
 
     private void Update()
@@ -49,18 +71,18 @@ public class SpeedController : MonoBehaviour
         bool jetpackVisible = _playerSuit.activeSelf && _playerJetpack.activeSelf;
 
         // get thruster vector IF the player is sprinting and the jetpack is visible. Otherwise, move towards zero
-        _thrusterVector = Vector2.MoveTowards(_thrusterVector, _isSprinting && jetpackVisible && ModController.s_instance.isSprintEffectEnabled ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
+        _thrusterVector = Vector2.MoveTowards(_thrusterVector, _isSprinting && jetpackVisible && Main.Instance.isSprintEffectEnabled ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
         Vector2 flameVector = _thrusterVector;
 
         // adjust vector based on sprinting and strafe speed
-        flameVector.x *= (ModController.s_instance.sprintStrafeSpeed / ModController.s_instance.strafeSpeed) - 1;
+        flameVector.x *= (Main.Instance.sprintStrafeSpeed / Main.Instance.strafeSpeed) - 1;
         if (flameVector.y < 0f)
         {
-            flameVector.y *= (ModController.s_instance.sprintStrafeSpeed / ModController.s_instance.strafeSpeed) - 1;
+            flameVector.y *= (Main.Instance.sprintStrafeSpeed / Main.Instance.strafeSpeed) - 1;
         }
         else
         {
-            flameVector.y *= (ModController.s_instance.sprintSpeed / ModController.s_instance.defaultSpeed) - 1;
+            flameVector.y *= (Main.Instance.sprintSpeed / Main.Instance.defaultSpeed) - 1;
         }
 
         // clamp the vector so it doesn't become too big
@@ -114,20 +136,20 @@ public class SpeedController : MonoBehaviour
         if (_characterController == null) return;
 
         // Change built-in character attributes
-        _characterController._runSpeed = ModController.s_instance.defaultSpeed;
-        _characterController._strafeSpeed = ModController.s_instance.strafeSpeed;
-        _characterController._walkSpeed = ModController.s_instance.walkSpeed;
-        _characterController._airSpeed = ModController.s_instance.airSpeed;
-        _characterController._airAcceleration = ModController.s_instance.airAccel;
+        _characterController._runSpeed = Main.Instance.defaultSpeed;
+        _characterController._strafeSpeed = Main.Instance.strafeSpeed;
+        _characterController._walkSpeed = Main.Instance.walkSpeed;
+        _characterController._airSpeed = Main.Instance.airSpeed;
+        _characterController._airAcceleration = Main.Instance.airAccel;
 
-        _sprintButton = (ModController.s_instance.sprintButtonMode == "Down Thrust") ? InputLibrary.thrustDown : InputLibrary.thrustUp;
+        _sprintButton = (Main.Instance.sprintButtonMode == "Down Thrust") ? InputLibrary.thrustDown : InputLibrary.thrustUp;
 
         UpdateSprinting();
     }
 
     private void UpdateSprinting()
     {
-        bool isSprintAllowed = ModController.s_instance.sprintMode == "Always" || (ModController.s_instance.sprintMode == "When Suited" && PlayerState.IsWearingSuit());
+        bool isSprintAllowed = Main.Instance.sprintMode == "Always" || (Main.Instance.sprintMode == "When Suited" && PlayerState.IsWearingSuit());
         bool isOnValidGround = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce();
         bool isWalking = _isDreamLanternFocused || (OWInput.IsPressed(InputLibrary.rollMode) && _characterController._heldLanternItem == null);
         bool wasSprinting = _isSprinting;
@@ -135,20 +157,20 @@ public class SpeedController : MonoBehaviour
         if (isSprintAllowed && isOnValidGround && !isWalking && OWInput.IsPressed(_sprintButton) && (_isSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0))
         {
             _isSprinting = true;
-            _characterController._runSpeed = ModController.s_instance.sprintSpeed;
-            _characterController._strafeSpeed = ModController.s_instance.sprintStrafeSpeed;
+            _characterController._runSpeed = Main.Instance.sprintSpeed;
+            _characterController._strafeSpeed = Main.Instance.sprintStrafeSpeed;
         }
         else
         {
             _isSprinting = false;
-            _characterController._runSpeed = ModController.s_instance.defaultSpeed;
-            _characterController._strafeSpeed = ModController.s_instance.strafeSpeed;
+            _characterController._runSpeed = Main.Instance.defaultSpeed;
+            _characterController._strafeSpeed = Main.Instance.strafeSpeed;
         }
 
         // log it
         if (_isSprinting != wasSprinting)
         {
-            ModController.s_instance.DebugLog($"{(_isSprinting ? "Started" : "Stopped")} sprinting");
+            Main.Instance.DebugLog($"{(_isSprinting ? "Started" : "Stopped")} sprinting");
         }
     }
 
@@ -179,37 +201,13 @@ public class SpeedController : MonoBehaviour
     }
 
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
-    private static void OnCharacterControllerStart()
-    {
-        s_instance._characterController = Locator.GetPlayerController();
-        s_instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
-        s_instance._jetpackAudio = FindObjectOfType<JetpackThrusterAudio>();
-        s_instance._playerSuit = GameObject.Find("Player_Body/Traveller_HEA_Player_v2/Traveller_Mesh_v01:Traveller_Geo");
-        s_instance._playerJetpack = GameObject.Find("Player_Body/Traveller_HEA_Player_v2/Traveller_Mesh_v01:Traveller_Geo/Traveller_Mesh_v01:Props_HEA_Jetpack");
-        s_instance._thrusters = new(s_instance._characterController.gameObject.GetComponentsInChildren<ThrusterFlameController>(includeInactive: true));
-        s_instance._thrusterVector = Vector2.zero;
-        s_instance._isDreamLanternFocused = false;
-
-        s_instance._characterController.OnBecomeGrounded += () =>
-        {
-            if (ModController.s_instance.sprintOnLanding)
-            {
-                s_instance.UpdateSprinting();
-            }
-        };
-
-        s_instance.ApplyChanges();
-    }
-
-    [HarmonyPostfix]
     [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
     private static void OnGetJetpackInput(ref Vector3 __result)
     {
-        if (s_instance._isSprinting && __result.y != 0f)
+        if (Instance._isSprinting && __result.y != 0f)
         {
             __result.y = 0f;
-            s_instance._jetpackModel._boostActivated = false;
+            Instance._jetpackModel._boostActivated = false;
         }
     }
 
@@ -217,7 +215,7 @@ public class SpeedController : MonoBehaviour
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Update))]
     private static void CharacterControllerUpdate(PlayerCharacterController __instance)
     {
-        if (s_instance._isSprinting || !s_instance._characterController._isWearingSuit)
+        if (Instance._isSprinting || !Instance._characterController._isWearingSuit)
         {
             __instance.UpdateJumpInput();
         }
@@ -228,7 +226,7 @@ public class SpeedController : MonoBehaviour
     private static void IsBoosterAllowed(ref bool __result, PlayerResources __instance)
     {
         // prevents player from jumping higher when sprinting
-        if (s_instance._isSprinting) __result = false;
+        if (Instance._isSprinting) __result = false;
     }
 
     [HarmonyPrefix]
@@ -239,7 +237,7 @@ public class SpeedController : MonoBehaviour
         if (audioType != AudioType.None)
         {
             __instance._footstepAudio.pitch = Random.Range(0.9f, 1.1f);
-            __instance._footstepAudio.PlayOneShot(audioType, 1.4f * s_instance._characterController.GetRelativeGroundVelocity().magnitude / 6);
+            __instance._footstepAudio.PlayOneShot(audioType, 1.4f * Instance._characterController.GetRelativeGroundVelocity().magnitude / 6);
         }
         return false;
     }
@@ -250,8 +248,8 @@ public class SpeedController : MonoBehaviour
     {
         float lerpPosition = 1f - __instance._lanternController.GetFocus();
         lerpPosition *= lerpPosition;
-        maxSpeedX = Mathf.Lerp(ModController.s_instance.dreamLanternSpeed, maxSpeedX, lerpPosition);
-        maxSpeedZ = Mathf.Lerp(ModController.s_instance.dreamLanternSpeed, maxSpeedZ, lerpPosition);
+        maxSpeedX = Mathf.Lerp(Main.Instance.dreamLanternSpeed, maxSpeedX, lerpPosition);
+        maxSpeedZ = Mathf.Lerp(Main.Instance.dreamLanternSpeed, maxSpeedZ, lerpPosition);
         return false;
     }
 }

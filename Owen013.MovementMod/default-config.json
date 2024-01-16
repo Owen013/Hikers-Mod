@@ -102,6 +102,26 @@
 			"tooltip": "How much the player's held item bobs.'. Recommended: 1"
 		},
 
+
+		"Air Tricks": {
+			"type": "separator"
+		},
+		"Enable Air Tricks": {
+			"type": "toggle",
+			"value": true,
+			"tooltip": "Allows you to do tricks in the air. Recommended: Enabled"
+		},
+		"Air Trick Mouse Sensitivity": {
+			"type": "number",
+			"value": 1,
+			"tooltip": "How sensitive your mouse is in performing air tricks. Recommended: 1"
+		},
+		"Maximum Trick Momentum": {
+			"type": "number",
+			"value": 360,
+			"tooltip": "The maximum angular momentum (in degrees/second) you can have via flipping. Recommended: 360"
+		},
+
 		"Character Attributes": {
 			"type": "separator"
 		},

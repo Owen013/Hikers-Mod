@@ -1,12 +1,10 @@
-﻿using HarmonyLib;
-using HikersMod.APIs;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace HikersMod.Components;
 
 public class ViewBobController : MonoBehaviour
 {
-    public static ViewBobController s_instance;
+    public static ViewBobController Instance;
     private PlayerCharacterController _characterController;
     private PlayerCameraController _cameraController;
     private PlayerAnimController _animController;
@@ -16,13 +14,46 @@ public class ViewBobController : MonoBehaviour
     private float _viewBobTimePosition;
     private float _viewBobIntensity;
 
-    public void Awake()
+    private void Awake()
     {
-        s_instance = this;
-        Harmony.CreateAndPatchAll(typeof(ViewBobController));
+        Instance = this;
     }
 
-    public void FixedUpdate()
+    private void Start()
+    {
+        _characterController = GetComponent<PlayerCharacterController>();
+        _cameraController = Locator.GetPlayerCameraController();
+        _animController = GetComponentInChildren<PlayerAnimController>();
+
+        // create viewbob root and parent camera to it
+        _viewBobRoot = new();
+        _viewBobRoot.name = "ViewBobRoot";
+        _viewBobRoot.transform.parent = _cameraController._playerCamera.mainCamera.transform.parent;
+        _viewBobRoot.transform.localPosition = Vector3.zero;
+        _viewBobRoot.transform.localRotation = Quaternion.identity;
+        _cameraController._playerCamera.mainCamera.transform.parent = _viewBobRoot.transform;
+
+        // create tool bob root and parent camera objects to it
+        _toolBobRoot = new();
+        _toolBobRoot.name = "ToolBobRoot";
+        _toolBobRoot.transform.parent = _cameraController._playerCamera.mainCamera.transform;
+        _toolBobRoot.transform.localPosition = Vector3.zero;
+        _toolBobRoot.transform.localRotation = Quaternion.identity;
+        _cameraController._playerCamera.mainCamera.transform.Find("ItemCarryTool").transform.parent = _toolBobRoot.transform;
+        _cameraController._playerCamera.mainCamera.transform.Find("FlashlightRoot").transform.parent = _toolBobRoot.transform;
+        _cameraController._playerCamera.mainCamera.transform.Find("Signalscope").transform.parent = _toolBobRoot.transform;
+        _cameraController._playerCamera.mainCamera.transform.Find("NomaiTranslatorProp").transform.parent = _toolBobRoot.transform;
+
+        // create tool bob root and parent camera objects to it
+        _scoutBobRoot = new();
+        _scoutBobRoot.name = "ScoutBobRoot";
+        _scoutBobRoot.transform.parent = _cameraController._playerCamera.mainCamera.transform;
+        _scoutBobRoot.transform.localPosition = Vector3.zero;
+        _scoutBobRoot.transform.localRotation = Quaternion.identity;
+        _cameraController._playerCamera.mainCamera.transform.Find("ProbeLauncher").transform.parent = _scoutBobRoot.transform;
+    }
+
+    private void FixedUpdate()
     {
         if (_characterController == null) return;
 
@@ -30,53 +61,18 @@ public class ViewBobController : MonoBehaviour
         _viewBobIntensity = Mathf.Lerp(_viewBobIntensity, Mathf.Sqrt(Mathf.Pow(_animController._animator.GetFloat("RunSpeedX"), 2f) + Mathf.Pow(_animController._animator.GetFloat("RunSpeedY"), 2f)) * 0.02f, 0.25f);
 
         // camera bob
-        float bobX = Mathf.Sin(2f * Mathf.PI * _viewBobTimePosition) * _viewBobIntensity * ModController.s_instance.viewBobXSensitivity;
-        float bobY = Mathf.Cos(4f * Mathf.PI * _viewBobTimePosition) * _viewBobIntensity * ModController.s_instance.viewBobYSensitivity;
+        float bobX = Mathf.Sin(2f * Mathf.PI * _viewBobTimePosition) * _viewBobIntensity * Main.Instance.viewBobXSensitivity;
+        float bobY = Mathf.Cos(4f * Mathf.PI * _viewBobTimePosition) * _viewBobIntensity * Main.Instance.viewBobYSensitivity;
         _viewBobRoot.transform.localPosition = new Vector3(bobX, bobY, 0f);
 
         // tool bob
-        float toolBobX = Mathf.Sin(2f * Mathf.PI * _viewBobTimePosition) * _viewBobIntensity * ModController.s_instance.toolBobSensitivity * 0.5f;
-        toolBobX *= ModController.s_instance.SmolHatchlingAPI != null ? ModController.s_instance.SmolHatchlingAPI.GetCurrentScale().x : 1f;
-        float toolBobY = Mathf.Cos(4f * Mathf.PI * _viewBobTimePosition) * _viewBobIntensity * ModController.s_instance.toolBobSensitivity * 0.25f;
-        toolBobY *= ModController.s_instance.SmolHatchlingAPI != null ? ModController.s_instance.SmolHatchlingAPI.GetCurrentScale().y : 1f;
+        float toolBobX = Mathf.Sin(2f * Mathf.PI * _viewBobTimePosition) * _viewBobIntensity * Main.Instance.toolBobSensitivity * 0.5f;
+        toolBobX *= Main.Instance.SmolHatchlingAPI != null ? Main.Instance.SmolHatchlingAPI.GetCurrentScale().x : 1f;
+        float toolBobY = Mathf.Cos(4f * Mathf.PI * _viewBobTimePosition) * _viewBobIntensity * Main.Instance.toolBobSensitivity * 0.25f;
+        toolBobY *= Main.Instance.SmolHatchlingAPI != null ? Main.Instance.SmolHatchlingAPI.GetCurrentScale().y : 1f;
         _toolBobRoot.transform.localPosition = new Vector3(toolBobX, toolBobY, 0f);
+
         // separate root for scout launcher since it's less reactive ingame
         _scoutBobRoot.transform.localPosition = _toolBobRoot.transform.localPosition * 3f;
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
-    public static void OnCharacterControllerStart()
-    {
-        s_instance._characterController = Locator.GetPlayerController();
-        s_instance._cameraController = FindObjectOfType<PlayerCameraController>();
-        s_instance._animController = FindObjectOfType<PlayerAnimController>();
-
-        // create viewbob root and parent camera to it
-        s_instance._viewBobRoot = new();
-        s_instance._viewBobRoot.name = "ViewBobRoot";
-        s_instance._viewBobRoot.transform.parent = s_instance._cameraController._playerCamera.mainCamera.transform.parent;
-        s_instance._viewBobRoot.transform.localPosition = Vector3.zero;
-        s_instance._viewBobRoot.transform.localRotation = Quaternion.identity;
-        s_instance._cameraController._playerCamera.mainCamera.transform.parent = s_instance._viewBobRoot.transform;
-
-        // create tool bob root and parent camera objects to it
-        s_instance._toolBobRoot = new();
-        s_instance._toolBobRoot.name = "ToolBobRoot";
-        s_instance._toolBobRoot.transform.parent = s_instance._cameraController._playerCamera.mainCamera.transform;
-        s_instance._toolBobRoot.transform.localPosition = Vector3.zero;
-        s_instance._toolBobRoot.transform.localRotation = Quaternion.identity;
-        s_instance._cameraController._playerCamera.mainCamera.transform.Find("ItemCarryTool").transform.parent = s_instance._toolBobRoot.transform;
-        s_instance._cameraController._playerCamera.mainCamera.transform.Find("FlashlightRoot").transform.parent = s_instance._toolBobRoot.transform;
-        s_instance._cameraController._playerCamera.mainCamera.transform.Find("Signalscope").transform.parent = s_instance._toolBobRoot.transform;
-        s_instance._cameraController._playerCamera.mainCamera.transform.Find("NomaiTranslatorProp").transform.parent = s_instance._toolBobRoot.transform;
-
-        // create tool bob root and parent camera objects to it
-        s_instance._scoutBobRoot = new();
-        s_instance._scoutBobRoot.name = "ScoutBobRoot";
-        s_instance._scoutBobRoot.transform.parent = s_instance._cameraController._playerCamera.mainCamera.transform;
-        s_instance._scoutBobRoot.transform.localPosition = Vector3.zero;
-        s_instance._scoutBobRoot.transform.localRotation = Quaternion.identity;
-        s_instance._cameraController._playerCamera.mainCamera.transform.Find("ProbeLauncher").transform.parent = s_instance._scoutBobRoot.transform;
     }
 }
