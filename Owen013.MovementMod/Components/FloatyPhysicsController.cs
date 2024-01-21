@@ -19,13 +19,22 @@ public class FloatyPhysicsController : MonoBehaviour
 
     private void Update()
     {
-        if (Main.Instance.isFloatyPhysicsEnabled) UpdateAcceleration();
+        if (Main.Instance.IsFloatyPhysicsEnabled) UpdateAcceleration();
     }
 
     private void UpdateAcceleration()
     {
         if (_characterController == null) return;
-        float gravMultiplier = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce() ? Mathf.Clamp(Mathf.Pow(_characterController.GetNormalAccelerationScalar() / 12, Main.Instance.floatyPhysicsPower), 0.25f, 1f) : 1f;
-        _characterController._acceleration = Main.Instance.groundAccel * gravMultiplier;
+        if (_characterController.IsGrounded() && !_characterController.IsSlidingOnIce())
+        {
+            float currentGravity = _characterController.GetNormalAccelerationScalar() / 12;
+            float maxGravity = Main.Instance.FloatyPhysicsMaxGravity;
+            float minGravity = Main.Instance.FloatyPhysicsMinGravity;
+            _characterController._acceleration = Mathf.Lerp(Main.Instance.FloatyPhysicsMinAccel, Main.Instance.GroundAccel, Mathf.Clamp((currentGravity - minGravity) / (maxGravity - minGravity), 0f, 1f));
+        }
+        else
+        {
+            _characterController._acceleration = Main.Instance.GroundAccel;
+        }
     }
 }

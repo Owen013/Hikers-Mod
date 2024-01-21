@@ -43,7 +43,7 @@ public class SpeedController : MonoBehaviour
 
         _characterController.OnBecomeGrounded += () =>
         {
-            if (Main.Instance.sprintOnLanding)
+            if (Main.Instance.ShouldSprintOnLanding)
             {
                 UpdateSprinting();
             }
@@ -76,18 +76,18 @@ public class SpeedController : MonoBehaviour
         bool jetpackVisible = _playerSuit.activeSelf && _playerJetpack.activeSelf;
 
         // get thruster vector IF the player is sprinting and the jetpack is visible. Otherwise, move towards zero
-        _thrusterVector = Vector2.MoveTowards(_thrusterVector, _isSprinting && jetpackVisible && Main.Instance.isSprintEffectEnabled ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
+        _thrusterVector = Vector2.MoveTowards(_thrusterVector, _isSprinting && jetpackVisible && Main.Instance.IsSprintEffectEnabled ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
         Vector2 flameVector = _thrusterVector;
 
         // adjust vector based on sprinting and strafe speed
-        flameVector.x *= (Main.Instance.sprintStrafeSpeed / Main.Instance.strafeSpeed) - 1;
+        flameVector.x *= (Main.Instance.SprintStrafeSpeed / Main.Instance.StrafeSpeed) - 1;
         if (flameVector.y < 0f)
         {
-            flameVector.y *= (Main.Instance.sprintStrafeSpeed / Main.Instance.strafeSpeed) - 1;
+            flameVector.y *= (Main.Instance.SprintStrafeSpeed / Main.Instance.StrafeSpeed) - 1;
         }
         else
         {
-            flameVector.y *= (Main.Instance.sprintSpeed / Main.Instance.defaultSpeed) - 1;
+            flameVector.y *= (Main.Instance.SprintSpeed / Main.Instance.DefaultSpeed) - 1;
         }
 
         // clamp the vector so it doesn't become too big
@@ -141,20 +141,20 @@ public class SpeedController : MonoBehaviour
         if (_characterController == null) return;
 
         // Change built-in character attributes
-        _characterController._runSpeed = Main.Instance.defaultSpeed;
-        _characterController._strafeSpeed = Main.Instance.strafeSpeed;
-        _characterController._walkSpeed = Main.Instance.walkSpeed;
-        _characterController._airSpeed = Main.Instance.airSpeed;
-        _characterController._airAcceleration = Main.Instance.airAccel;
+        _characterController._runSpeed = Main.Instance.DefaultSpeed;
+        _characterController._strafeSpeed = Main.Instance.StrafeSpeed;
+        _characterController._walkSpeed = Main.Instance.WalkSpeed;
+        _characterController._airSpeed = Main.Instance.AirSpeed;
+        _characterController._airAcceleration = Main.Instance.AirAccel;
 
-        _sprintButton = (Main.Instance.sprintButtonMode == "Down Thrust") ? InputLibrary.thrustDown : InputLibrary.thrustUp;
+        _sprintButton = (Main.Instance.SprintButtonMode == "Down Thrust") ? InputLibrary.thrustDown : InputLibrary.thrustUp;
 
         UpdateSprinting();
     }
 
     private void UpdateSprinting()
     {
-        bool isSprintAllowed = Main.Instance.sprintMode == "Always" || (Main.Instance.sprintMode == "When Suited" && PlayerState.IsWearingSuit());
+        bool isSprintAllowed = Main.Instance.SprintMode == "Always" || (Main.Instance.SprintMode == "When Suited" && PlayerState.IsWearingSuit());
         bool isOnValidGround = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce();
         bool isWalking = _isDreamLanternFocused || (OWInput.IsPressed(InputLibrary.rollMode) && _characterController._heldLanternItem == null);
         bool wasSprinting = _isSprinting;
@@ -162,14 +162,14 @@ public class SpeedController : MonoBehaviour
         if (isSprintAllowed && isOnValidGround && !isWalking && OWInput.IsPressed(_sprintButton) && (_isSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0))
         {
             _isSprinting = true;
-            _characterController._runSpeed = Main.Instance.sprintSpeed;
-            _characterController._strafeSpeed = Main.Instance.sprintStrafeSpeed;
+            _characterController._runSpeed = Main.Instance.SprintSpeed;
+            _characterController._strafeSpeed = Main.Instance.SprintStrafeSpeed;
         }
         else
         {
             _isSprinting = false;
-            _characterController._runSpeed = Main.Instance.defaultSpeed;
-            _characterController._strafeSpeed = Main.Instance.strafeSpeed;
+            _characterController._runSpeed = Main.Instance.DefaultSpeed;
+            _characterController._strafeSpeed = Main.Instance.StrafeSpeed;
         }
 
         // log it
@@ -195,5 +195,34 @@ public class SpeedController : MonoBehaviour
         thruster._light.range = thruster._baseLightRadius * thruster._currentScale;
         thruster._thrusterRenderer.enabled = thruster._currentScale > 0f;
         thruster._light.enabled = thruster._currentScale > 0f;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
+    private static void OnGetJetpackInput(ref Vector3 __result)
+    {
+        if (Components.SpeedController.Instance.IsSprinting() == true && __result.y != 0f)
+        {
+            __result.y = 0f;
+            Instance._jetpackModel._boostActivated = false;
+        }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Update))]
+    private static void CharacterControllerUpdate(PlayerCharacterController __instance)
+    {
+        if (Components.SpeedController.Instance.IsSprinting() == true || !Instance._characterController._isWearingSuit)
+        {
+            __instance.UpdateJumpInput();
+        }
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
+    private static void IsBoosterAllowed(ref bool __result, PlayerResources __instance)
+    {
+        // prevents player from jumping higher when sprinting
+        if (Components.SpeedController.Instance.IsSprinting() == true) __result = false;
     }
 }

@@ -83,6 +83,35 @@
 			"tooltip": "How much the camera shakes when doing an emergency boost. Only works if Camera Shake mod is installed and enabled. Recommended: 1"
 		},
 
+		"Floaty Physics": {
+			"type": "separator"
+		},
+		"Enable Floaty Physics": {
+			"type": "toggle",
+			"value": true,
+			"tooltip": "Lowers your acceleration in low gravity, making movement floatier. Recommended: Enabled"
+		},
+		"Floaty Physics Power": {
+			"type": "number",
+			"value": 1,
+			"tooltip": "The higher this number is, the faster you'll notice your acceleration decreasing as gravity decreases. Recommended: 1"
+		},
+		"Minimum Acceleration": {
+			"type": "number",
+			"value": 0.25,
+			"tooltip": "The minimum acceleration that can take effect with floaty physics. Recommended: 0.25"
+		},
+		"Maximum Gravity": {
+			"type": "number",
+			"value": 1,
+			"tooltip": "The gravity below which floaty physics will start to take effect. Recommended: 1"
+		},
+		"Minimum Gravity": {
+			"type": "number",
+			"value": 0.5,
+			"tooltip": "The gravity at which the minimum acceleration will take effect. Recommended: 0.5"
+		},
+
 		"Character Attributes": {
 			"type": "separator"
 		},
@@ -149,16 +178,6 @@
 			"type": "toggle",
 			"value": false,
 			"tooltip": "Allows you to change direction and/or slow down in midiar, even without your jetpack. Recommended: Disabled"
-		},
-		"Floaty Physics": {
-			"type": "toggle",
-			"value": false,
-			"tooltip": "Lowers your acceleration in low gravity, making movement floatier. Recommended: Disabled"
-		},
-		"Floaty Physics Power": {
-			"type": "number",
-			"value": 1,
-			"tooltip": "How strongly floaty physics takes affect in any given gravity. Recommended: 1"
 		},
 		"Enable Wall Jumping": {
 			"type": "selector",
