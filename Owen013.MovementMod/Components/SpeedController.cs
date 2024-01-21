@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace HikersMod.Components;
@@ -12,7 +11,7 @@ public class SpeedController : MonoBehaviour
     private JetpackThrusterAudio _jetpackAudio;
     private GameObject _playerSuit;
     private GameObject _playerJetpack;
-    private List<ThrusterFlameController> _thrusters;
+    private ThrusterFlameController[] _thrusters;
     private Vector2 _thrusterVector;
     private IInputCommands _sprintButton;
     private bool _isSprinting;
@@ -35,9 +34,10 @@ public class SpeedController : MonoBehaviour
         _characterController = GetComponent<PlayerCharacterController>();
         _jetpackModel = FindObjectOfType<JetpackThrusterModel>();
         _jetpackAudio = FindObjectOfType<JetpackThrusterAudio>();
-        _playerSuit = GameObject.Find("Player_Body/Traveller_HEA_Player_v2/Traveller_Mesh_v01:Traveller_Geo");
-        _playerJetpack = GameObject.Find("Player_Body/Traveller_HEA_Player_v2/Traveller_Mesh_v01:Traveller_Geo/Traveller_Mesh_v01:Props_HEA_Jetpack");
-        _thrusters = new(GetComponentsInChildren<ThrusterFlameController>(includeInactive: true));
+        var _animController = GetComponentInChildren<PlayerAnimController>();
+        _playerSuit = _animController.transform.Find("Traveller_Mesh_v01:Traveller_Geo").gameObject;
+        _playerJetpack = _animController.transform.Find("Traveller_Mesh_v01:Traveller_Geo/Traveller_Mesh_v01:Props_HEA_Jetpack").gameObject;
+        _thrusters = GetComponentsInChildren<ThrusterFlameController>(includeInactive: true);
         _thrusterVector = Vector2.zero;
         _isDreamLanternFocused = false;
 
@@ -108,7 +108,7 @@ public class SpeedController : MonoBehaviour
         }
 
         // update thruster visuals as long as their controllers are inactive
-        for (int i = 0; i < _thrusters.Count; i++)
+        for (int i = 0; i < _thrusters.Length; i++)
         {
             if (_thrusters[i].isActiveAndEnabled) break;
 
@@ -201,7 +201,7 @@ public class SpeedController : MonoBehaviour
     [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
     private static void OnGetJetpackInput(ref Vector3 __result)
     {
-        if (Components.SpeedController.Instance.IsSprinting() == true && __result.y != 0f)
+        if (Instance.IsSprinting() == true && __result.y != 0f)
         {
             __result.y = 0f;
             Instance._jetpackModel._boostActivated = false;
@@ -212,7 +212,7 @@ public class SpeedController : MonoBehaviour
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Update))]
     private static void CharacterControllerUpdate(PlayerCharacterController __instance)
     {
-        if (Components.SpeedController.Instance.IsSprinting() == true || !Instance._characterController._isWearingSuit)
+        if (Instance.IsSprinting() == true || !Instance._characterController._isWearingSuit)
         {
             __instance.UpdateJumpInput();
         }
@@ -223,6 +223,6 @@ public class SpeedController : MonoBehaviour
     private static void IsBoosterAllowed(ref bool __result, PlayerResources __instance)
     {
         // prevents player from jumping higher when sprinting
-        if (Components.SpeedController.Instance.IsSprinting() == true) __result = false;
+        if (Instance.IsSprinting() == true) __result = false;
     }
 }
