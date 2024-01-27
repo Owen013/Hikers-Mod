@@ -227,10 +227,9 @@ public class Main : ModBehaviour
             localVelocity.y = 0f;
 
             float physicsTime = Time.fixedDeltaTime * 60f;
-            float maxChange = __instance._airAcceleration * physicsTime;
-
-            Vector2 axisValue = OWInput.GetAxisValue(InputLibrary.moveXZ, InputMode.Character | InputMode.NomaiRemoteCam);
-            Vector3 localVelocityChange = new(maxChange * axisValue.x, 0f, maxChange * axisValue.y);
+            float acceleration = __instance._airAcceleration * physicsTime;
+            Vector2 moveInput = OWInput.GetAxisValue(InputLibrary.moveXZ, InputMode.Character | InputMode.NomaiRemoteCam);
+            Vector3 localVelocityChange = new(acceleration * moveInput.x, 0f, acceleration * moveInput.y);
 
             // new velocity can't be more than old velocity and airspeed
             float maxSpeed = Mathf.Max(localVelocity.magnitude, __instance._airSpeed);

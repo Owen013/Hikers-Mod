@@ -9,9 +9,9 @@ public class SpeedController : MonoBehaviour
     private PlayerCharacterController _characterController;
     private JetpackThrusterModel _jetpackModel;
     private JetpackThrusterAudio _jetpackAudio;
+    private ThrusterFlameController[] _thrusters;
     private GameObject _playerSuit;
     private GameObject _playerJetpack;
-    private ThrusterFlameController[] _thrusters;
     private Vector2 _thrusterVector;
     private IInputCommands _sprintButton;
     private bool _isSprinting;
@@ -32,14 +32,13 @@ public class SpeedController : MonoBehaviour
     private void Start()
     {
         _characterController = GetComponent<PlayerCharacterController>();
-        _jetpackModel = FindObjectOfType<JetpackThrusterModel>();
-        _jetpackAudio = FindObjectOfType<JetpackThrusterAudio>();
+        _jetpackModel = GetComponent<JetpackThrusterModel>();
+        _jetpackAudio = GetComponentInChildren<JetpackThrusterAudio>();
         var _animController = GetComponentInChildren<PlayerAnimController>();
+        _thrusters = GetComponentsInChildren<ThrusterFlameController>(includeInactive: true);
         _playerSuit = _animController.transform.Find("Traveller_Mesh_v01:Traveller_Geo").gameObject;
         _playerJetpack = _animController.transform.Find("Traveller_Mesh_v01:Traveller_Geo/Traveller_Mesh_v01:Props_HEA_Jetpack").gameObject;
-        _thrusters = GetComponentsInChildren<ThrusterFlameController>(includeInactive: true);
         _thrusterVector = Vector2.zero;
-        _isDreamLanternFocused = false;
 
         _characterController.OnBecomeGrounded += () =>
         {
@@ -201,6 +200,7 @@ public class SpeedController : MonoBehaviour
     [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
     private static void OnGetJetpackInput(ref Vector3 __result)
     {
+        // prevents player from using jetpack while they are sprinting
         if (Instance.IsSprinting() == true && __result.y != 0f)
         {
             __result.y = 0f;
@@ -210,8 +210,9 @@ public class SpeedController : MonoBehaviour
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Update))]
-    private static void CharacterControllerUpdate(PlayerCharacterController __instance)
+    private static void OnCharacterControllerUpdate(PlayerCharacterController __instance)
     {
+        // allows player to jump while holding shift if they aren't actively using the jetpack
         if (Instance.IsSprinting() == true || !Instance._characterController._isWearingSuit)
         {
             __instance.UpdateJumpInput();
@@ -220,9 +221,9 @@ public class SpeedController : MonoBehaviour
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
-    private static void IsBoosterAllowed(ref bool __result, PlayerResources __instance)
+    private static void OnCheckIsBoosterAllowed(ref bool __result, PlayerResources __instance)
     {
-        // prevents player from jumping higher when sprinting
+        // prevents player from using booster on the very first frame after jumping out of a sprint
         if (Instance.IsSprinting() == true) __result = false;
     }
 }

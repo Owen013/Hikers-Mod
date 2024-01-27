@@ -17,13 +17,6 @@ public class WallJumpController : MonoBehaviour
         Instance = this;
     }
 
-    private void Update()
-    {
-        if (_characterController == null) return;
-
-        UpdateWallJump();
-    }
-
     private void Start()
     {
         _characterController = GetComponent<PlayerCharacterController>();
@@ -32,18 +25,24 @@ public class WallJumpController : MonoBehaviour
         _characterController.OnBecomeGrounded += () => _wallJumpsLeft = Main.Instance.WallJumpsPerJump;
     }
 
+    private void Update()
+    {
+        UpdateWallJump();
+    }
+
     private void UpdateWallJump()
     {
         _characterController.UpdatePushable();
         bool isWallJumpAllowed = (Main.Instance.WallJumpMode == "When Unsuited" && !PlayerState.IsWearingSuit()) || Main.Instance.WallJumpMode == "Always";
-        if (isWallJumpAllowed && _characterController._isPushable && !PlayerState.InZeroG() && !_characterController._isGrounded && OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && _wallJumpsLeft > 0)
+        bool canWallJump = isWallJumpAllowed && _characterController._isPushable && !PlayerState.InZeroG() && !_characterController._isGrounded && _wallJumpsLeft > 0;
+        if (isWallJumpAllowed && canWallJump && OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character))
         {
             OWRigidbody pushBody = _characterController._pushableBody;
             Vector3 pushPoint = _characterController._pushContactPt;
             Vector3 pointVelocity = pushBody.GetPointVelocity(pushPoint);
-            Vector3 climbVelocity = new Vector3(0, Main.Instance.JumpPower * (_wallJumpsLeft / Main.Instance.WallJumpsPerJump), 0);
+            Vector3 climbVelocity = new Vector3(0, Main.Instance.JumpPower, 0f) * (_wallJumpsLeft / Main.Instance.WallJumpsPerJump);
 
-            if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20)
+            if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20f)
             {
                 Main.Instance.DebugLog("Can't Wall-Jump; going too fast");
             }
