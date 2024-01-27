@@ -45,7 +45,8 @@ public class Main : ModBehaviour
     public float GroundAccel;
     public float AirSpeed;
     public float AirAccel;
-    public float JumpPower;
+    public float MinJumpPower;
+    public float MaxJumpPower;
     public float JetpackAccel;
     public float JetpackBoostAccel;
     public float JetpackBoostTime;
@@ -101,7 +102,8 @@ public class Main : ModBehaviour
         GroundAccel = config.GetSettingsValue<float>("Ground Acceleration");
         AirSpeed = config.GetSettingsValue<float>("Air Speed");
         AirAccel = config.GetSettingsValue<float>("Air Acceleration");
-        JumpPower = config.GetSettingsValue<float>("Jump Power");
+        MinJumpPower = config.GetSettingsValue<float>("Minimum Jump Power");
+        MaxJumpPower = config.GetSettingsValue<float>("Maximum Jump Power");
         JetpackAccel = config.GetSettingsValue<float>("Jetpack Acceleration");
         JetpackBoostAccel = config.GetSettingsValue<float>("Jetpack Boost Acceleration");
         JetpackBoostTime = config.GetSettingsValue<float>("Max Jetpack Boost Time");
@@ -163,6 +165,8 @@ public class Main : ModBehaviour
         if (!IsFloatyPhysicsEnabled) _characterController._acceleration = GroundAccel;
         _characterController._airSpeed = AirSpeed;
         _characterController._airAcceleration = AirAccel;
+        _characterController._minJumpSpeed = MinJumpPower;
+        _characterController._maxJumpSpeed = MaxJumpPower;
         _jetpackModel._maxTranslationalThrust = JetpackAccel;
         _jetpackModel._boostThrust = JetpackBoostAccel;
         _jetpackModel._boostSeconds = JetpackBoostTime;

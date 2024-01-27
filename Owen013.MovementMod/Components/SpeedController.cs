@@ -25,7 +25,6 @@ public class SpeedController : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        Harmony.CreateAndPatchAll(typeof(SpeedController));
         Main.Instance.OnConfigure += ApplyChanges;
     }
 
@@ -204,24 +203,38 @@ public class SpeedController : MonoBehaviour
         if (Instance.IsSprinting() == true && __result.y != 0f)
         {
             __result.y = 0f;
-            Instance._jetpackModel._boostActivated = false;
+            Instance._jetpackModel._boostActivated = false; // is this necessary
         }
     }
 
-    [HarmonyPostfix]
+    [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Update))]
-    private static void OnCharacterControllerUpdate(PlayerCharacterController __instance)
+    private static bool OnCharacterControllerUpdate(PlayerCharacterController __instance)
     {
-        // allows player to jump while holding shift if they aren't actively using the jetpack
-        if (Instance.IsSprinting() == true || !Instance._characterController._isWearingSuit)
+        if (!__instance._isAlignedToForce && !__instance._isZeroGMovementEnabled) return false;
+
+        if (OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f || Instance.IsSprinting() == true || !Instance._characterController._isWearingSuit)
         {
             __instance.UpdateJumpInput();
         }
+        else
+        {
+            __instance._jumpChargeTime = 0f;
+            __instance._jumpNextFixedUpdate = false;
+            __instance._jumpPressedInOtherMode = false;
+        }
+
+        if (__instance._isZeroGMovementEnabled)
+        {
+            __instance._pushPrompt.SetVisibility(OWInput.IsInputMode(InputMode.Character | InputMode.NomaiRemoteCam) && __instance._isPushable);
+        }
+
+        return false;
     }
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
-    private static void OnCheckIsBoosterAllowed(ref bool __result, PlayerResources __instance)
+    private static void OnCheckIsBoosterAllowed(ref bool __result)
     {
         // prevents player from using booster on the very first frame after jumping out of a sprint
         if (Instance.IsSprinting() == true) __result = false;

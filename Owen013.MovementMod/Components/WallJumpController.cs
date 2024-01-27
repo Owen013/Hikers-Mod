@@ -40,7 +40,7 @@ public class WallJumpController : MonoBehaviour
             OWRigidbody pushBody = _characterController._pushableBody;
             Vector3 pushPoint = _characterController._pushContactPt;
             Vector3 pointVelocity = pushBody.GetPointVelocity(pushPoint);
-            Vector3 climbVelocity = new Vector3(0, Main.Instance.JumpPower, 0f) * (_wallJumpsLeft / Main.Instance.WallJumpsPerJump);
+            Vector3 climbVelocity = new Vector3(0, Main.Instance.MaxJumpPower, 0f) * (_wallJumpsLeft / Main.Instance.WallJumpsPerJump);
 
             if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20f)
             {

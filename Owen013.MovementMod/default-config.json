@@ -140,10 +140,15 @@
 			"value": 0.5,
 			"tooltip": "How quickly you reach your maximum speed. Vanilla: 0.5"
 		},
-		"Jump Power": {
+		"Minimum Jump Power": {
+			"type": "number",
+			"value": 3,
+			"tooltip": "The power of your jump when it isn't charged. Vanilla: 3"
+		},
+		"Maximum Jump Power": {
 			"type": "number",
 			"value": 7,
-			"tooltip": "How high you jump. Vanilla: 7"
+			"tooltip": "The power of your jump when it is fully charged. Vanilla: 7"
 		},
 		"Air Speed": {
 			"type": "number",
