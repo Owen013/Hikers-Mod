@@ -13,6 +13,9 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="HikersModAPI.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="OWML" Version="2.9.8" />
     <PackageReference Include="OuterWildsGameLibs" Version="1.1.14.768" />
   </ItemGroup>
@@ -26,8 +29,5 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="HikersMod.csproj.user" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Components\" />
   </ItemGroup>
 </Project>

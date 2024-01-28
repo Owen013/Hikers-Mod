@@ -4,7 +4,6 @@ namespace HikersMod.Components;
 
 public class EmergencyBoostController : MonoBehaviour
 {
-    public static EmergencyBoostController Instance;
     private OWAudioSource _superBoostAudio;
     private JetpackThrusterModel _jetpackModel;
     private JetpackThrusterController _jetpackController;
@@ -16,17 +15,7 @@ public class EmergencyBoostController : MonoBehaviour
     private float _lastBoostTime;
     private bool _isEmergencyBoosting;
 
-    public bool IsEmergencyBoosting()
-    {
-        return _isEmergencyBoosting;
-    }
-
     private void Awake()
-    {
-        Instance = this;
-    }
-
-    private void Start()
     {
         _characterController = Locator.GetPlayerController();
         _audioController = Locator.GetPlayerAudioController();
@@ -60,7 +49,7 @@ public class EmergencyBoostController : MonoBehaviour
         bool canEmergencyBoost = _characterController._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
         if (!canEmergencyBoost) EndEmergencyBoost();
 
-        else if (Main.Instance.IsEmergencyBoostEnabled && isInputting && Time.time - _lastBoostInputTime < Main.Instance.EmergencyBoostInputTime && _jetpackController._resources.GetFuel() > 0f && !_isEmergencyBoosting)
+        else if (Config.IsEmergencyBoostEnabled && isInputting && Time.time - _lastBoostInputTime < Config.EmergencyBoostInputTime && _jetpackController._resources.GetFuel() > 0f && !_isEmergencyBoosting)
         {
             ApplyEmergencyBoost();
         }
@@ -87,8 +76,8 @@ public class EmergencyBoostController : MonoBehaviour
         _isEmergencyBoosting = true;
         _lastBoostTime = Time.time;
         _jetpackModel._boostChargeFraction = 0f;
-        _jetpackController._resources._currentFuel = Mathf.Max(0f, _jetpackController._resources.GetFuel() - Main.Instance.EmergencyBoostCost);
-        float boostPower = Main.Instance.EmergencyBoostPower;
+        _jetpackController._resources._currentFuel = Mathf.Max(0f, _jetpackController._resources.GetFuel() - Config.EmergencyBoostCost);
+        float boostPower = Config.EmergencyBoostPower;
 
         // set player velocity
         Vector3 pointVelocity = _characterController._transform.InverseTransformDirection(_characterController._lastGroundBody.GetPointVelocity(_characterController._transform.position));
@@ -97,14 +86,14 @@ public class EmergencyBoostController : MonoBehaviour
 
         // sound and visual effects
         _superBoostAudio.pitch = Random.Range(1.0f, 1.4f);
-        _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, Main.Instance.EmergencyBoostVolume * 0.75f);
+        _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, Config.EmergencyBoostVolume * 0.75f);
         _helmetAnimator.OnInstantDamage(boostPower, InstantDamageType.Impact);
         NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "EMERGENCY BOOST ACTIVATED", 5f), false);
 
         // if camerashaker is installed and camera shake is enabled, do a camera shake
-        if (Main.Instance.EmergencyBoostCameraShakeAmount > 0)
+        if (Config.EmergencyBoostCameraShakeAmount > 0)
         {
-            Main.Instance.CameraShakerAPI?.ExplosionShake(strength: boostPower * Main.Instance.EmergencyBoostCameraShakeAmount);
+            Main.Instance.CameraShakerAPI?.ExplosionShake(strength: boostPower * Config.EmergencyBoostCameraShakeAmount);
         }
 
         Main.Instance.DebugLog("Super-Boosted");
