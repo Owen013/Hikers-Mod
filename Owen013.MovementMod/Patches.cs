@@ -11,9 +11,8 @@ public static class Patches
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
     private static void OnCharacterControllerStart(PlayerCharacterController __instance)
     {
-        Main.Instance.ApplyCharacterAttributes();
-
         // Add components to character
+        __instance.gameObject.AddComponent<CharacterAttributeController>();
         __instance.gameObject.AddComponent<SpeedController>();
         __instance.gameObject.AddComponent<EmergencyBoostController>();
         __instance.gameObject.AddComponent<FloatyPhysicsController>();
@@ -27,7 +26,7 @@ public static class Patches
         if (!__instance._isAlignedToForce && !__instance._isZeroGMovementEnabled) return false;
 
         // add edge cases, allowing the player to jump while holding thrust up if they're sprinting or not wearing the suit and therefore can't use the jetpack
-        if (!__instance._isWearingSuit || SpeedController.Instance.IsSprinting() == true || OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f)
+        if (!__instance._isWearingSuit || __instance.GetComponent<SpeedController>().IsSprinting() == true || OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f)
         {
             __instance.UpdateJumpInput();
         }
@@ -110,9 +109,9 @@ public static class Patches
     // prevents player from using jetpack while they are sprinting
     [HarmonyPostfix]
     [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
-    private static void OnGetJetpackInput(ref Vector3 __result)
+    private static void OnGetJetpackInput(JetpackThrusterController __instance, ref Vector3 __result)
     {
-        if (SpeedController.Instance.IsSprinting() == true && __result.y != 0f)
+        if (__result.y != 0f && __instance._characterController.GetComponent<SpeedController>().IsSprinting() == true)
         {
             __result.y = 0f;
         }
@@ -123,6 +122,6 @@ public static class Patches
     [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
     private static void OnCheckIsBoosterAllowed(ref bool __result)
     {
-        if (SpeedController.Instance.IsSprinting() == true) __result = false;
+        if (Locator.GetPlayerController().GetComponent<SpeedController>().IsSprinting() == true) __result = false;
     }
 }

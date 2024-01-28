@@ -41,7 +41,7 @@
 		"Start Sprinting On Landing": {
 			"type": "toggle",
 			"value": true,
-			"tooltip": "If you're holding the sprint button when you land on the ground, you will stop thrusting and start sprinting. Recommended: Enabled"
+			"tooltip": "If you're holding the sprint button and a directional input when you land on the ground, you will stop thrusting and start sprinting. Recommended: Enabled"
 		},
 		"Show Thruster Effect while Sprinting": {
 			"type": "toggle",

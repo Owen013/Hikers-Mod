@@ -4,7 +4,7 @@
     {
         public static string JumpStyle;
         public static string SprintMode;
-        public static string SprintButtonMode;
+        public static string SprintButton;
         public static float SprintSpeed;
         public static float SprintStrafeSpeed;
         public static bool ShouldSprintOnLanding;

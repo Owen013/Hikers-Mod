@@ -4,7 +4,6 @@ namespace HikersMod.Components;
 
 public class SpeedController : MonoBehaviour
 {
-    public static SpeedController Instance;
     private PlayerCharacterController _characterController;
     private JetpackThrusterAudio _jetpackAudio;
     private ThrusterFlameController[] _thrusters;
@@ -19,9 +18,6 @@ public class SpeedController : MonoBehaviour
 
     private void Awake()
     {
-        Instance = this;
-        Main.Instance.OnConfigure += ApplyChanges;
-        
         _characterController = GetComponent<PlayerCharacterController>();
         _jetpackAudio = GetComponentInChildren<JetpackThrusterAudio>();
         var _animController = GetComponentInChildren<PlayerAnimController>();
@@ -38,6 +34,7 @@ public class SpeedController : MonoBehaviour
             }
         };
 
+        Main.Instance.OnConfigure += ApplyChanges;
         ApplyChanges();
     }
 
@@ -136,7 +133,7 @@ public class SpeedController : MonoBehaviour
         _characterController._airSpeed = Config.AirSpeed;
         _characterController._airAcceleration = Config.AirAccel;
 
-        _sprintButton = (Config.SprintButtonMode == "Down Thrust") ? InputLibrary.thrustDown : InputLibrary.thrustUp;
+        _sprintButton = (Config.SprintButton == "Down Thrust") ? InputLibrary.thrustDown : InputLibrary.thrustUp;
 
         UpdateSprinting();
     }

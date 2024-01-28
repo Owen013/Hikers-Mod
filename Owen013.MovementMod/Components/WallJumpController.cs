@@ -16,7 +16,11 @@ public class WallJumpController : MonoBehaviour
         _characterController = GetComponent<PlayerCharacterController>();
         _animController = GetComponentInChildren<PlayerAnimController>();
         _impactAudio = FindObjectOfType<PlayerImpactAudio>();
-        _characterController.OnBecomeGrounded += () => _wallJumpsLeft = Config.WallJumpsPerJump;
+
+        _characterController.OnBecomeGrounded += () =>
+        {
+            _wallJumpsLeft = Config.WallJumpsPerJump;
+        };
     }
 
     private void Update()
