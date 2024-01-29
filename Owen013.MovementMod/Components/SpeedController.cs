@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using OWML.Common;
+using TMPro;
+using UnityEngine;
 
 namespace HikersMod.Components;
 
@@ -25,6 +27,7 @@ public class SpeedController : MonoBehaviour
         _playerSuit = _animController.transform.Find("Traveller_Mesh_v01:Traveller_Geo").gameObject;
         _playerJetpack = _animController.transform.Find("Traveller_Mesh_v01:Traveller_Geo/Traveller_Mesh_v01:Props_HEA_Jetpack").gameObject;
         _thrusterVector = Vector2.zero;
+        _sprintButton = Config.SprintButton == "Up Thrust" ? InputLibrary.thrustUp : InputLibrary.thrustDown;
 
         _characterController.OnBecomeGrounded += () =>
         {
@@ -36,6 +39,8 @@ public class SpeedController : MonoBehaviour
 
         Main.Instance.OnConfigure += ApplyChanges;
         ApplyChanges();
+
+        Main.Instance.Log($"{nameof(SpeedController)} added to {gameObject.name}", MessageType.Debug);
     }
 
     private void Update()
@@ -133,8 +138,6 @@ public class SpeedController : MonoBehaviour
         _characterController._airSpeed = Config.AirSpeed;
         _characterController._airAcceleration = Config.AirAccel;
 
-        _sprintButton = (Config.SprintButton == "Down Thrust") ? InputLibrary.thrustDown : InputLibrary.thrustUp;
-
         UpdateSprinting();
     }
 
@@ -145,7 +148,7 @@ public class SpeedController : MonoBehaviour
         bool isWalking = _isDreamLanternFocused || (OWInput.IsPressed(InputLibrary.rollMode) && _characterController._heldLanternItem == null);
         bool wasSprinting = _isSprinting;
 
-        if (isSprintAllowed && isOnValidGround && !isWalking && OWInput.IsPressed(_sprintButton) && (wasSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0))
+        if (isSprintAllowed && isOnValidGround && !isWalking && OWInput.IsPressed(_sprintButton) && (wasSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
         {
             _isSprinting = true;
             _characterController._runSpeed = Config.SprintSpeed;
@@ -161,7 +164,7 @@ public class SpeedController : MonoBehaviour
         // log it
         if (_isSprinting != wasSprinting)
         {
-            Main.Instance.DebugLog($"{(_isSprinting ? "Started" : "Stopped")} sprinting");
+            Main.Instance.Log($"[{nameof(SpeedController)}] {(_isSprinting ? "Started" : "Stopped")} sprinting", MessageType.Debug);
         }
     }
 

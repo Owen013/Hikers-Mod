@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using OWML.Common;
+using UnityEngine;
 
 namespace HikersMod.Components;
 
@@ -21,6 +22,8 @@ public class WallJumpController : MonoBehaviour
         {
             _wallJumpsLeft = Config.WallJumpsPerJump;
         };
+
+        Main.Instance.Log($"{nameof(WallJumpController)} added to {gameObject.name}", MessageType.Debug);
     }
 
     private void Update()
@@ -42,7 +45,7 @@ public class WallJumpController : MonoBehaviour
 
             if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20f)
             {
-                Main.Instance.DebugLog("Can't Wall-Jump; going too fast");
+                Main.Instance.Log($"[{nameof(WallJumpController)}] Can't Wall-Jump; going too fast", MessageType.Debug);
             }
             else
             {
@@ -51,7 +54,7 @@ public class WallJumpController : MonoBehaviour
                 _wallJumpsLeft -= 1;
                 _impactAudio._impactAudioSrc.PlayOneShot(AudioType.ImpactLowSpeed);
                 _lastWallJumpTime = _lastWallJumpRefill = Time.time;
-                Main.Instance.DebugLog("Wall-Jumped");
+                Main.Instance.Log($"[{nameof(WallJumpController)}] Wall-Jumped", MessageType.Debug);
             }
         }
 
@@ -63,8 +66,8 @@ public class WallJumpController : MonoBehaviour
         }
 
         // Make player play fast freefall animation after each wall jump
-        float freeFallSpeed = _animController._animator.GetFloat("FreefallSpeed");
+        float freeFallSpeed = _animController._animator.GetFloat($"[{nameof(WallJumpController)}] FreefallSpeed");
         float climbFraction = Mathf.Max(0, 1 - (Time.time - _lastWallJumpTime));
-        _animController._animator.SetFloat("FreefallSpeed", Mathf.Max(freeFallSpeed, climbFraction));
+        _animController._animator.SetFloat($"[{nameof(WallJumpController)}] FreefallSpeed", Mathf.Max(freeFallSpeed, climbFraction));
     }
 }

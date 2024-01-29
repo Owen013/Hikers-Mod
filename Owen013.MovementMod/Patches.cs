@@ -7,11 +7,11 @@ namespace HikersMod;
 [HarmonyPatch]
 public static class Patches
 {
+    // Add components to character
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
     private static void OnCharacterControllerStart(PlayerCharacterController __instance)
     {
-        // Add components to character
         __instance.gameObject.AddComponent<CharacterAttributeController>();
         __instance.gameObject.AddComponent<SpeedController>();
         __instance.gameObject.AddComponent<EmergencyBoostController>();
@@ -19,13 +19,14 @@ public static class Patches
         __instance.gameObject.AddComponent<WallJumpController>();
     }
 
+    // allows the player to jump while sprinting
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Update))]
     private static bool CharacterControllerUpdate(PlayerCharacterController __instance)
     {
         if (!__instance._isAlignedToForce && !__instance._isZeroGMovementEnabled) return false;
 
-        // add edge cases, allowing the player to jump while holding thrust up if they're sprinting or not wearing the suit and therefore can't use the jetpack
+        // normal Update() function, but added isWearingSuit and IsSprinting to if statement
         if (!__instance._isWearingSuit || __instance.GetComponent<SpeedController>().IsSprinting() == true || OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f)
         {
             __instance.UpdateJumpInput();
@@ -45,6 +46,7 @@ public static class Patches
         return false;
     }
 
+    // allows turning in midair
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.UpdateAirControl))]
     private static bool UpdateAirControl(PlayerCharacterController __instance)
@@ -73,6 +75,7 @@ public static class Patches
         return false;
     }
 
+    // add component to animator(s)
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerAnimController), nameof(PlayerAnimController.Start))]
     private static void OnAnimControllerStart(PlayerAnimController __instance)

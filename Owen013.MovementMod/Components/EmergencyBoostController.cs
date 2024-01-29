@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using OWML.Common;
+using UnityEngine;
 
 namespace HikersMod.Components;
 
@@ -26,7 +27,7 @@ public class EmergencyBoostController : MonoBehaviour
         // create super boost audio source
         _superBoostAudio = new GameObject("HikersMod_EmergencyBoostAudioSrc").AddComponent<OWAudioSource>();
         _superBoostAudio.transform.parent = _audioController.transform;
-        _superBoostAudio.transform.localPosition = new Vector3(0, 0, 1);
+        _superBoostAudio.transform.localPosition = new Vector3(0, -1f, 1f);
 
         // get player's downward thruster flame
         var thrusters = _characterController.gameObject.GetComponentsInChildren<ThrusterFlameController>(includeInactive: true);
@@ -39,6 +40,8 @@ public class EmergencyBoostController : MonoBehaviour
         }
 
         _characterController.OnBecomeGrounded += EndEmergencyBoost;
+
+        Main.Instance.Log($"{nameof(EmergencyBoostController)} added to {gameObject.name}", MessageType.Debug);
     }
 
     private void Update()
@@ -91,12 +94,12 @@ public class EmergencyBoostController : MonoBehaviour
         NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "EMERGENCY BOOST ACTIVATED", 5f), false);
 
         // if camerashaker is installed and camera shake is enabled, do a camera shake
-        if (Config.EmergencyBoostCameraShakeAmount > 0)
+        if (Config.EmergencyBoostCameraShakeAmount > 0f)
         {
             Main.Instance.CameraShakerAPI?.ExplosionShake(strength: boostPower * Config.EmergencyBoostCameraShakeAmount);
         }
 
-        Main.Instance.DebugLog("Super-Boosted");
+        Main.Instance.Log($"[{nameof(EmergencyBoostController)}] Super-Boosted", MessageType.Debug);
     }
 
     private void EndEmergencyBoost()

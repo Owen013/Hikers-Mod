@@ -194,11 +194,6 @@
 			"type": "number",
 			"value": 5,
 			"tooltip": "How many times you can Wall Jump without touching the ground. Recommended: 5"
-		},
-		"Enable Debug Log": {
-			"type": "toggle",
-			"value": false,
-			"tooltip": "Prints certain events to the Outer Wilds Mod Manager console."
 		}
 	}
 }

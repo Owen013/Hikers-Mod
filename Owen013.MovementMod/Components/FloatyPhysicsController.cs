@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using OWML.Common;
+using UnityEngine;
 
 namespace HikersMod.Components;
 
@@ -9,6 +10,8 @@ public class FloatyPhysicsController : MonoBehaviour
     private void Awake()
     {
         _characterController = GetComponent<PlayerCharacterController>();
+
+        Main.Instance.Log($"{nameof(SpeedController)} added to {gameObject.name}", MessageType.Debug);
     }
 
     private void Update()
