@@ -41,7 +41,7 @@ public class EmergencyBoostController : MonoBehaviour
 
         _characterController.OnBecomeGrounded += EndEmergencyBoost;
 
-        Main.Instance.Log($"{nameof(EmergencyBoostController)} added to {gameObject.name}", MessageType.Debug);
+        Main.Log($"{nameof(EmergencyBoostController)} added to {gameObject.name}", MessageType.Debug);
     }
 
     private void Update()
@@ -99,7 +99,7 @@ public class EmergencyBoostController : MonoBehaviour
             Main.Instance.CameraShakerAPI?.ExplosionShake(strength: boostPower * Config.EmergencyBoostCameraShakeAmount);
         }
 
-        Main.Instance.Log($"[{nameof(EmergencyBoostController)}] Super-Boosted", MessageType.Debug);
+        Main.Log($"[{nameof(EmergencyBoostController)}] Super-Boosted", MessageType.Debug);
     }
 
     private void EndEmergencyBoost()

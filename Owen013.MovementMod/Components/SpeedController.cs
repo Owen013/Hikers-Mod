@@ -1,33 +1,33 @@
 ﻿using OWML.Common;
-using TMPro;
 using UnityEngine;
 
 namespace HikersMod.Components;
 
 public class SpeedController : MonoBehaviour
 {
+    public static SpeedController Instance { get; private set; }
+    public bool IsSprinting { get; private set; }
+
     private PlayerCharacterController _characterController;
     private JetpackThrusterAudio _jetpackAudio;
     private ThrusterFlameController[] _thrusters;
     private GameObject _playerSuit;
     private GameObject _playerJetpack;
-    private Vector2 _thrusterVector;
     private IInputCommands _sprintButton;
-    private bool _isSprinting;
+    private Vector2 _thrusterVector;
     private bool _isDreamLanternFocused;
-
-    public bool IsSprinting() => _isSprinting;
 
     private void Awake()
     {
+        Instance = this;
+
         _characterController = GetComponent<PlayerCharacterController>();
         _jetpackAudio = GetComponentInChildren<JetpackThrusterAudio>();
-        var _animController = GetComponentInChildren<PlayerAnimController>();
         _thrusters = GetComponentsInChildren<ThrusterFlameController>(includeInactive: true);
-        _playerSuit = _animController.transform.Find("Traveller_Mesh_v01:Traveller_Geo").gameObject;
-        _playerJetpack = _animController.transform.Find("Traveller_Mesh_v01:Traveller_Geo/Traveller_Mesh_v01:Props_HEA_Jetpack").gameObject;
-        _thrusterVector = Vector2.zero;
+        _playerSuit = GetComponentInChildren<PlayerAnimController>().transform.Find("Traveller_Mesh_v01:Traveller_Geo").gameObject;
+        _playerJetpack = _playerSuit.transform.Find("Traveller_Mesh_v01:Props_HEA_Jetpack").gameObject;
         _sprintButton = Config.SprintButton == "Up Thrust" ? InputLibrary.thrustUp : InputLibrary.thrustDown;
+        _thrusterVector = Vector2.zero;
 
         _characterController.OnBecomeGrounded += () =>
         {
@@ -40,34 +40,32 @@ public class SpeedController : MonoBehaviour
         Main.Instance.OnConfigure += ApplyChanges;
         ApplyChanges();
 
-        Main.Instance.Log($"{nameof(SpeedController)} added to {gameObject.name}", MessageType.Debug);
+        Main.Log($"{nameof(SpeedController)} added to {gameObject.name}", MessageType.Debug);
     }
 
     private void Update()
     {
-        if (_characterController == null) return;
-
-        bool rollInputChanged = OWInput.IsNewlyPressed(InputLibrary.rollMode) || OWInput.IsNewlyReleased(InputLibrary.rollMode);
-        bool downInputChanged = OWInput.IsNewlyPressed(InputLibrary.thrustDown) || OWInput.IsNewlyReleased(InputLibrary.thrustDown);
-        bool upInputChanged = OWInput.IsNewlyPressed(InputLibrary.thrustUp) || OWInput.IsNewlyReleased(InputLibrary.thrustUp);
-        bool boostedInMidair = OWInput.IsNewlyPressed(InputLibrary.boost) && !_characterController.IsGrounded();
+        bool hasRollInputChanged = OWInput.IsNewlyPressed(InputLibrary.rollMode) || OWInput.IsNewlyReleased(InputLibrary.rollMode);
+        bool hasThrustInputChanged = OWInput.IsNewlyPressed(InputLibrary.thrustDown) || OWInput.IsNewlyReleased(InputLibrary.thrustDown) || OWInput.IsNewlyPressed(InputLibrary.thrustUp) || OWInput.IsNewlyReleased(InputLibrary.thrustUp);
+        bool hasPressedBoostInMidair = OWInput.IsNewlyPressed(InputLibrary.boost) && !_characterController.IsGrounded();
 
         // if holding a dream lantern, find out if the focus has changed since last frame
         DreamLanternItem heldLantern = _characterController._heldLanternItem;
-        bool dreamLanternFocusChanged = heldLantern ? heldLantern._focusing != _isDreamLanternFocused : false;
-        if (dreamLanternFocusChanged) _isDreamLanternFocused = heldLantern ? heldLantern._focusing : false;
+        bool hasDreamLanternFocusChanged = heldLantern != null && heldLantern._focusing != _isDreamLanternFocused;
+        if (hasDreamLanternFocusChanged)
+        {
+            _isDreamLanternFocused = heldLantern._focusing;
+        }
 
-        if (rollInputChanged || downInputChanged || upInputChanged || boostedInMidair || dreamLanternFocusChanged) UpdateSprinting();
+        if (hasRollInputChanged || hasThrustInputChanged || hasPressedBoostInMidair || hasDreamLanternFocusChanged) UpdateSprinting();
     }
 
     private void LateUpdate()
     {
-        if (_characterController == null) return;
-
         bool jetpackVisible = _playerSuit.activeSelf && _playerJetpack.activeSelf;
 
         // get thruster vector IF the player is sprinting and the jetpack is visible. Otherwise, move towards zero
-        _thrusterVector = Vector2.MoveTowards(_thrusterVector, _isSprinting && jetpackVisible && Config.IsSprintEffectEnabled ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
+        _thrusterVector = Vector2.MoveTowards(_thrusterVector, IsSprinting && jetpackVisible && Config.IsSprintEffectEnabled ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
         Vector2 flameVector = _thrusterVector;
 
         // adjust vector based on sprinting and strafe speed
@@ -129,8 +127,6 @@ public class SpeedController : MonoBehaviour
 
     private void ApplyChanges()
     {
-        if (_characterController == null) return;
-
         // Change built-in character attributes
         _characterController._runSpeed = Config.DefaultSpeed;
         _characterController._strafeSpeed = Config.StrafeSpeed;
@@ -146,25 +142,25 @@ public class SpeedController : MonoBehaviour
         bool isSprintAllowed = Config.SprintMode == "Always" || (Config.SprintMode == "When Suited" && PlayerState.IsWearingSuit());
         bool isOnValidGround = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce();
         bool isWalking = _isDreamLanternFocused || (OWInput.IsPressed(InputLibrary.rollMode) && _characterController._heldLanternItem == null);
-        bool wasSprinting = _isSprinting;
+        bool wasSprinting = IsSprinting;
 
         if (isSprintAllowed && isOnValidGround && !isWalking && OWInput.IsPressed(_sprintButton) && (wasSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
         {
-            _isSprinting = true;
+            IsSprinting = true;
             _characterController._runSpeed = Config.SprintSpeed;
             _characterController._strafeSpeed = Config.SprintStrafeSpeed;
         }
         else
         {
-            _isSprinting = false;
+            IsSprinting = false;
             _characterController._runSpeed = Config.DefaultSpeed;
             _characterController._strafeSpeed = Config.StrafeSpeed;
         }
 
         // log it
-        if (_isSprinting != wasSprinting)
+        if (IsSprinting != wasSprinting)
         {
-            Main.Instance.Log($"[{nameof(SpeedController)}] {(_isSprinting ? "Started" : "Stopped")} sprinting", MessageType.Debug);
+            Main.Log($"[{nameof(SpeedController)}] {(IsSprinting ? "Started" : "Stopped")} sprinting", MessageType.Debug);
         }
     }
 

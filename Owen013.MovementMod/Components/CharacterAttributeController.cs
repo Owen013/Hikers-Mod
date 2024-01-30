@@ -16,7 +16,7 @@ internal class CharacterAttributeController : MonoBehaviour
         Main.Instance.OnConfigure += ApplyChanges;
         ApplyChanges();
 
-        Main.Instance.Log($"{nameof(CharacterAttributeController)} added to {gameObject.name}", MessageType.Debug);
+        Main.Log($"{nameof(CharacterAttributeController)} added to {gameObject.name}", MessageType.Debug);
     }
 
     private void ApplyChanges()

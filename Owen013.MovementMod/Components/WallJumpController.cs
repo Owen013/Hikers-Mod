@@ -23,7 +23,7 @@ public class WallJumpController : MonoBehaviour
             _wallJumpsLeft = Config.WallJumpsPerJump;
         };
 
-        Main.Instance.Log($"{nameof(WallJumpController)} added to {gameObject.name}", MessageType.Debug);
+        Main.Log($"{nameof(WallJumpController)} added to {gameObject.name}", MessageType.Debug);
     }
 
     private void Update()
@@ -45,7 +45,7 @@ public class WallJumpController : MonoBehaviour
 
             if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20f)
             {
-                Main.Instance.Log($"[{nameof(WallJumpController)}] Can't Wall-Jump; going too fast", MessageType.Debug);
+                Main.Log($"[{nameof(WallJumpController)}] Can't Wall-Jump; going too fast", MessageType.Debug);
             }
             else
             {
@@ -54,7 +54,7 @@ public class WallJumpController : MonoBehaviour
                 _wallJumpsLeft -= 1;
                 _impactAudio._impactAudioSrc.PlayOneShot(AudioType.ImpactLowSpeed);
                 _lastWallJumpTime = _lastWallJumpRefill = Time.time;
-                Main.Instance.Log($"[{nameof(WallJumpController)}] Wall-Jumped", MessageType.Debug);
+                Main.Log($"[{nameof(WallJumpController)}] Wall-Jumped", MessageType.Debug);
             }
         }
 

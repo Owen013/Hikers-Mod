@@ -14,9 +14,9 @@ public class Main : ModBehaviour
     public ISmolHatchling SmolHatchlingAPI;
     public ICameraShaker CameraShakerAPI;
 
-    public void Log(string text, MessageType type = MessageType.Message)
+    public static void Log(string text, MessageType type = MessageType.Message)
     {
-        ModHelper.Console.WriteLine(text, type);
+        Instance.ModHelper.Console.WriteLine(text, type);
     }
 
     public override void Configure(IModConfig config)
@@ -72,6 +72,6 @@ public class Main : ModBehaviour
         CameraShakerAPI = ModHelper.Interaction.TryGetModApi<ICameraShaker>("SBtT.CameraShake");
 
         // Ready!
-        ModHelper.Console.WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
+        Log($"Hiker's Mod is ready to go!", MessageType.Success);
     }
 }

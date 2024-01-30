@@ -13,7 +13,7 @@ public class AnimSpeedController : MonoBehaviour
         _animator = GetComponent<Animator>();
         _characterController = Locator.GetPlayerController();
 
-        Main.Instance.Log($"{nameof(AnimSpeedController)} added to {gameObject.name}", MessageType.Debug);
+        Main.Log($"{nameof(AnimSpeedController)} added to {gameObject.name}", MessageType.Debug);
     }
 
     private void Update()

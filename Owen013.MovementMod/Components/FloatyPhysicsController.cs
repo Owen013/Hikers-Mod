@@ -11,7 +11,7 @@ public class FloatyPhysicsController : MonoBehaviour
     {
         _characterController = GetComponent<PlayerCharacterController>();
 
-        Main.Instance.Log($"{nameof(SpeedController)} added to {gameObject.name}", MessageType.Debug);
+        Main.Log($"{nameof(SpeedController)} added to {gameObject.name}", MessageType.Debug);
     }
 
     private void Update()
