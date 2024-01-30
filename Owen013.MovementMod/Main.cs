@@ -72,6 +72,6 @@ public class Main : ModBehaviour
         CameraShakerAPI = ModHelper.Interaction.TryGetModApi<ICameraShaker>("SBtT.CameraShake");
 
         // Ready!
-        ModHelper.Console.WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
+        Log($"Hiker's Mod is ready to go!", MessageType.Success);
     }
 }

@@ -27,7 +27,7 @@ public static class Patches
         if (!__instance._isAlignedToForce && !__instance._isZeroGMovementEnabled) return false;
 
         // normal Update() function, but added isWearingSuit and IsSprinting to if statement
-        if (!__instance._isWearingSuit || __instance.GetComponent<SpeedController>().IsSprinting() == true || OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f)
+        if (!__instance._isWearingSuit || __instance.GetComponent<SpeedController>().IsSprinting == true || OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f)
         {
             __instance.UpdateJumpInput();
         }
@@ -114,7 +114,7 @@ public static class Patches
     [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
     private static void OnGetJetpackInput(JetpackThrusterController __instance, ref Vector3 __result)
     {
-        if (__result.y != 0f && __instance._characterController.GetComponent<SpeedController>().IsSprinting() == true)
+        if (__result.y != 0f && __instance._characterController.GetComponent<SpeedController>().IsSprinting == true)
         {
             __result.y = 0f;
         }
@@ -125,6 +125,6 @@ public static class Patches
     [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
     private static void OnCheckIsBoosterAllowed(ref bool __result)
     {
-        if (Locator.GetPlayerController().GetComponent<SpeedController>().IsSprinting() == true) __result = false;
+        if (Locator.GetPlayerController().GetComponent<SpeedController>().IsSprinting == true) __result = false;
     }
 }
