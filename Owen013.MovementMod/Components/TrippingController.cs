@@ -5,7 +5,7 @@ namespace HikersMod.Components;
 
 public class TrippingController : MonoBehaviour
 {
-    public static TrippingController s_instance;
+    public static TrippingController Instance;
     private PlayerCharacterController _characterController;
     private PlayerAudioController _audioController;
     private bool _isTripping;
@@ -13,7 +13,7 @@ public class TrippingController : MonoBehaviour
 
     private void Awake()
     {
-        s_instance = this;
+        Instance = this;
         Harmony.CreateAndPatchAll(typeof(TrippingController));
     }
 
@@ -30,7 +30,7 @@ public class TrippingController : MonoBehaviour
             StopTripping();
         }
 
-        float trippingChance = SpeedController.s_instance.GetMoveSpeed() == "sprinting" ? ModController.s_instance.SprintingTripChance : ModController.s_instance.TripChance;
+        float trippingChance = SpeedController.Instance.IsSprinting ? Config.SprintingTripChance : Config.TripChance;
         bool canTrip = _tripTimeLeft <= 0 && _characterController.IsGrounded();
         if (trippingChance != 0f && canTrip && Random.Range(0f, 1f) <= 1f - Mathf.Pow(1f - trippingChance, Time.fixedDeltaTime))
         {
@@ -42,7 +42,7 @@ public class TrippingController : MonoBehaviour
     public void StartTripping()
     {
         _isTripping = true;
-        _tripTimeLeft = ModController.s_instance.TripDuration;
+        _tripTimeLeft = Config.TripDuration;
         _characterController.MakeUngrounded();
         _characterController._owRigidbody.UnfreezeRotation();
         _characterController.GetComponent<AlignPlayerWithForce>().enabled = false;
@@ -61,17 +61,17 @@ public class TrippingController : MonoBehaviour
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
     private static void OnCharacterControllerStart()
     {
-        s_instance._characterController = Locator.GetPlayerController();
-        s_instance._audioController = Locator.GetPlayerAudioController();
+        Instance._characterController = Locator.GetPlayerController();
+        Instance._audioController = Locator.GetPlayerAudioController();
     }
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.OnInstantDamage))]
     private static void OnCharacterControllerDamaged(float instantDamage)
     {
-        if (Random.Range(0f, 1f) <= ModController.s_instance.DamagedTripChance * instantDamage)
+        if (Random.Range(0f, 1f) <= Config.DamagedTripChance * instantDamage)
         {
-            s_instance.StartTripping();
+            Instance.StartTripping();
         }
     }
 }

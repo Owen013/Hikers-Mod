@@ -5,24 +5,24 @@ namespace HikersMod.Components;
 
 public class ScoutMisfireController : MonoBehaviour
 {
-    public static ScoutMisfireController s_instance;
+    public static ScoutMisfireController Instance;
     private PlayerCharacterController _characterController;
 
     private void Awake()
     {
-        s_instance = this;
+        Instance = this;
         Harmony.CreateAndPatchAll(typeof(ScoutMisfireController));
     }
 
     private void OnProbeLaunched(SurveyorProbe probe)
     {
-        if (ModController.s_instance.ScoutMisfireChance != 0f && Random.Range(0f, 1f) <= ModController.s_instance.ScoutMisfireChance)
+        if (Config.ScoutMisfireChance != 0f && Random.Range(0f, 1f) <= Config.ScoutMisfireChance)
         {
-            TrippingController.s_instance.StartTripping();
+            TrippingController.Instance.StartTripping();
             Vector3 probeVelocity = probe._owRigidbody.GetRelativeVelocity(_characterController._owRigidbody);
-            s_instance._characterController._owRigidbody.AddVelocityChange(probeVelocity.normalized * 20f);
+            Instance._characterController._owRigidbody.AddVelocityChange(probeVelocity.normalized * 20f);
             probe._owRigidbody.AddVelocityChange(probeVelocity);
-            s_instance._characterController._owRigidbody.AddAngularVelocityChange(new(Random.Range(-5f, 5f), Random.Range(-5f, 5f), Random.Range(-5f, 5f)));
+            Instance._characterController._owRigidbody.AddAngularVelocityChange(new(Random.Range(-5f, 5f), Random.Range(-5f, 5f), Random.Range(-5f, 5f)));
             NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "ERROR: SCOUT LAUNCHER MISFIRE", 5f), false);
         }
     }
@@ -31,7 +31,7 @@ public class ScoutMisfireController : MonoBehaviour
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
     private static void OnCharacterControllerStart(PlayerCharacterController __instance)
     {
-        s_instance._characterController = __instance;
+        Instance._characterController = __instance;
     }
 
     [HarmonyPostfix]
@@ -40,7 +40,7 @@ public class ScoutMisfireController : MonoBehaviour
     {
         if (__instance.GetComponentInParent<PlayerCharacterController>())
         {
-            __instance.OnLaunchProbe += s_instance.OnProbeLaunched;
+            __instance.OnLaunchProbe += Instance.OnProbeLaunched;
         }
     }
 }

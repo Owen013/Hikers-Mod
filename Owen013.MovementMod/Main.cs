@@ -31,6 +31,14 @@ public class Main : ModBehaviour
         Config.emergencyBoostVolume = config.GetSettingsValue<float>("Emergency Boost Volume");
         Config.emergencyBoostInputTime = config.GetSettingsValue<float>("Emergency Boost Input Time");
         Config.emergencyBoostCameraShakeAmount = config.GetSettingsValue<float>("Emergency Boost Camera Shake Amount");
+        Config.TripDuration = config.GetSettingsValue<float>("Trip Duration");
+        Config.TripChance = config.GetSettingsValue<float>("Chance of Tripping Randomly");
+        Config.SprintingTripChance = config.GetSettingsValue<float>("Chance of Tripping while Sprinting");
+        Config.DamagedTripChance = config.GetSettingsValue<float>("Chance of Tripping when Damaged");
+        Config.ReverseBoostChance = config.GetSettingsValue<float>("Reverse Boost Chance");
+        Config.EmergencyBoostMisfireChance = config.GetSettingsValue<float>("Emergency Boost Misfire Chance");
+        Config.ScoutMisfireChance = config.GetSettingsValue<float>("Scout Misfire Chance");
+        Config.ReverseRepairChance = config.GetSettingsValue<float>("Reverse Repair Chance");
         Config.isFloatyPhysicsEnabled = config.GetSettingsValue<bool>("Enable Floaty Physics");
         Config.floatyPhysicsMinAccel = config.GetSettingsValue<float>("Minimum Acceleration");
         Config.floatyPhysicsMaxGravity = config.GetSettingsValue<float>("Maximum Gravity");

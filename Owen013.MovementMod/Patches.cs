@@ -17,6 +17,10 @@ public static class Patches
         __instance.gameObject.AddComponent<EmergencyBoostController>();
         __instance.gameObject.AddComponent<FloatyPhysicsController>();
         __instance.gameObject.AddComponent<WallJumpController>();
+        __instance.gameObject.AddComponent<TrippingController>();
+        __instance.gameObject.AddComponent<ReverseBoostController>();
+        __instance.gameObject.AddComponent<ScoutMisfireController>();
+        __instance.gameObject.AddComponent<ReverseRepairController>();
     }
 
     // allows the player to jump while sprinting

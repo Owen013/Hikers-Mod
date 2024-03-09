@@ -15,6 +15,14 @@ public static class Config
     public static float emergencyBoostVolume;
     public static float emergencyBoostInputTime;
     public static float emergencyBoostCameraShakeAmount;
+    public static float TripDuration;
+    public static float TripChance;
+    public static float SprintingTripChance;
+    public static float DamagedTripChance;
+    public static float ReverseBoostChance;
+    public static float EmergencyBoostMisfireChance;
+    public static float ScoutMisfireChance;
+    public static float ReverseRepairChance;
     public static bool isFloatyPhysicsEnabled;
     public static float floatyPhysicsMinAccel;
     public static float floatyPhysicsMaxGravity;

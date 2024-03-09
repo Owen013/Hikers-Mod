@@ -5,12 +5,12 @@ namespace HikersMod.Components;
 
 public class ReverseBoostController : MonoBehaviour
 {
-    public static ReverseBoostController s_instance;
+    public static ReverseBoostController Instance;
     private bool _isBoostReversed;
 
     private void Awake()
     {
-        s_instance = this;
+        Instance = this;
         Harmony.CreateAndPatchAll(typeof(ReverseBoostController));
     }
 
@@ -18,9 +18,9 @@ public class ReverseBoostController : MonoBehaviour
     [HarmonyPatch(typeof(JetpackThrusterModel), nameof(JetpackThrusterModel.ActivateBoost))]
     private static void OnStartBoosting(JetpackThrusterModel __instance)
     {
-        if (ModController.s_instance.ReverseBoostChance != 0f && Random.Range(0f, 1f) <= ModController.s_instance.ReverseBoostChance)
+        if (Config.ReverseBoostChance != 0f && Random.Range(0f, 1f) <= Config.ReverseBoostChance)
         {
-            s_instance._isBoostReversed = true;
+            Instance._isBoostReversed = true;
             __instance._boostThrust = -__instance._boostThrust;
         }
     }
@@ -29,9 +29,9 @@ public class ReverseBoostController : MonoBehaviour
     [HarmonyPatch(typeof(JetpackThrusterModel), nameof(JetpackThrusterModel.DeactivateBoost))]
     private static void OnStopBoosting(JetpackThrusterModel __instance)
     {
-        if (s_instance._isBoostReversed)
+        if (Instance._isBoostReversed)
         {
-            s_instance._isBoostReversed = false;
+            Instance._isBoostReversed = false;
             __instance._boostThrust = -__instance._boostThrust;
         }
     }
