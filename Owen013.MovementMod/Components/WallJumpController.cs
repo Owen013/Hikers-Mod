@@ -1,11 +1,10 @@
-﻿using HarmonyLib;
+﻿using OWML.Common;
 using UnityEngine;
 
 namespace HikersMod.Components;
 
 public class WallJumpController : MonoBehaviour
 {
-    public static WallJumpController s_instance;
     private PlayerCharacterController _characterController;
     private PlayerAnimController _animController;
     private PlayerImpactAudio _impactAudio;
@@ -15,31 +14,36 @@ public class WallJumpController : MonoBehaviour
 
     private void Awake()
     {
-        s_instance = this;
-        Harmony.CreateAndPatchAll(typeof(WallJumpController));
+        _characterController = GetComponent<PlayerCharacterController>();
+        _animController = GetComponentInChildren<PlayerAnimController>();
+        _impactAudio = FindObjectOfType<PlayerImpactAudio>();
+
+        _characterController.OnBecomeGrounded += () =>
+        {
+            _wallJumpsLeft = Config.wallJumpsPerJump;
+        };
     }
 
     private void Update()
     {
-        if (_characterController == null) return;
-
         UpdateWallJump();
     }
 
     private void UpdateWallJump()
     {
         _characterController.UpdatePushable();
-        bool isWallJumpAllowed = (ModController.s_instance.WallJumpMode == "When Unsuited" && !PlayerState.IsWearingSuit()) || ModController.s_instance.WallJumpMode == "Always";
-        if (isWallJumpAllowed && _characterController._isPushable && !PlayerState.InZeroG() && !_characterController._isGrounded && OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && _wallJumpsLeft > 0)
+        bool isWallJumpAllowed = (Config.wallJumpMode == "When Unsuited" && !PlayerState.IsWearingSuit()) || Config.wallJumpMode == "Always";
+        bool canWallJump = isWallJumpAllowed && _characterController._isPushable && !PlayerState.InZeroG() && !_characterController._isGrounded && _wallJumpsLeft > 0;
+        if (isWallJumpAllowed && canWallJump && OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character))
         {
             OWRigidbody pushBody = _characterController._pushableBody;
             Vector3 pushPoint = _characterController._pushContactPt;
             Vector3 pointVelocity = pushBody.GetPointVelocity(pushPoint);
-            Vector3 climbVelocity = new Vector3(0, ModController.s_instance.JumpPower * (_wallJumpsLeft / ModController.s_instance.WallJumpsPerJump), 0);
+            Vector3 climbVelocity = new Vector3(0, Config.maxJumpPower, 0f) * (_wallJumpsLeft / Config.wallJumpsPerJump);
 
-            if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20)
+            if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20f)
             {
-                ModController.s_instance.DebugLog("Can't Wall-Jump; going too fast");
+                Main.WriteLine($"[{nameof(WallJumpController)}] Can't Wall-Jump; going too fast", MessageType.Debug);
             }
             else
             {
@@ -48,30 +52,20 @@ public class WallJumpController : MonoBehaviour
                 _wallJumpsLeft -= 1;
                 _impactAudio._impactAudioSrc.PlayOneShot(AudioType.ImpactLowSpeed);
                 _lastWallJumpTime = _lastWallJumpRefill = Time.time;
-                ModController.s_instance.DebugLog("Wall-Jumped");
+                Main.WriteLine($"[{nameof(WallJumpController)}] Wall-Jumped", MessageType.Debug);
             }
         }
 
         // Replenish 1 wall jump if you hasn't done one for five seconds
-        if (Time.time - _lastWallJumpRefill > 5 && _wallJumpsLeft < ModController.s_instance.WallJumpsPerJump)
+        if (Time.time - _lastWallJumpRefill > 5 && _wallJumpsLeft < Config.wallJumpsPerJump)
         {
             _wallJumpsLeft += 1;
             _lastWallJumpRefill = Time.time;
         }
 
         // Make player play fast freefall animation after each wall jump
-        float freeFallSpeed = _animController._animator.GetFloat("FreefallSpeed");
+        float freeFallSpeed = _animController._animator.GetFloat($"[{nameof(WallJumpController)}] FreefallSpeed");
         float climbFraction = Mathf.Max(0, 1 - (Time.time - _lastWallJumpTime));
-        _animController._animator.SetFloat("FreefallSpeed", Mathf.Max(freeFallSpeed, climbFraction));
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
-    private static void CharacterControllerStart()
-    {
-        s_instance._characterController = FindObjectOfType<PlayerCharacterController>();
-        s_instance._animController = FindObjectOfType<PlayerAnimController>();
-        s_instance._impactAudio = FindObjectOfType<PlayerImpactAudio>();
-        s_instance._characterController.OnBecomeGrounded += () => s_instance._wallJumpsLeft = ModController.s_instance.WallJumpsPerJump;
+        _animController._animator.SetFloat($"[{nameof(WallJumpController)}] FreefallSpeed", Mathf.Max(freeFallSpeed, climbFraction));
     }
 }

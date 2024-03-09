@@ -1,14 +1,10 @@
-﻿using HarmonyLib;
+﻿using OWML.Common;
 using UnityEngine;
 
 namespace HikersMod.Components;
 
 public class EmergencyBoostController : MonoBehaviour
 {
-    public static EmergencyBoostController s_instance;
-    private float _lastBoostInputTime;
-    private float _lastBoostTime;
-    private bool _isEmergencyBoosting;
     private OWAudioSource _superBoostAudio;
     private JetpackThrusterModel _jetpackModel;
     private JetpackThrusterController _jetpackController;
@@ -16,21 +12,45 @@ public class EmergencyBoostController : MonoBehaviour
     private PlayerAudioController _audioController;
     private ThrusterFlameController _downThrustFlame;
     private HUDHelmetAnimator _helmetAnimator;
+    private float _lastBoostInputTime;
+    private float _lastBoostTime;
+    private bool _isEmergencyBoosting;
 
     private void Awake()
     {
-        s_instance = this;
-        Harmony.CreateAndPatchAll(typeof(EmergencyBoostController));
+        _characterController = Locator.GetPlayerController();
+        _audioController = Locator.GetPlayerAudioController();
+        _jetpackModel = FindObjectOfType<JetpackThrusterModel>();
+        _jetpackController = FindObjectOfType<JetpackThrusterController>();
+        _helmetAnimator = FindObjectOfType<HUDHelmetAnimator>();
+
+        // create super boost audio source
+        _superBoostAudio = new GameObject("HikersMod_EmergencyBoostAudioSrc").AddComponent<OWAudioSource>();
+        _superBoostAudio.transform.parent = _audioController.transform;
+        _superBoostAudio.transform.localPosition = new Vector3(0, -1f, 1f);
+
+        // get player's downward thruster flame
+        var thrusters = _characterController.gameObject.GetComponentsInChildren<ThrusterFlameController>(includeInactive: true);
+        for (int i = 0; i < thrusters.Length; i++)
+        {
+            if (thrusters[i]._thruster == Thruster.Up_LeftThruster)
+            {
+                _downThrustFlame = thrusters[i];
+            }
+        }
+
+        _characterController.OnBecomeGrounded += EndEmergencyBoost;
     }
 
     private void Update()
     {
         if (_characterController == null) return;
+
         bool isInputting = OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && !OWInput.IsPressed(InputLibrary.thrustUp, InputMode.Character);
         bool canEmergencyBoost = _characterController._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
         if (!canEmergencyBoost) EndEmergencyBoost();
 
-        else if (ModController.s_instance.IsEmergencyBoostEnabled && isInputting && Time.time - _lastBoostInputTime < 0.25f  && _jetpackController._resources.GetFuel() > 0f && !_isEmergencyBoosting)
+        else if (Config.isEmergencyBoostEnabled && isInputting && Time.time - _lastBoostInputTime < Config.emergencyBoostInputTime && _jetpackController._resources.GetFuel() > 0f && !_isEmergencyBoosting)
         {
             ApplyEmergencyBoost();
         }
@@ -39,26 +59,13 @@ public class EmergencyBoostController : MonoBehaviour
         if (_isEmergencyBoosting) _jetpackModel._chargeSeconds = float.PositiveInfinity;
     }
 
-    private void LateUpdate()
-    {
-        if (_characterController == null) return;
-
-        float timeSinceBoost = Time.time - _lastBoostTime;
-        float thrusterCurve = -Mathf.Pow(5f * timeSinceBoost - 1f, 2f) + 1f;
-        float thrusterScale = Mathf.Max(15f * thrusterCurve, _downThrustFlame._currentScale);
-        _downThrustFlame.transform.localScale = Vector3.one * thrusterScale;
-        _downThrustFlame._light.range = _downThrustFlame._baseLightRadius * thrusterScale;
-        _downThrustFlame._thrusterRenderer.enabled = thrusterScale > 0f;
-        _downThrustFlame._light.enabled = thrusterScale > 0f;
-    }
-
     private void ApplyEmergencyBoost()
     {
         _isEmergencyBoosting = true;
         _lastBoostTime = Time.time;
         _jetpackModel._boostChargeFraction = 0f;
-        _jetpackController._resources._currentFuel = Mathf.Max(0f, _jetpackController._resources.GetFuel() - ModController.s_instance.EmergencyBoostCost);
-        float boostPower = ModController.s_instance.EmergencyBoostPower;
+        _jetpackController._resources._currentFuel = Mathf.Max(0f, _jetpackController._resources.GetFuel() - Config.emergencyBoostCost);
+        float boostPower = Config.emergencyBoostPower;
 
         // April Fools
         if (ModController.s_instance.SuperBoostMisfireChance != 0f && Random.Range(0f, 1f) <= ModController.s_instance.SuperBoostMisfireChance)
@@ -82,17 +89,17 @@ public class EmergencyBoostController : MonoBehaviour
 
         // sound and visual effects
         _superBoostAudio.pitch = Random.Range(1.0f, 1.4f);
-        _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, ModController.s_instance.EmergencyBoostVolume * 0.75f);
+        _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, Config.emergencyBoostVolume * 0.75f);
         _helmetAnimator.OnInstantDamage(boostPower, InstantDamageType.Impact);
         NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "EMERGENCY BOOST ACTIVATED", 5f), false);
 
         // if camerashaker is installed and camera shake is enabled, do a camera shake
-        if (ModController.s_instance.EmergencyBoostCameraShakeAmount > 0)
+        if (Config.emergencyBoostCameraShakeAmount > 0f)
         {
-            ModController.s_instance.CameraShakerAPI?.ExplosionShake(strength: boostPower * ModController.s_instance.EmergencyBoostCameraShakeAmount);
+            Main.Instance.CameraShakerAPI?.ExplosionShake(strength: boostPower * Config.emergencyBoostCameraShakeAmount);
         }
 
-        ModController.s_instance.DebugLog("Super-Boosted");
+        Main.WriteLine($"[{nameof(EmergencyBoostController)}] Super-Boosted", MessageType.Debug);
     }
 
     private void EndEmergencyBoost()
@@ -101,34 +108,16 @@ public class EmergencyBoostController : MonoBehaviour
         _jetpackModel._chargeSeconds = _characterController.IsGrounded() ? _jetpackModel._chargeSecondsGround : _jetpackModel._chargeSecondsAir;
     }
 
-    public bool IsEmergencyBoosting()
+    private void LateUpdate()
     {
-        return _isEmergencyBoosting;
-    }
+        if (_characterController == null) return;
 
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
-    private static void OnCharacterControllerStart()
-    {
-        s_instance._characterController = FindObjectOfType<PlayerCharacterController>();
-        s_instance._audioController = FindObjectOfType<PlayerAudioController>();
-        s_instance._jetpackModel = FindObjectOfType<JetpackThrusterModel>();
-        s_instance._jetpackController = FindObjectOfType<JetpackThrusterController>();
-        s_instance._helmetAnimator = FindObjectOfType<HUDHelmetAnimator>();
-
-        s_instance._superBoostAudio = new GameObject("HikersMod_EmergencyBoostAudioSrc").AddComponent<OWAudioSource>();
-        s_instance._superBoostAudio.transform.parent = s_instance._audioController.transform;
-        s_instance._superBoostAudio.transform.localPosition = new Vector3(0, 0, 1);
-
-        var thrusters = Resources.FindObjectsOfTypeAll<ThrusterFlameController>();
-        for (int i = 0; i < thrusters.Length; i++)
-        {
-            if (thrusters[i].GetComponentInParent<PlayerBody>() && thrusters[i]._thruster == Thruster.Up_LeftThruster)
-            {
-                s_instance._downThrustFlame = thrusters[i];
-            }
-        }
-
-        s_instance._characterController.OnBecomeGrounded += s_instance.EndEmergencyBoost;
+        float timeSinceBoost = Time.time - _lastBoostTime;
+        float thrusterCurve = -Mathf.Pow(5f * timeSinceBoost - 1f, 2f) + 1f;
+        float thrusterScale = Mathf.Max(15f * thrusterCurve, _downThrustFlame._currentScale);
+        _downThrustFlame.transform.localScale = Vector3.one * thrusterScale;
+        _downThrustFlame._light.range = _downThrustFlame._baseLightRadius * thrusterScale;
+        _downThrustFlame._thrusterRenderer.enabled = thrusterScale > 0f;
+        _downThrustFlame._light.enabled = thrusterScale > 0f;
     }
 }

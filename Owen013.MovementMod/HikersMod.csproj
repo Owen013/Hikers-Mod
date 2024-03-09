@@ -13,8 +13,7 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Components\CrouchController.cs" />
-    <Compile Remove="Components\ViewBobController.cs" />
+    <Compile Remove="HikersModAPI.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="OWML" Version="2.9.8" />

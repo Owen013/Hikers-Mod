@@ -4,18 +4,13 @@ namespace HikersMod;
 
 public class HikersModAPI
 {
-    public float GetAnimSpeed()
+    public bool IsSprinting()
     {
-        return ModController.s_instance.GetAnimSpeed();
-    }
-
-    public string GetMoveSpeed()
-    {
-        return SpeedController.s_instance.GetMoveSpeed();
+        return SpeedController.Instance.IsSprinting();
     }
 
     public bool IsEmergencyBoosting()
     {
-        return EmergencyBoostController.s_instance.IsEmergencyBoosting();
+        return EmergencyBoostController.Instance.IsEmergencyBoosting();
     }
 }

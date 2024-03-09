@@ -1,32 +1,31 @@
-﻿using HarmonyLib;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace HikersMod.Components;
 
 public class FloatyPhysicsController : MonoBehaviour
 {
-    public static FloatyPhysicsController s_instance;
     private PlayerCharacterController _characterController;
 
     private void Awake()
     {
-        s_instance = this;
-        Harmony.CreateAndPatchAll(typeof(FloatyPhysicsController));
+        _characterController = GetComponent<PlayerCharacterController>();
     }
 
     private void Update()
     {
-        if (ModController.s_instance.IsFloatyPhysicsEnabled) UpdateAcceleration();
+        if (Config.isFloatyPhysicsEnabled)
+        {
+            if (_characterController.IsGrounded() && !_characterController.IsSlidingOnIce())
+            {
+                float currentGravity = _characterController.GetNormalAccelerationScalar() / 12f;
+                float maxGravity = Config.floatyPhysicsMaxGravity;
+                float minGravity = Config.floatyPhysicsMinGravity;
+                _characterController._acceleration = Mathf.Lerp(Config.floatyPhysicsMinAccel, Config.groundAccel, Mathf.Clamp((currentGravity - minGravity) / (maxGravity - minGravity), 0f, 1f));
+            }
+            else
+            {
+                _characterController._acceleration = Config.groundAccel;
+            }
+        }
     }
-
-    private void UpdateAcceleration()
-    {
-        if (_characterController == null) return;
-        float gravMultiplier = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce() ? Mathf.Clamp(Mathf.Pow(_characterController.GetNormalAccelerationScalar() / 12, ModController.s_instance.FloatyPhysicsPower), 0.25f, 1f) : 1f;
-        _characterController._acceleration = ModController.s_instance.GroundAccel * gravMultiplier;
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
-    private static void OnCharacterControllerStart() => s_instance._characterController = Locator.GetPlayerController();
 }
