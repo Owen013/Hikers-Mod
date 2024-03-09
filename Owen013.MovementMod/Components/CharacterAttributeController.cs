@@ -1,5 +1,4 @@
-﻿using OWML.Common;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace HikersMod.Components;
 
@@ -15,21 +14,19 @@ internal class CharacterAttributeController : MonoBehaviour
 
         Main.Instance.OnConfigure += ApplyChanges;
         ApplyChanges();
-
-        Main.Log($"{nameof(CharacterAttributeController)} added to {gameObject.name}", MessageType.Debug);
     }
 
     private void ApplyChanges()
     {
         // Change built-in character attributes
-        _characterController._useChargeJump = Config.UseChargeJump;
-        if (!Config.IsFloatyPhysicsEnabled) _characterController._acceleration = Config.GroundAccel;
-        _characterController._airSpeed = Config.AirSpeed;
-        _characterController._airAcceleration = Config.AirAccel;
-        _characterController._minJumpSpeed = Config.MinJumpPower;
-        _characterController._maxJumpSpeed = Config.MaxJumpPower;
-        _jetpackModel._maxTranslationalThrust = Config.JetpackAccel;
-        _jetpackModel._boostThrust = Config.JetpackBoostAccel;
-        _jetpackModel._boostSeconds = Config.JetpackBoostTime;
+        _characterController._useChargeJump = Config.useChargeJump;
+        if (!Config.isFloatyPhysicsEnabled) _characterController._acceleration = Config.groundAccel;
+        _characterController._airSpeed = Config.airSpeed;
+        _characterController._airAcceleration = Config.airAccel;
+        _characterController._minJumpSpeed = Config.minJumpPower;
+        _characterController._maxJumpSpeed = Config.maxJumpPower;
+        _jetpackModel._maxTranslationalThrust = Config.jetpackAccel;
+        _jetpackModel._boostThrust = Config.jetpackBoostAccel;
+        _jetpackModel._boostSeconds = Config.jetpackBoostTime;
     }
 }

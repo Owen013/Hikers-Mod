@@ -27,7 +27,7 @@ public static class Patches
         if (!__instance._isAlignedToForce && !__instance._isZeroGMovementEnabled) return false;
 
         // normal Update() function, but added isWearingSuit and IsSprinting to if statement. The rest of this method is unmodified.
-        if (!__instance._isWearingSuit || __instance.GetComponent<SpeedController>().IsSprinting == true || OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f)
+        if (!__instance._isWearingSuit || SpeedController.Instance.IsSprinting == true || OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f)
         {
             __instance.UpdateJumpInput();
         }
@@ -52,7 +52,7 @@ public static class Patches
     private static bool UpdateAirControl(PlayerCharacterController __instance)
     {
         // if feature is disabled then just do the vanilla method
-        if (!Config.IsMidairTurningEnabled) return true;
+        if (!Config.isMidairTurningEnabled) return true;
 
         if (__instance._lastGroundBody != null)
         {
@@ -105,8 +105,8 @@ public static class Patches
     {
         float lerpPosition = 1f - __instance._lanternController.GetFocus();
         lerpPosition *= lerpPosition;
-        maxSpeedX = Mathf.Lerp(Config.DreamLanternSpeed, maxSpeedX, lerpPosition);
-        maxSpeedZ = Mathf.Lerp(Config.DreamLanternSpeed, maxSpeedZ, lerpPosition);
+        maxSpeedX = Mathf.Lerp(Config.dreamLanternSpeed, maxSpeedX, lerpPosition);
+        maxSpeedZ = Mathf.Lerp(Config.dreamLanternSpeed, maxSpeedZ, lerpPosition);
         return false;
     }
 

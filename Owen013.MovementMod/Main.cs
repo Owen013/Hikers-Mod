@@ -8,52 +8,48 @@ namespace HikersMod;
 
 public class Main : ModBehaviour
 {
-    public static Main Instance;
+    public static Main Instance { get; private set; }
+    public ISmolHatchling SmolHatchlingAPI { get; private set; }
+    public ICameraShaker CameraShakerAPI { get; private set; }
+
     public delegate void ConfigureEvent();
     public event ConfigureEvent OnConfigure;
-    public ISmolHatchling SmolHatchlingAPI;
-    public ICameraShaker CameraShakerAPI;
-
-    public static void Log(string text, MessageType type = MessageType.Message)
-    {
-        Instance.ModHelper.Console.WriteLine(text, type);
-    }
 
     public override void Configure(IModConfig config)
     {
         // Update the config
-        Config.UseChargeJump = config.GetSettingsValue<string>("Jump Style") == "Charge";
-        Config.SprintMode = config.GetSettingsValue<string>("Enable Sprinting");
-        Config.SprintButton = config.GetSettingsValue<string>("Sprint Button");
-        Config.SprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
-        Config.SprintStrafeSpeed = config.GetSettingsValue<float>("Sprint Strafe Speed");
-        Config.ShouldSprintOnLanding = config.GetSettingsValue<bool>("Start Sprinting On Landing");
-        Config.IsSprintEffectEnabled = config.GetSettingsValue<bool>("Show Thruster Effect while Sprinting");
-        Config.IsEmergencyBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
-        Config.EmergencyBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");
-        Config.EmergencyBoostCost = config.GetSettingsValue<float>("Emergency Boost Cost");
-        Config.EmergencyBoostVolume = config.GetSettingsValue<float>("Emergency Boost Volume");
-        Config.EmergencyBoostInputTime = config.GetSettingsValue<float>("Emergency Boost Input Time");
-        Config.EmergencyBoostCameraShakeAmount = config.GetSettingsValue<float>("Emergency Boost Camera Shake Amount");
-        Config.IsFloatyPhysicsEnabled = config.GetSettingsValue<bool>("Enable Floaty Physics");
-        Config.FloatyPhysicsMinAccel = config.GetSettingsValue<float>("Minimum Acceleration");
-        Config.FloatyPhysicsMaxGravity = config.GetSettingsValue<float>("Maximum Gravity");
-        Config.FloatyPhysicsMinGravity = config.GetSettingsValue<float>("Minimum Gravity");
-        Config.DefaultSpeed = config.GetSettingsValue<float>("Normal Speed");
-        Config.StrafeSpeed = config.GetSettingsValue<float>("Strafe Speed");
-        Config.WalkSpeed = config.GetSettingsValue<float>("Walk Speed");
-        Config.DreamLanternSpeed = config.GetSettingsValue<float>("Focused Lantern Speed");
-        Config.GroundAccel = config.GetSettingsValue<float>("Ground Acceleration");
-        Config.AirSpeed = config.GetSettingsValue<float>("Air Speed");
-        Config.AirAccel = config.GetSettingsValue<float>("Air Acceleration");
-        Config.MinJumpPower = config.GetSettingsValue<float>("Minimum Jump Power");
-        Config.MaxJumpPower = config.GetSettingsValue<float>("Maximum Jump Power");
-        Config.JetpackAccel = config.GetSettingsValue<float>("Jetpack Acceleration");
-        Config.JetpackBoostAccel = config.GetSettingsValue<float>("Jetpack Boost Acceleration");
-        Config.JetpackBoostTime = config.GetSettingsValue<float>("Max Jetpack Boost Time");
-        Config.IsMidairTurningEnabled = config.GetSettingsValue<bool>("Enable Midair Turning");
-        Config.WallJumpMode = config.GetSettingsValue<string>("Enable Wall Jumping");
-        Config.WallJumpsPerJump = config.GetSettingsValue<float>("Wall Jumps per Jump");
+        Config.useChargeJump = config.GetSettingsValue<string>("Jump Style") == "Charge";
+        Config.sprintMode = config.GetSettingsValue<string>("Enable Sprinting");
+        Config.sprintButton = config.GetSettingsValue<string>("Sprint Button");
+        Config.sprintSpeed = config.GetSettingsValue<float>("Sprint Speed");
+        Config.sprintStrafeSpeed = config.GetSettingsValue<float>("Sprint Strafe Speed");
+        Config.shouldSprintOnLanding = config.GetSettingsValue<bool>("Start Sprinting On Landing");
+        Config.isSprintEffectEnabled = config.GetSettingsValue<bool>("Show Thruster Effect while Sprinting");
+        Config.isEmergencyBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
+        Config.emergencyBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");
+        Config.emergencyBoostCost = config.GetSettingsValue<float>("Emergency Boost Cost");
+        Config.emergencyBoostVolume = config.GetSettingsValue<float>("Emergency Boost Volume");
+        Config.emergencyBoostInputTime = config.GetSettingsValue<float>("Emergency Boost Input Time");
+        Config.emergencyBoostCameraShakeAmount = config.GetSettingsValue<float>("Emergency Boost Camera Shake Amount");
+        Config.isFloatyPhysicsEnabled = config.GetSettingsValue<bool>("Enable Floaty Physics");
+        Config.floatyPhysicsMinAccel = config.GetSettingsValue<float>("Minimum Acceleration");
+        Config.floatyPhysicsMaxGravity = config.GetSettingsValue<float>("Maximum Gravity");
+        Config.floatyPhysicsMinGravity = config.GetSettingsValue<float>("Minimum Gravity");
+        Config.defaultSpeed = config.GetSettingsValue<float>("Normal Speed");
+        Config.strafeSpeed = config.GetSettingsValue<float>("Strafe Speed");
+        Config.walkSpeed = config.GetSettingsValue<float>("Walk Speed");
+        Config.dreamLanternSpeed = config.GetSettingsValue<float>("Focused Lantern Speed");
+        Config.groundAccel = config.GetSettingsValue<float>("Ground Acceleration");
+        Config.airSpeed = config.GetSettingsValue<float>("Air Speed");
+        Config.airAccel = config.GetSettingsValue<float>("Air Acceleration");
+        Config.minJumpPower = config.GetSettingsValue<float>("Minimum Jump Power");
+        Config.maxJumpPower = config.GetSettingsValue<float>("Maximum Jump Power");
+        Config.jetpackAccel = config.GetSettingsValue<float>("Jetpack Acceleration");
+        Config.jetpackBoostAccel = config.GetSettingsValue<float>("Jetpack Boost Acceleration");
+        Config.jetpackBoostTime = config.GetSettingsValue<float>("Max Jetpack Boost Time");
+        Config.isMidairTurningEnabled = config.GetSettingsValue<bool>("Enable Midair Turning");
+        Config.wallJumpMode = config.GetSettingsValue<string>("Enable Wall Jumping");
+        Config.wallJumpsPerJump = config.GetSettingsValue<float>("Wall Jumps per Jump");
 
         OnConfigure?.Invoke();
     }
@@ -72,6 +68,14 @@ public class Main : ModBehaviour
         CameraShakerAPI = ModHelper.Interaction.TryGetModApi<ICameraShaker>("SBtT.CameraShake");
 
         // Ready!
-        Log($"Hiker's Mod is ready to go!", MessageType.Success);
+        WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
+    }
+
+    public static void WriteLine(string text, MessageType type = MessageType.Message)
+    {
+        // null check because this method is created before ModHelper is defined!
+        if (Instance.ModHelper == null) return;
+
+        Instance.ModHelper.Console.WriteLine(text, type);
     }
 }

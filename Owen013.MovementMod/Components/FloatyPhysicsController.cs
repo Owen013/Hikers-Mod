@@ -1,5 +1,4 @@
-﻿using OWML.Common;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace HikersMod.Components;
 
@@ -10,28 +9,23 @@ public class FloatyPhysicsController : MonoBehaviour
     private void Awake()
     {
         _characterController = GetComponent<PlayerCharacterController>();
-
-        Main.Log($"{nameof(SpeedController)} added to {gameObject.name}", MessageType.Debug);
     }
 
     private void Update()
     {
-        if (Config.IsFloatyPhysicsEnabled) UpdateAcceleration();
-    }
-
-    private void UpdateAcceleration()
-    {
-        if (_characterController == null) return;
-        if (_characterController.IsGrounded() && !_characterController.IsSlidingOnIce())
+        if (Config.isFloatyPhysicsEnabled)
         {
-            float currentGravity = _characterController.GetNormalAccelerationScalar() / 12;
-            float maxGravity = Config.FloatyPhysicsMaxGravity;
-            float minGravity = Config.FloatyPhysicsMinGravity;
-            _characterController._acceleration = Mathf.Lerp(Config.FloatyPhysicsMinAccel, Config.GroundAccel, Mathf.Clamp((currentGravity - minGravity) / (maxGravity - minGravity), 0f, 1f));
-        }
-        else
-        {
-            _characterController._acceleration = Config.GroundAccel;
+            if (_characterController.IsGrounded() && !_characterController.IsSlidingOnIce())
+            {
+                float currentGravity = _characterController.GetNormalAccelerationScalar() / 12f;
+                float maxGravity = Config.floatyPhysicsMaxGravity;
+                float minGravity = Config.floatyPhysicsMinGravity;
+                _characterController._acceleration = Mathf.Lerp(Config.floatyPhysicsMinAccel, Config.groundAccel, Mathf.Clamp((currentGravity - minGravity) / (maxGravity - minGravity), 0f, 1f));
+            }
+            else
+            {
+                _characterController._acceleration = Config.groundAccel;
+            }
         }
     }
 }
