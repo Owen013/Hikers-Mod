@@ -64,8 +64,8 @@ public class WallJumpController : MonoBehaviour
         }
 
         // Make player play fast freefall animation after each wall jump
-        float freeFallSpeed = _animController._animator.GetFloat($"[{nameof(WallJumpController)}] FreefallSpeed");
+        float freeFallSpeed = _animController._animator.GetFloat($"FreefallSpeed");
         float climbFraction = Mathf.Max(0, 1 - (Time.time - _lastWallJumpTime));
-        _animController._animator.SetFloat($"[{nameof(WallJumpController)}] FreefallSpeed", Mathf.Max(freeFallSpeed, climbFraction));
+        _animController._animator.SetFloat($"FreefallSpeed", Mathf.Max(freeFallSpeed, climbFraction));
     }
 }
