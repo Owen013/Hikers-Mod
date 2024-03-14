@@ -16,6 +16,11 @@ internal class CharacterAttributeController : MonoBehaviour
         ApplyChanges();
     }
 
+    private void OnDestroy()
+    {
+        Main.Instance.OnConfigure -= ApplyChanges;
+    }
+
     private void ApplyChanges()
     {
         // Change built-in character attributes
