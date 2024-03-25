@@ -118,24 +118,6 @@
 			"type": "number",
 			"value": 1.6
 		},
-		"TiredMultiplier": {
-			"title": "Tired Speed Multiplier",
-			"tooltip": "How much your speed is multiplied when you're out of stamina. Recommended: 0.75",
-			"type": "number",
-			"value": 0.75
-		},
-		"StaminaSeconds": {
-			"title": "Seconds of Stamina",
-			"tooltip": "How many seconds you can sprint before becoming tired. Recommended: 10",
-			"type": "number",
-			"value": 10
-		},
-		"StaminaRecoveryRate": {
-			"title": "Stamina Recovery Rate",
-			"tooltip": "How many seconds of stamina you regain each second. Recommended: 1",
-			"type": "number",
-			"value": 1
-		},
 		"Start Sprinting On Landing": {
 			"tooltip": "If you're holding the sprint button and a directional input when you land on the ground, you will stop thrusting and start sprinting. Recommended: Enabled",
 			"type": "toggle",

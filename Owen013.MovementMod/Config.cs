@@ -24,9 +24,6 @@ public static class Config
     public static float jetpackBoostAccel { get; private set; }
     public static float jetpackBoostTime { get; private set; }
     public static float sprintMultiplier { get; private set; }
-    public static float tiredMultiplier { get; private set; }
-    public static float staminaSeconds { get; private set; }
-    public static float staminaRecoveryRate { get; private set; }
     public static bool shouldSprintOnLanding { get; private set; }
     public static bool isSprintEffectEnabled { get; private set; }
     public static float emergencyBoostPower { get; private set; }
@@ -63,9 +60,6 @@ public static class Config
         jetpackBoostAccel = config.GetSettingsValue<float>("Jetpack Boost Acceleration");
         jetpackBoostTime = config.GetSettingsValue<float>("Max Jetpack Boost Time");
         sprintMultiplier = config.GetSettingsValue<float>("SprintMultiplier");
-        tiredMultiplier = config.GetSettingsValue<float>("TiredMultiplier");
-        staminaSeconds = config.GetSettingsValue<float>("StaminaSeconds");
-        staminaRecoveryRate = config.GetSettingsValue<float>("StaminaRecoveryRate");
         shouldSprintOnLanding = config.GetSettingsValue<bool>("Start Sprinting On Landing");
         isSprintEffectEnabled = config.GetSettingsValue<bool>("Show Thruster Effect while Sprinting");
         emergencyBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");

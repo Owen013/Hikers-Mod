@@ -16,10 +16,6 @@ public class SpeedController : MonoBehaviour
     private IInputCommands _sprintButton;
     private Vector2 _thrusterVector;
     private bool _isDreamLanternFocused;
-    private bool _isUsingStamina;
-    private bool _isTired;
-    private float _lastStaminaUseTime;
-    private float _staminaSecondsLeft;
 
     private void Awake()
     {
@@ -32,7 +28,6 @@ public class SpeedController : MonoBehaviour
         _playerJetpack = _playerSuit.transform.Find("Traveller_Mesh_v01:Props_HEA_Jetpack").gameObject;
         _sprintButton = Config.sprintButton == "Up Thrust" ? InputLibrary.thrustUp : InputLibrary.thrustDown;
         _thrusterVector = Vector2.zero;
-        _staminaSecondsLeft = Config.staminaSeconds;
 
         _characterController.OnBecomeGrounded += () =>
         {
@@ -65,32 +60,6 @@ public class SpeedController : MonoBehaviour
 
     private void Update()
     {
-        bool justBecameTired = false;
-        float currentMoveSpeed = _characterController.GetRelativeGroundVelocity().magnitude;
-        if (currentMoveSpeed <= Config.runSpeed)
-        {
-            
-        }
-        if (IsSprinting)
-        {
-            _staminaSecondsLeft -= Time.deltaTime * Mathf.Clamp01((currentMoveSpeed - Config.runSpeed) / Mathf.Max(1f, Config.runSpeed * Config.sprintMultiplier));
-            if (_staminaSecondsLeft <= 0f)
-            {
-                _staminaSecondsLeft = 0f;
-                _isTired = true;
-                justBecameTired = true;
-            }
-        }
-        else if (Time.time - _lastStaminaUseTime > 1f)
-        {
-            _staminaSecondsLeft += Config.staminaRecoveryRate * Time.deltaTime;
-            if (_staminaSecondsLeft > Config.staminaSeconds)
-            {
-                _staminaSecondsLeft = Config.staminaSeconds;
-                _isTired = false;
-            }
-        };
-
         bool hasRollInputChanged = OWInput.IsNewlyPressed(InputLibrary.rollMode) || OWInput.IsNewlyReleased(InputLibrary.rollMode);
         bool hasThrustInputChanged = OWInput.IsNewlyPressed(InputLibrary.thrustDown) || OWInput.IsNewlyReleased(InputLibrary.thrustDown) || OWInput.IsNewlyPressed(InputLibrary.thrustUp) || OWInput.IsNewlyReleased(InputLibrary.thrustUp);
         bool hasPressedBoostInMidair = OWInput.IsNewlyPressed(InputLibrary.boost) && !_characterController.IsGrounded();
@@ -103,12 +72,12 @@ public class SpeedController : MonoBehaviour
             _isDreamLanternFocused = heldLantern._focusing;
         }
 
-        if (justBecameTired || hasRollInputChanged || hasThrustInputChanged || hasPressedBoostInMidair || hasDreamLanternFocusChanged) UpdateSprinting();
+        if (hasRollInputChanged || hasThrustInputChanged || hasPressedBoostInMidair || hasDreamLanternFocusChanged) UpdateSprinting();
     }
 
     private void UpdateSprinting()
     {
-        bool isSprintAllowed = Config.isSprintingEnabled && !_isTired;
+        bool isSprintAllowed = Config.isSprintingEnabled;
         bool isOnValidGround = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce();
         bool isWalking = _isDreamLanternFocused || (OWInput.IsPressed(InputLibrary.rollMode) && _characterController._heldLanternItem == null);
         bool wasSprinting = IsSprinting;
@@ -124,10 +93,6 @@ public class SpeedController : MonoBehaviour
             IsSprinting = false;
             _characterController._runSpeed = Config.runSpeed;
             _characterController._strafeSpeed = Config.strafeSpeed;
-            if (!_isUsingStamina)
-            {
-
-            }
         }
 
         // log it
