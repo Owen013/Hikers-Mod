@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using GhostEnums;
+using HarmonyLib;
 using HikersMod.Components;
 using UnityEngine;
 
@@ -127,5 +128,21 @@ public static class Patches
     private static void OnCheckIsBoosterAllowed(ref bool __result)
     {
         if (SpeedController.Instance.IsSprinting == true) __result = false;
+    }
+
+    // makes ghosts run faster when player is sprinting
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetMoveSpeed))]
+    private static void GhostGetMoveSpeed(MoveType moveType, ref float __result)
+    {
+        if (moveType == MoveType.CHASE && SpeedController.Instance.IsSprinting == true) __result *= Config.sprintMultiplier;
+    }
+
+    // makes ghosts speed up faster when player is sprinting
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetMoveAcceleration))]
+    private static void GhostGetMoveAcceleration(MoveType moveType, ref float __result)
+    {
+        if (moveType == MoveType.CHASE && SpeedController.Instance.IsSprinting == true) __result *= Config.sprintMultiplier;
     }
 }

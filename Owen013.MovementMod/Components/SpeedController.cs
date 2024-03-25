@@ -16,6 +16,10 @@ public class SpeedController : MonoBehaviour
     private IInputCommands _sprintButton;
     private Vector2 _thrusterVector;
     private bool _isDreamLanternFocused;
+    private bool _isUsingStamina;
+    private bool _isTired;
+    private float _lastStaminaUseTime;
+    private float _staminaSecondsLeft;
 
     private void Awake()
     {
@@ -28,6 +32,7 @@ public class SpeedController : MonoBehaviour
         _playerJetpack = _playerSuit.transform.Find("Traveller_Mesh_v01:Props_HEA_Jetpack").gameObject;
         _sprintButton = Config.sprintButton == "Up Thrust" ? InputLibrary.thrustUp : InputLibrary.thrustDown;
         _thrusterVector = Vector2.zero;
+        _staminaSecondsLeft = Config.staminaSeconds;
 
         _characterController.OnBecomeGrounded += () =>
         {
@@ -49,7 +54,7 @@ public class SpeedController : MonoBehaviour
     private void ApplyChanges()
     {
         // Change built-in character attributes
-        _characterController._runSpeed = Config.defaultSpeed;
+        _characterController._runSpeed = Config.runSpeed;
         _characterController._strafeSpeed = Config.strafeSpeed;
         _characterController._walkSpeed = Config.walkSpeed;
         _characterController._airSpeed = Config.airSpeed;
@@ -60,6 +65,32 @@ public class SpeedController : MonoBehaviour
 
     private void Update()
     {
+        bool justBecameTired = false;
+        float currentMoveSpeed = _characterController.GetRelativeGroundVelocity().magnitude;
+        if (currentMoveSpeed <= Config.runSpeed)
+        {
+            
+        }
+        if (IsSprinting)
+        {
+            _staminaSecondsLeft -= Time.deltaTime * Mathf.Clamp01((currentMoveSpeed - Config.runSpeed) / Mathf.Max(1f, Config.runSpeed * Config.sprintMultiplier));
+            if (_staminaSecondsLeft <= 0f)
+            {
+                _staminaSecondsLeft = 0f;
+                _isTired = true;
+                justBecameTired = true;
+            }
+        }
+        else if (Time.time - _lastStaminaUseTime > 1f)
+        {
+            _staminaSecondsLeft += Config.staminaRecoveryRate * Time.deltaTime;
+            if (_staminaSecondsLeft > Config.staminaSeconds)
+            {
+                _staminaSecondsLeft = Config.staminaSeconds;
+                _isTired = false;
+            }
+        };
+
         bool hasRollInputChanged = OWInput.IsNewlyPressed(InputLibrary.rollMode) || OWInput.IsNewlyReleased(InputLibrary.rollMode);
         bool hasThrustInputChanged = OWInput.IsNewlyPressed(InputLibrary.thrustDown) || OWInput.IsNewlyReleased(InputLibrary.thrustDown) || OWInput.IsNewlyPressed(InputLibrary.thrustUp) || OWInput.IsNewlyReleased(InputLibrary.thrustUp);
         bool hasPressedBoostInMidair = OWInput.IsNewlyPressed(InputLibrary.boost) && !_characterController.IsGrounded();
@@ -72,12 +103,12 @@ public class SpeedController : MonoBehaviour
             _isDreamLanternFocused = heldLantern._focusing;
         }
 
-        if (hasRollInputChanged || hasThrustInputChanged || hasPressedBoostInMidair || hasDreamLanternFocusChanged) UpdateSprinting();
+        if (justBecameTired || hasRollInputChanged || hasThrustInputChanged || hasPressedBoostInMidair || hasDreamLanternFocusChanged) UpdateSprinting();
     }
 
     private void UpdateSprinting()
     {
-        bool isSprintAllowed = Config.sprintMode == "Always" || (Config.sprintMode == "When Suited" && PlayerState.IsWearingSuit());
+        bool isSprintAllowed = Config.isSprintingEnabled && !_isTired;
         bool isOnValidGround = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce();
         bool isWalking = _isDreamLanternFocused || (OWInput.IsPressed(InputLibrary.rollMode) && _characterController._heldLanternItem == null);
         bool wasSprinting = IsSprinting;
@@ -85,14 +116,18 @@ public class SpeedController : MonoBehaviour
         if (isSprintAllowed && isOnValidGround && !isWalking && OWInput.IsPressed(_sprintButton) && (wasSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
         {
             IsSprinting = true;
-            _characterController._runSpeed = Config.sprintSpeed;
-            _characterController._strafeSpeed = Config.sprintStrafeSpeed;
+            _characterController._runSpeed = Config.runSpeed * Config.sprintMultiplier;
+            _characterController._strafeSpeed = Config.strafeSpeed * Config.sprintMultiplier;
         }
         else
         {
             IsSprinting = false;
-            _characterController._runSpeed = Config.defaultSpeed;
+            _characterController._runSpeed = Config.runSpeed;
             _characterController._strafeSpeed = Config.strafeSpeed;
+            if (!_isUsingStamina)
+            {
+
+            }
         }
 
         // log it
@@ -109,17 +144,6 @@ public class SpeedController : MonoBehaviour
         // get thruster vector IF the player is sprinting and the jetpack is visible. Otherwise, move towards zero
         _thrusterVector = Vector2.MoveTowards(_thrusterVector, IsSprinting && jetpackVisible && Config.isSprintEffectEnabled ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
         Vector2 flameVector = _thrusterVector;
-
-        // adjust vector based on sprinting and strafe speed
-        flameVector.x *= (Config.sprintStrafeSpeed / Config.strafeSpeed) - 1f;
-        if (flameVector.y > 0f)
-        {
-            flameVector.y *= (Config.sprintSpeed / Config.defaultSpeed) - 1f;
-        }
-        else
-        {
-            flameVector.y *= (Config.sprintStrafeSpeed / Config.strafeSpeed) - 1f;
-        }
 
         // clamp the vector so it doesn't become too big
         flameVector.x = Mathf.Clamp(flameVector.x, -20, 20);
