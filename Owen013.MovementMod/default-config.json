@@ -13,7 +13,7 @@
 			"options": [ "Charge", "Instant" ]
 		},
 		"Enable Sprinting": {
-			"tooltip": "Allows you to sprint. Recommended: When Suited",
+			"tooltip": "Allows you to sprint. Recommended: Enabled",
 			"type": "toggle",
 			"value": true
 		},
@@ -22,6 +22,11 @@
 			"type": "selector",
 			"value": "Up Thrust",
 			"options": [ "Up Thrust", "Down Thrust" ]
+		},
+		"Enable Stamina": {
+			"tooltip": "",
+			"type": "toggle",
+			"value": true
 		},
 		"Enable Midair Turning": {
 			"tooltip": "Allows you to change direction and/or slow down in midiar, even without your jetpack. Recommended: Enabled",
@@ -118,14 +123,24 @@
 		},
 		"SprintMultiplier": {
 			"title": "Sprint Speed Multiplier",
-			"tooltip": "How much your speed is multiplied while sprinting. Recommended: 1.6",
+			"tooltip": "How much your speed is multiplied while sprinting. Recommended: 2",
 			"type": "number",
-			"value": 1.75
+			"value": 2
 		},
 		"Start Sprinting On Landing": {
 			"tooltip": "If you're holding the sprint button and a directional input when you land on the ground, you will stop thrusting and start sprinting. Recommended: Enabled",
 			"type": "toggle",
 			"value": true
+		},
+		"Seconds of Stamina": {
+			"tooltip": "The amount of time you can sprint before running out of stamina. Recommended: 5",
+			"type": "number",
+			"value": 5
+		},
+		"Stamina Recovery Rate": {
+			"tooltip": "The amount of seconds of stamina you regain every second. Recommended: 1",
+			"type": "number",
+			"value": 1
 		},
 		"Show Thruster Effect while Sprinting": {
 			"tooltip": "Makes your jetpack thrusters fire as you sprint, as if they're boosting you. No gameplay effect. Recommended: Disabled",

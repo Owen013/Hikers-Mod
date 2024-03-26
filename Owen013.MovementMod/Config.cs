@@ -7,6 +7,7 @@ public static class Config
     public static bool UseChargeJump { get; private set; }
     public static bool IsSprintingEnabled { get; private set; }
     public static string SprintButton { get; private set; }
+    public static bool IsStaminaEnabled { get; private set; }
     public static bool IsMidairTurningEnabled { get; private set; }
     public static bool IsEmergencyBoostEnabled { get; private set; }
     public static bool IsFloatyPhysicsEnabled { get; private set; }
@@ -25,6 +26,8 @@ public static class Config
     public static float JetpackBoostTime { get; private set; }
     public static float SprintMultiplier { get; private set; }
     public static bool ShouldSprintOnLanding { get; private set; }
+    public static float StaminaSeconds { get; private set; }
+    public static float StaminaRecoveryRate { get; private set; }
     public static bool IsSprintEffectEnabled { get; private set; }
     public static float EmergencyBoostPower { get; private set; }
     public static float EmergencyBoostCost { get; private set; }
@@ -43,6 +46,7 @@ public static class Config
     {
         UseChargeJump = config.GetSettingsValue<string>("Jump Style") == "Charge";
         IsSprintingEnabled = config.GetSettingsValue<bool>("Enable Sprinting");
+        IsSprintingEnabled = config.GetSettingsValue<bool>("Enable Stamina");
         SprintButton = config.GetSettingsValue<string>("Sprint Button");
         IsMidairTurningEnabled = config.GetSettingsValue<bool>("Enable Midair Turning");
         IsEmergencyBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
@@ -61,6 +65,8 @@ public static class Config
         JetpackBoostAccel = config.GetSettingsValue<float>("Jetpack Boost Acceleration");
         JetpackBoostTime = config.GetSettingsValue<float>("Max Jetpack Boost Time");
         SprintMultiplier = config.GetSettingsValue<float>("SprintMultiplier");
+        StaminaSeconds = config.GetSettingsValue<float>("Seconds of Stamina");
+        StaminaRecoveryRate = config.GetSettingsValue<float>("Stamina Recovery Rate");
         ShouldSprintOnLanding = config.GetSettingsValue<bool>("Start Sprinting On Landing");
         IsSprintEffectEnabled = config.GetSettingsValue<bool>("Show Thruster Effect while Sprinting");
         EmergencyBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");

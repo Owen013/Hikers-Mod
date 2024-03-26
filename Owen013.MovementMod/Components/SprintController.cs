@@ -2,29 +2,36 @@
 
 namespace HikersMod.Components;
 
-public class SpeedController : MonoBehaviour
+public class SprintController : MonoBehaviour
 {
-    public static SpeedController Instance { get; private set; }
+    public static SprintController Instance { get; private set; }
     public bool IsSprintActive { get; private set; }
 
     private PlayerCharacterController _characterController;
     private IInputCommands _sprintButton;
+    private float _staminaSecondsLeft;
+    private float _lastSprintTime;
 
     public bool IsSprinting()
     {
-        if (!_characterController.IsGrounded() || _characterController._lastGroundBody == null) return false;
+        if (!_characterController.IsGrounded()) return false;
 
-        Vector3 pointVelocity = _characterController._transform.InverseTransformDirection(_characterController._lastGroundBody.GetPointVelocity(_characterController._transform.position));
-        Vector3 localVelocity = _characterController._transform.InverseTransformDirection(_characterController._owRigidbody.GetVelocity()) - pointVelocity;
-        localVelocity.y = 0f;
+        Vector3 groundVelocity = _characterController.GetRelativeGroundVelocity();
+        groundVelocity.y = 0f;
 
-        return IsSprintActive && OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f && localVelocity.magnitude > Config.RunSpeed;
+        return IsSprintActive && HasStamina() && OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f && groundVelocity.magnitude > Config.RunSpeed;
+    }
+
+    public bool HasStamina()
+    {
+        return _staminaSecondsLeft > 0f || Config.IsStaminaEnabled;
     }
 
     private void Awake()
     {
         Instance = this;
         _characterController = GetComponent<PlayerCharacterController>();
+        _staminaSecondsLeft = Config.StaminaSeconds;
 
         _characterController.OnBecomeGrounded += () =>
         {
@@ -64,6 +71,19 @@ public class SpeedController : MonoBehaviour
         {
             UpdateSprinting();
         }
+
+        if (IsSprintActive && HasStamina())
+        {
+            _characterController._runSpeed = Config.RunSpeed * Config.SprintMultiplier;
+            _characterController._strafeSpeed = Config.StrafeSpeed * Config.SprintMultiplier;
+        }
+        else
+        {
+            _characterController._runSpeed = Config.RunSpeed;
+            _characterController._strafeSpeed = Config.StrafeSpeed;
+        }
+
+        UpdateStamina();
     }
 
     private void UpdateSprinting()
@@ -75,14 +95,31 @@ public class SpeedController : MonoBehaviour
         if (isSprintAllowed && isOnValidGround && OWInput.IsPressed(_sprintButton) && (wasSprintActive || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
         {
             IsSprintActive = true;
-            _characterController._runSpeed = Config.RunSpeed * Config.SprintMultiplier;
-            _characterController._strafeSpeed = Config.StrafeSpeed * Config.SprintMultiplier;
         }
         else
         {
             IsSprintActive = false;
-            _characterController._runSpeed = Config.RunSpeed;
-            _characterController._strafeSpeed = Config.StrafeSpeed;
+        }
+    }
+
+    private void UpdateStamina()
+    {
+        if (IsSprinting())
+        {
+            _staminaSecondsLeft -= Time.deltaTime;
+            _lastSprintTime = Time.time;
+            if (_staminaSecondsLeft <= 0f)
+            {
+                _staminaSecondsLeft = 0f;
+            }
+        }
+        else if (Time.time - _lastSprintTime >= 1f)
+        {
+            _staminaSecondsLeft += Time.deltaTime * Config.StaminaRecoveryRate;
+            if (_staminaSecondsLeft >= Config.StaminaSeconds)
+            {
+                _staminaSecondsLeft = Config.StaminaSeconds;
+            }
         }
     }
 }
