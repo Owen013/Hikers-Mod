@@ -20,7 +20,7 @@ public class AnimSpeedController : MonoBehaviour
         {
             speedMultiplier *= Main.Instance.SmolHatchlingAPI.GetAnimSpeed();
         }
-        float gravMultiplier = Mathf.Sqrt(_characterController._acceleration / Config.groundAccel);
+        float gravMultiplier = Mathf.Sqrt(_characterController._acceleration / Config.GroundAccel);
 
         _animator.speed = _characterController.IsGrounded() ? Mathf.Max(speedMultiplier * gravMultiplier, gravMultiplier) : 1f;
     }

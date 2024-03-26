@@ -20,7 +20,7 @@ public class WallJumpController : MonoBehaviour
 
         _characterController.OnBecomeGrounded += () =>
         {
-            _wallJumpsLeft = Config.wallJumpsPerJump;
+            _wallJumpsLeft = Config.WallJumpsPerJump;
         };
     }
 
@@ -32,14 +32,14 @@ public class WallJumpController : MonoBehaviour
     private void UpdateWallJump()
     {
         _characterController.UpdatePushable();
-        bool isWallJumpAllowed = (Config.wallJumpMode == "When Unsuited" && !PlayerState.IsWearingSuit()) || Config.wallJumpMode == "Always";
+        bool isWallJumpAllowed = (Config.WallJumpMode == "When Unsuited" && !PlayerState.IsWearingSuit()) || Config.WallJumpMode == "Always";
         bool canWallJump = isWallJumpAllowed && _characterController._isPushable && !PlayerState.InZeroG() && !_characterController._isGrounded && _wallJumpsLeft > 0;
         if (isWallJumpAllowed && canWallJump && OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character))
         {
             OWRigidbody pushBody = _characterController._pushableBody;
             Vector3 pushPoint = _characterController._pushContactPt;
             Vector3 pointVelocity = pushBody.GetPointVelocity(pushPoint);
-            Vector3 climbVelocity = new Vector3(0, Config.maxJumpPower, 0f) * (_wallJumpsLeft / Config.wallJumpsPerJump);
+            Vector3 climbVelocity = new Vector3(0, Config.MaxJumpPower, 0f) * (_wallJumpsLeft / Config.WallJumpsPerJump);
 
             if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20f)
             {
@@ -57,7 +57,7 @@ public class WallJumpController : MonoBehaviour
         }
 
         // Replenish 1 wall jump if you hasn't done one for five seconds
-        if (Time.time - _lastWallJumpRefill > 5 && _wallJumpsLeft < Config.wallJumpsPerJump)
+        if (Time.time - _lastWallJumpRefill > 5 && _wallJumpsLeft < Config.WallJumpsPerJump)
         {
             _wallJumpsLeft += 1;
             _lastWallJumpRefill = Time.time;

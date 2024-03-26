@@ -12,13 +12,9 @@ public class Main : ModBehaviour
     public ISmolHatchling SmolHatchlingAPI { get; private set; }
     public ICameraShaker CameraShakerAPI { get; private set; }
 
-    public delegate void ConfigureEvent();
-    public event ConfigureEvent OnConfigure;
-
     public override void Configure(IModConfig config)
     {
         Config.UpdateConfig(config);
-        OnConfigure?.Invoke();
     }
 
     private void Awake()

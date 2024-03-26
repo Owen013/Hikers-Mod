@@ -18,6 +18,7 @@ public static class Patches
         __instance.gameObject.AddComponent<EmergencyBoostController>();
         __instance.gameObject.AddComponent<FloatyPhysicsController>();
         __instance.gameObject.AddComponent<WallJumpController>();
+        __instance.gameObject.AddComponent<JetpackSprintEffectController>();
     }
 
     // allows the player to jump while sprinting
@@ -28,7 +29,7 @@ public static class Patches
         if (!__instance._isAlignedToForce && !__instance._isZeroGMovementEnabled) return false;
 
         // normal Update() function, but added isWearingSuit and IsSprinting to if statement. The rest of this method is unmodified.
-        if (!__instance._isWearingSuit || SpeedController.Instance.IsSprinting == true || OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f)
+        if (!__instance._isWearingSuit || SpeedController.Instance.IsSprintActive == true || OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f)
         {
             __instance.UpdateJumpInput();
         }
@@ -53,7 +54,7 @@ public static class Patches
     private static bool UpdateAirControl(PlayerCharacterController __instance)
     {
         // if feature is disabled then just do the vanilla method
-        if (!Config.isMidairTurningEnabled) return true;
+        if (!Config.IsMidairTurningEnabled) return true;
 
         if (__instance._lastGroundBody != null)
         {
@@ -94,7 +95,7 @@ public static class Patches
         if (audioType != AudioType.None)
         {
             __instance._footstepAudio.pitch = Random.Range(0.9f, 1.1f);
-            __instance._footstepAudio.PlayOneShot(audioType, 1.4f * Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude / 6);
+            __instance._footstepAudio.PlayOneShot(audioType, 1.4f * Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude / 6f);
         }
         return false;
     }
@@ -106,8 +107,8 @@ public static class Patches
     {
         float lerpPosition = 1f - __instance._lanternController.GetFocus();
         lerpPosition *= lerpPosition;
-        maxSpeedX = Mathf.Lerp(Config.dreamLanternSpeed, maxSpeedX, lerpPosition);
-        maxSpeedZ = Mathf.Lerp(Config.dreamLanternSpeed, maxSpeedZ, lerpPosition);
+        maxSpeedX = Mathf.Lerp(Config.DreamLanternSpeed, maxSpeedX, lerpPosition);
+        maxSpeedZ = Mathf.Lerp(Config.DreamLanternSpeed, maxSpeedZ, lerpPosition);
         return false;
     }
 
@@ -116,7 +117,7 @@ public static class Patches
     [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
     private static void OnGetJetpackInput(JetpackThrusterController __instance, ref Vector3 __result)
     {
-        if (__result.y != 0f && SpeedController.Instance.IsSprinting == true)
+        if (__result.y != 0f && SpeedController.Instance.IsSprintActive == true)
         {
             __result.y = 0f;
         }
@@ -127,7 +128,7 @@ public static class Patches
     [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
     private static void OnCheckIsBoosterAllowed(ref bool __result)
     {
-        if (SpeedController.Instance.IsSprinting == true) __result = false;
+        if (SpeedController.Instance.IsSprintActive == true) __result = false;
     }
 
     // makes ghosts run faster when player is sprinting
@@ -135,14 +136,6 @@ public static class Patches
     [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetMoveSpeed))]
     private static void GhostGetMoveSpeed(MoveType moveType, ref float __result)
     {
-        if (moveType == MoveType.CHASE && SpeedController.Instance.IsSprinting == true) __result *= Config.sprintMultiplier;
-    }
-
-    // makes ghosts speed up faster when player is sprinting
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetMoveAcceleration))]
-    private static void GhostGetMoveAcceleration(MoveType moveType, ref float __result)
-    {
-        if (moveType == MoveType.CHASE && SpeedController.Instance.IsSprinting == true) __result *= Config.sprintMultiplier;
+        if (moveType == MoveType.CHASE && SpeedController.Instance.IsSprintActive == true) __result *= Config.SprintMultiplier;
     }
 }

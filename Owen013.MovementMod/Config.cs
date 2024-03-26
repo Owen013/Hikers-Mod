@@ -4,72 +4,75 @@ namespace HikersMod;
 
 public static class Config
 {
-    public static bool useChargeJump { get; private set; }
-    public static bool isSprintingEnabled { get; private set; }
-    public static string sprintButton { get; private set; }
-    public static bool isMidairTurningEnabled { get; private set; }
-    public static bool isEmergencyBoostEnabled { get; private set; }
-    public static bool isFloatyPhysicsEnabled { get; private set; }
-    public static string wallJumpMode { get; private set; }
-    public static float runSpeed { get; private set; }
-    public static float strafeSpeed { get; private set; }
-    public static float walkSpeed { get; private set; }
-    public static float dreamLanternSpeed { get; private set; }
-    public static float groundAccel { get; private set; }
-    public static float airSpeed { get; private set; }
-    public static float airAccel { get; private set; }
-    public static float minJumpPower { get; private set; }
-    public static float maxJumpPower { get; private set; }
-    public static float jetpackAccel { get; private set; }
-    public static float jetpackBoostAccel { get; private set; }
-    public static float jetpackBoostTime { get; private set; }
-    public static float sprintMultiplier { get; private set; }
-    public static bool shouldSprintOnLanding { get; private set; }
-    public static bool isSprintEffectEnabled { get; private set; }
-    public static float emergencyBoostPower { get; private set; }
-    public static float emergencyBoostCost { get; private set; }
-    public static float emergencyBoostVolume { get; private set; }
-    public static float emergencyBoostInputTime { get; private set; }
-    public static float emergencyBoostCameraShakeAmount { get; private set; }
-    public static float floatyPhysicsMinAccel { get; private set; }
-    public static float floatyPhysicsMaxGravity { get; private set; }
-    public static float floatyPhysicsMinGravity { get; private set; }
-    public static float wallJumpsPerJump { get; private set; }
+    public static bool UseChargeJump { get; private set; }
+    public static bool IsSprintingEnabled { get; private set; }
+    public static string SprintButton { get; private set; }
+    public static bool IsMidairTurningEnabled { get; private set; }
+    public static bool IsEmergencyBoostEnabled { get; private set; }
+    public static bool IsFloatyPhysicsEnabled { get; private set; }
+    public static string WallJumpMode { get; private set; }
+    public static float RunSpeed { get; private set; }
+    public static float StrafeSpeed { get; private set; }
+    public static float WalkSpeed { get; private set; }
+    public static float DreamLanternSpeed { get; private set; }
+    public static float GroundAccel { get; private set; }
+    public static float AirSpeed { get; private set; }
+    public static float AirAccel { get; private set; }
+    public static float MinJumpPower { get; private set; }
+    public static float MaxJumpPower { get; private set; }
+    public static float JetpackAccel { get; private set; }
+    public static float JetpackBoostAccel { get; private set; }
+    public static float JetpackBoostTime { get; private set; }
+    public static float SprintMultiplier { get; private set; }
+    public static bool ShouldSprintOnLanding { get; private set; }
+    public static bool IsSprintEffectEnabled { get; private set; }
+    public static float EmergencyBoostPower { get; private set; }
+    public static float EmergencyBoostCost { get; private set; }
+    public static float EmergencyBoostVolume { get; private set; }
+    public static float EmergencyBoostInputTime { get; private set; }
+    public static float EmergencyBoostCameraShakeAmount { get; private set; }
+    public static float FloatyPhysicsMinAccel { get; private set; }
+    public static float FloatyPhysicsMaxGravity { get; private set; }
+    public static float FloatyPhysicsMinGravity { get; private set; }
+    public static float WallJumpsPerJump { get; private set; }
+
+    public delegate void ConfigureEvent();
+    public static event ConfigureEvent OnConfigure;
 
     public static void UpdateConfig(IModConfig config)
     {
-        useChargeJump = config.GetSettingsValue<string>("Jump Style") == "Charge";
-        isSprintingEnabled = config.GetSettingsValue<bool>("Enable Sprinting");
-        sprintButton = config.GetSettingsValue<string>("Sprint Button");
-        isMidairTurningEnabled = config.GetSettingsValue<bool>("Enable Midair Turning");
+        UseChargeJump = config.GetSettingsValue<string>("Jump Style") == "Charge";
+        IsSprintingEnabled = config.GetSettingsValue<bool>("Enable Sprinting");
+        SprintButton = config.GetSettingsValue<string>("Sprint Button");
+        IsMidairTurningEnabled = config.GetSettingsValue<bool>("Enable Midair Turning");
+        IsEmergencyBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
+        IsFloatyPhysicsEnabled = config.GetSettingsValue<bool>("Enable Floaty Physics");
+        WallJumpMode = config.GetSettingsValue<string>("Enable Wall Jumping");
+        RunSpeed = config.GetSettingsValue<float>("Normal Speed");
+        StrafeSpeed = config.GetSettingsValue<float>("Strafe Speed");
+        WalkSpeed = config.GetSettingsValue<float>("Walk Speed");
+        DreamLanternSpeed = config.GetSettingsValue<float>("Focused Lantern Speed");
+        GroundAccel = config.GetSettingsValue<float>("Ground Acceleration");
+        AirSpeed = config.GetSettingsValue<float>("Air Speed");
+        AirAccel = config.GetSettingsValue<float>("Air Acceleration");
+        MinJumpPower = config.GetSettingsValue<float>("Minimum Jump Power");
+        MaxJumpPower = config.GetSettingsValue<float>("Maximum Jump Power");
+        JetpackAccel = config.GetSettingsValue<float>("Jetpack Acceleration");
+        JetpackBoostAccel = config.GetSettingsValue<float>("Jetpack Boost Acceleration");
+        JetpackBoostTime = config.GetSettingsValue<float>("Max Jetpack Boost Time");
+        SprintMultiplier = config.GetSettingsValue<float>("SprintMultiplier");
+        ShouldSprintOnLanding = config.GetSettingsValue<bool>("Start Sprinting On Landing");
+        IsSprintEffectEnabled = config.GetSettingsValue<bool>("Show Thruster Effect while Sprinting");
+        EmergencyBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");
+        EmergencyBoostCost = config.GetSettingsValue<float>("Emergency Boost Cost");
+        EmergencyBoostVolume = config.GetSettingsValue<float>("Emergency Boost Volume");
+        EmergencyBoostInputTime = config.GetSettingsValue<float>("Emergency Boost Input Time");
+        EmergencyBoostCameraShakeAmount = config.GetSettingsValue<float>("Emergency Boost Camera Shake Amount");
+        FloatyPhysicsMinAccel = config.GetSettingsValue<float>("Floaty Physics Minimum Acceleration");
+        FloatyPhysicsMaxGravity = config.GetSettingsValue<float>("Floaty Physics Minimum Gravity");
+        FloatyPhysicsMinGravity = config.GetSettingsValue<float>("Minimum Gravity");
+        WallJumpsPerJump = config.GetSettingsValue<float>("Wall Jumps per Jump");
 
-        isEmergencyBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
-        isFloatyPhysicsEnabled = config.GetSettingsValue<bool>("Enable Floaty Physics");
-        wallJumpMode = config.GetSettingsValue<string>("Enable Wall Jumping");
-
-        runSpeed = config.GetSettingsValue<float>("Normal Speed");
-        strafeSpeed = config.GetSettingsValue<float>("Strafe Speed");
-        walkSpeed = config.GetSettingsValue<float>("Walk Speed");
-        dreamLanternSpeed = config.GetSettingsValue<float>("Focused Lantern Speed");
-        groundAccel = config.GetSettingsValue<float>("Ground Acceleration");
-        airSpeed = config.GetSettingsValue<float>("Air Speed");
-        airAccel = config.GetSettingsValue<float>("Air Acceleration");
-        minJumpPower = config.GetSettingsValue<float>("Minimum Jump Power");
-        maxJumpPower = config.GetSettingsValue<float>("Maximum Jump Power");
-        jetpackAccel = config.GetSettingsValue<float>("Jetpack Acceleration");
-        jetpackBoostAccel = config.GetSettingsValue<float>("Jetpack Boost Acceleration");
-        jetpackBoostTime = config.GetSettingsValue<float>("Max Jetpack Boost Time");
-        sprintMultiplier = config.GetSettingsValue<float>("SprintMultiplier");
-        shouldSprintOnLanding = config.GetSettingsValue<bool>("Start Sprinting On Landing");
-        isSprintEffectEnabled = config.GetSettingsValue<bool>("Show Thruster Effect while Sprinting");
-        emergencyBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");
-        emergencyBoostCost = config.GetSettingsValue<float>("Emergency Boost Cost");
-        emergencyBoostVolume = config.GetSettingsValue<float>("Emergency Boost Volume");
-        emergencyBoostInputTime = config.GetSettingsValue<float>("Emergency Boost Input Time");
-        emergencyBoostCameraShakeAmount = config.GetSettingsValue<float>("Emergency Boost Camera Shake Amount");
-        floatyPhysicsMinAccel = config.GetSettingsValue<float>("Floaty Physics Minimum Acceleration");
-        floatyPhysicsMaxGravity = config.GetSettingsValue<float>("Floaty Physics Minimum Gravity");
-        floatyPhysicsMinGravity = config.GetSettingsValue<float>("Minimum Gravity");
-        wallJumpsPerJump = config.GetSettingsValue<float>("Wall Jumps per Jump");
+        OnConfigure?.Invoke();
     }
 }
