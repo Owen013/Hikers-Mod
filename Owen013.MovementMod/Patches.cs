@@ -136,6 +136,14 @@ public static class Patches
     [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetMoveSpeed))]
     private static void GhostGetMoveSpeed(MoveType moveType, ref float __result)
     {
-        if (moveType == MoveType.CHASE && SprintController.Instance.IsSprintActive == true) __result *= Config.SprintMultiplier;
+        if (moveType == MoveType.CHASE && SprintController.Instance.IsSprinting() == true) __result *= Config.SprintMultiplier;
+    }
+
+    // makes ghosts speed up faster when player is sprinting
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetMoveAcceleration))]
+    private static void GhostGetMoveAcceleration(MoveType moveType, ref float __result)
+    {
+        if (moveType == MoveType.CHASE && SprintController.Instance.IsSprinting() == true) __result *= Config.SprintMultiplier;
     }
 }

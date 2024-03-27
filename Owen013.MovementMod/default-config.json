@@ -23,11 +23,6 @@
 			"value": "Up Thrust",
 			"options": [ "Up Thrust", "Down Thrust" ]
 		},
-		"Enable Stamina": {
-			"tooltip": "",
-			"type": "toggle",
-			"value": true
-		},
 		"Enable Midair Turning": {
 			"tooltip": "Allows you to change direction and/or slow down in midiar, even without your jetpack. Recommended: Enabled",
 			"type": "toggle",
@@ -118,7 +113,7 @@
 			"value": 1
 		},
 
-		"Advanced - Feature Settings": {
+		"Advanced - Sprinting Settings": {
 			"type": "separator"
 		},
 		"SprintMultiplier": {
@@ -132,20 +127,35 @@
 			"type": "toggle",
 			"value": true
 		},
+		"Enable Stamina": {
+			"tooltip": "",
+			"type": "toggle",
+			"value": true
+		},
 		"Seconds of Stamina": {
-			"tooltip": "The amount of time you can sprint before running out of stamina. Recommended: 5",
+			"tooltip": "The amount of time you can sprint before running out of stamina. Recommended: 8",
 			"type": "number",
-			"value": 5
+			"value": 8
 		},
 		"Stamina Recovery Rate": {
 			"tooltip": "The amount of seconds of stamina you regain every second. Recommended: 1",
 			"type": "number",
 			"value": 1
 		},
+		"TiredMultiplier": {
+			"title": "Tired Speed Multiplier",
+			"tooltip": "How much your speed is multiplied when tired. Recommended: 0.75",
+			"type": "number",
+			"value": 0.75
+		},
 		"Show Thruster Effect while Sprinting": {
 			"tooltip": "Makes your jetpack thrusters fire as you sprint, as if they're boosting you. No gameplay effect. Recommended: Disabled",
 			"type": "toggle",
 			"value": false
+		},
+
+		"Advanced - Emergency Boost Settings": {
+			"type": "separator"
 		},
 		"Emergency Boost Power": {
 			"tooltip": "How powerful an emergency boost is. Recommended: 20",
@@ -172,6 +182,10 @@
 			"type": "number",
 			"value": 1
 		},
+
+		"Advanced - Floaty Physics Settings": {
+			"type": "separator"
+		},
 		"Floaty Physics Power": {
 			"tooltip": "The higher this number is, the faster you'll notice your acceleration decreasing as gravity decreases. Recommended: 1",
 			"type": "number",
@@ -192,7 +206,11 @@
 			"type": "number",
 			"value": 0.5
 		},
-		"Wall Jumps per Jump": {
+
+		"Advanced - Wall Jump Settings": {
+			"type": "separator"
+		},
+		"Wall Jump Capacity": {
 			"tooltip": "How many times you can Wall Jump without touching the ground. Recommended: 5",
 			"type": "number",
 			"value": 5

@@ -9,22 +9,17 @@ public class SprintController : MonoBehaviour
 
     private PlayerCharacterController _characterController;
     private IInputCommands _sprintButton;
+    private bool _isTired;
     private float _staminaSecondsLeft;
     private float _lastSprintTime;
 
     public bool IsSprinting()
     {
-        if (!_characterController.IsGrounded()) return false;
+        if (!_characterController.IsGrounded() || !IsSprintActive || _isTired) return false;
 
         Vector3 groundVelocity = _characterController.GetRelativeGroundVelocity();
         groundVelocity.y = 0f;
-
-        return IsSprintActive && HasStamina() && OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f && groundVelocity.magnitude > Config.RunSpeed;
-    }
-
-    public bool HasStamina()
-    {
-        return _staminaSecondsLeft > 0f || Config.IsStaminaEnabled;
+        return OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f && groundVelocity.magnitude > Config.RunSpeed;
     }
 
     private void Awake()
@@ -72,10 +67,15 @@ public class SprintController : MonoBehaviour
             UpdateSprinting();
         }
 
-        if (IsSprintActive && HasStamina())
+        if (_isTired)
         {
-            _characterController._runSpeed = Config.RunSpeed * Config.SprintMultiplier;
-            _characterController._strafeSpeed = Config.StrafeSpeed * Config.SprintMultiplier;
+            _characterController._runSpeed = Config.RunSpeed * Config.TiredMultiplier;
+            _characterController._strafeSpeed = Config.StrafeSpeed * Config.TiredMultiplier;
+        }
+        else if (IsSprintActive)
+        {
+            _characterController._runSpeed = Config.RunSpeed + (Config.RunSpeed * Config.SprintMultiplier - Config.RunSpeed) * (0.5f + 0.5f * _staminaSecondsLeft / Config.StaminaSeconds);
+            _characterController._strafeSpeed = Config.StrafeSpeed + (Config.StrafeSpeed * Config.SprintMultiplier - Config.StrafeSpeed) * (0.5f + 0.5f * _staminaSecondsLeft / Config.StaminaSeconds);
         }
         else
         {
@@ -88,11 +88,9 @@ public class SprintController : MonoBehaviour
 
     private void UpdateSprinting()
     {
-        bool isSprintAllowed = Config.IsSprintingEnabled;
         bool isOnValidGround = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce();
-        bool wasSprintActive = IsSprintActive;
 
-        if (isSprintAllowed && isOnValidGround && OWInput.IsPressed(_sprintButton) && (wasSprintActive || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
+        if (Config.IsSprintingEnabled && isOnValidGround && OWInput.IsPressed(_sprintButton) && (IsSprintActive || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
         {
             IsSprintActive = true;
         }
@@ -104,13 +102,19 @@ public class SprintController : MonoBehaviour
 
     private void UpdateStamina()
     {
-        if (IsSprinting())
+        if (!Config.IsStaminaEnabled)
+        {
+            _isTired = false;
+            _staminaSecondsLeft = Config.StaminaSeconds;
+        }
+        else if (IsSprinting())
         {
             _staminaSecondsLeft -= Time.deltaTime;
             _lastSprintTime = Time.time;
             if (_staminaSecondsLeft <= 0f)
             {
                 _staminaSecondsLeft = 0f;
+                _isTired = true;
             }
         }
         else if (Time.time - _lastSprintTime >= 1f)
@@ -119,6 +123,7 @@ public class SprintController : MonoBehaviour
             if (_staminaSecondsLeft >= Config.StaminaSeconds)
             {
                 _staminaSecondsLeft = Config.StaminaSeconds;
+                _isTired = false;
             }
         }
     }
