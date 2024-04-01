@@ -38,7 +38,7 @@ public static class Config
     public static float FloatyPhysicsMinAccel { get; private set; }
     public static float FloatyPhysicsMaxGravity { get; private set; }
     public static float FloatyPhysicsMinGravity { get; private set; }
-    public static float WallJumpsPerJump { get; private set; }
+    public static float MaxWallJumps { get; private set; }
 
     public delegate void ConfigureEvent();
     public static event ConfigureEvent OnConfigure;
@@ -79,7 +79,7 @@ public static class Config
         FloatyPhysicsMinAccel = config.GetSettingsValue<float>("Floaty Physics Minimum Acceleration");
         FloatyPhysicsMaxGravity = config.GetSettingsValue<float>("Floaty Physics Minimum Gravity");
         FloatyPhysicsMinGravity = config.GetSettingsValue<float>("Minimum Gravity");
-        WallJumpsPerJump = config.GetSettingsValue<float>("Wall Jumps per Jump");
+        MaxWallJumps = config.GetSettingsValue<float>("Maximum Number of Wall Jumps");
 
         OnConfigure?.Invoke();
     }

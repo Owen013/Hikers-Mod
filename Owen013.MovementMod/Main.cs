@@ -11,6 +11,7 @@ public class Main : ModBehaviour
     public static Main Instance { get; private set; }
     public ISmolHatchling SmolHatchlingAPI { get; private set; }
     public ICameraShaker CameraShakerAPI { get; private set; }
+    public IImmersion ImmersionAPI { get; private set; }
 
     public override void Configure(IModConfig config)
     {
@@ -29,16 +30,14 @@ public class Main : ModBehaviour
         // Get APIs
         SmolHatchlingAPI = ModHelper.Interaction.TryGetModApi<ISmolHatchling>("Owen013.TeenyHatchling");
         CameraShakerAPI = ModHelper.Interaction.TryGetModApi<ICameraShaker>("SBtT.CameraShake");
+        ImmersionAPI = ModHelper.Interaction.TryGetModApi<IImmersion>("Owen_013.FirstPersonPresence");
 
         // Ready!
         WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
     }
 
-    public static void WriteLine(string text, MessageType type = MessageType.Message)
+    public void WriteLine(string text, MessageType type = MessageType.Message)
     {
-        // null check because this method is created before ModHelper is defined!
-        if (Instance.ModHelper == null) return;
-
         Instance.ModHelper.Console.WriteLine(text, type);
     }
 }

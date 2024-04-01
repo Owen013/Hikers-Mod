@@ -20,7 +20,7 @@ public class WallJumpController : MonoBehaviour
 
         _characterController.OnBecomeGrounded += () =>
         {
-            _wallJumpsLeft = Config.WallJumpsPerJump;
+            _wallJumpsLeft = Config.MaxWallJumps;
         };
     }
 
@@ -39,11 +39,11 @@ public class WallJumpController : MonoBehaviour
             OWRigidbody pushBody = _characterController._pushableBody;
             Vector3 pushPoint = _characterController._pushContactPt;
             Vector3 pointVelocity = pushBody.GetPointVelocity(pushPoint);
-            Vector3 climbVelocity = new Vector3(0, Config.MaxJumpPower, 0f) * (_wallJumpsLeft / Config.WallJumpsPerJump);
+            Vector3 climbVelocity = new Vector3(0, Config.MaxJumpPower, 0f) * (_wallJumpsLeft / Config.MaxWallJumps);
 
             if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20f)
             {
-                Main.WriteLine($"[{nameof(WallJumpController)}] Can't Wall-Jump; going too fast", MessageType.Debug);
+                Main.Instance.WriteLine($"[{nameof(WallJumpController)}] Can't Wall-Jump; going too fast", MessageType.Debug);
             }
             else
             {
@@ -52,12 +52,12 @@ public class WallJumpController : MonoBehaviour
                 _wallJumpsLeft -= 1;
                 _impactAudio._impactAudioSrc.PlayOneShot(AudioType.ImpactLowSpeed);
                 _lastWallJumpTime = _lastWallJumpRefill = Time.time;
-                Main.WriteLine($"[{nameof(WallJumpController)}] Wall-Jumped", MessageType.Debug);
+                Main.Instance.WriteLine($"[{nameof(WallJumpController)}] Wall-Jumped", MessageType.Debug);
             }
         }
 
         // Replenish 1 wall jump if you hasn't done one for five seconds
-        if (Time.time - _lastWallJumpRefill > 5 && _wallJumpsLeft < Config.WallJumpsPerJump)
+        if (Time.time - _lastWallJumpRefill > 5 && _wallJumpsLeft < Config.MaxWallJumps)
         {
             _wallJumpsLeft += 1;
             _lastWallJumpRefill = Time.time;

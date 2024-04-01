@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 namespace HikersMod.Components;
 
@@ -13,13 +14,17 @@ public class SprintController : MonoBehaviour
     private float _staminaSecondsLeft;
     private float _lastSprintTime;
 
+    private bool temp_isSprinting;
+    private float temp_groundVelocity;
+
     public bool IsSprinting()
     {
         if (!_characterController.IsGrounded() || !IsSprintActive || _isTired) return false;
 
+        Vector2 inputVector = OWInput.GetAxisValue(InputLibrary.moveXZ);
         Vector3 groundVelocity = _characterController.GetRelativeGroundVelocity();
         groundVelocity.y = 0f;
-        return OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f && groundVelocity.magnitude > Config.RunSpeed;
+        return inputVector.magnitude > 0f && groundVelocity.magnitude > (groundVelocity.z > Config.StrafeSpeed ? Config.RunSpeed : Config.StrafeSpeed);
     }
 
     private void Awake()
@@ -84,6 +89,9 @@ public class SprintController : MonoBehaviour
         }
 
         UpdateStamina();
+
+        temp_isSprinting = IsSprinting();
+        temp_groundVelocity = _characterController.GetRelativeGroundVelocity().magnitude;
     }
 
     private void UpdateSprinting()

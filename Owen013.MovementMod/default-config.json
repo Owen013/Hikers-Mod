@@ -24,7 +24,7 @@
 			"options": [ "Up Thrust", "Down Thrust" ]
 		},
 		"Enable Midair Turning": {
-			"tooltip": "Allows you to change direction and/or slow down in midiar, even without your jetpack. Recommended: Enabled",
+			"tooltip": "Allows you to change direction and/or slow down in midair, even without your jetpack. Recommended: Enabled",
 			"type": "toggle",
 			"value": true
 		},
@@ -158,14 +158,14 @@
 			"type": "separator"
 		},
 		"Emergency Boost Power": {
-			"tooltip": "How powerful an emergency boost is. Recommended: 20",
+			"tooltip": "How powerful an emergency boost is. Recommended: 15",
 			"type": "number",
-			"value": 20
+			"value": 15
 		},
 		"Emergency Boost Cost": {
-			"tooltip": "The amount of fuel an emergency boost uses. Recommended: 20",
+			"tooltip": "The amount of fuel an emergency boost uses. Recommended: 30",
 			"type": "number",
-			"value": 20
+			"value": 30
 		},
 		"Emergency Boost Volume": {
 			"tooltip": "How loud the emergency boost sound is compared to the default volume. Recommended: 1",
@@ -210,7 +210,7 @@
 		"Advanced - Wall Jump Settings": {
 			"type": "separator"
 		},
-		"Wall Jump Capacity": {
+		"Maximum Number of Wall Jumps": {
 			"tooltip": "How many times you can Wall Jump without touching the ground. Recommended: 5",
 			"type": "number",
 			"value": 5

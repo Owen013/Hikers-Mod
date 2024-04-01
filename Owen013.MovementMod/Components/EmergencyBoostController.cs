@@ -12,8 +12,8 @@ public class EmergencyBoostController : MonoBehaviour
     private PlayerAudioController _audioController;
     private ThrusterFlameController _downThrustFlame;
     private HUDHelmetAnimator _helmetAnimator;
-    private float _lastBoostInputTime;
-    private float _lastBoostTime;
+    private float _lastEmergencyBoostInputTime;
+    private float _lastEmergencyBoostTime;
     private bool _isEmergencyBoosting;
 
     private void Awake()
@@ -50,19 +50,19 @@ public class EmergencyBoostController : MonoBehaviour
         bool canEmergencyBoost = _characterController._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
         if (!canEmergencyBoost) EndEmergencyBoost();
 
-        else if (Config.IsEmergencyBoostEnabled && isInputting && Time.time - _lastBoostInputTime < Config.EmergencyBoostInputTime && _jetpackController._resources.GetFuel() > 0f && !_isEmergencyBoosting)
+        else if (Config.IsEmergencyBoostEnabled && isInputting && Time.time - _lastEmergencyBoostInputTime < Config.EmergencyBoostInputTime && _jetpackController._resources.GetFuel() > 0f && !_isEmergencyBoosting)
         {
             ApplyEmergencyBoost();
         }
 
-        if (isInputting && canEmergencyBoost) _lastBoostInputTime = Time.time;
+        if (isInputting && canEmergencyBoost) _lastEmergencyBoostInputTime = Time.time;
         if (_isEmergencyBoosting) _jetpackModel._chargeSeconds = float.PositiveInfinity;
     }
 
     private void ApplyEmergencyBoost()
     {
         _isEmergencyBoosting = true;
-        _lastBoostTime = Time.time;
+        _lastEmergencyBoostTime = Time.time;
         _jetpackModel._boostChargeFraction = 0f;
         _jetpackController._resources._currentFuel = Mathf.Max(0f, _jetpackController._resources.GetFuel() - Config.EmergencyBoostCost);
         float boostPower = Config.EmergencyBoostPower;
@@ -70,7 +70,7 @@ public class EmergencyBoostController : MonoBehaviour
         // set player velocity
         Vector3 pointVelocity = _characterController._transform.InverseTransformDirection(_characterController._lastGroundBody.GetPointVelocity(_characterController._transform.position));
         Vector3 localVelocity = _characterController._transform.InverseTransformDirection(_characterController._owRigidbody.GetVelocity()) - pointVelocity;
-        _characterController._owRigidbody.AddLocalVelocityChange(new Vector3(-localVelocity.x * 0.5f, boostPower - localVelocity.y * 0.75f, -localVelocity.z * 0.5f));
+        _characterController._owRigidbody.AddLocalVelocityChange(new Vector3(-localVelocity.x * 0.5f, boostPower - localVelocity.y * 0.5f, -localVelocity.z * 0.5f));
 
         // sound and visual effects
         _superBoostAudio.pitch = Random.Range(1.0f, 1.4f);
@@ -84,7 +84,7 @@ public class EmergencyBoostController : MonoBehaviour
             Main.Instance.CameraShakerAPI?.ExplosionShake(strength: boostPower * Config.EmergencyBoostCameraShakeAmount);
         }
 
-        Main.WriteLine($"[{nameof(EmergencyBoostController)}] Super-Boosted", MessageType.Debug);
+        Main.Instance.WriteLine($"[{nameof(EmergencyBoostController)}] Super-Boosted", MessageType.Debug);
     }
 
     private void EndEmergencyBoost()
@@ -97,7 +97,7 @@ public class EmergencyBoostController : MonoBehaviour
     {
         if (_characterController == null) return;
 
-        float timeSinceBoost = Time.time - _lastBoostTime;
+        float timeSinceBoost = Time.time - _lastEmergencyBoostTime;
         float thrusterCurve = -Mathf.Pow(5f * timeSinceBoost - 1f, 2f) + 1f;
         float thrusterScale = Mathf.Max(15f * thrusterCurve, _downThrustFlame._currentScale);
         _downThrustFlame.transform.localScale = Vector3.one * thrusterScale;

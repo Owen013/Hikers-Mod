@@ -17,7 +17,7 @@
     <Compile Remove="HikersModAPI.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="OWML" Version="2.9.8" />
+    <PackageReference Include="OWML" Version="2.11.1" />
     <PackageReference Include="OuterWildsGameLibs" Version="1.1.14.768" />
   </ItemGroup>
   <ItemGroup>
