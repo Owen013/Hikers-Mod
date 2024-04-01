@@ -14,16 +14,16 @@ public class TrippingController : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        _characterController = GetComponent<PlayerCharacterController>();
+        _audioController = Locator.GetPlayerAudioController();
         Harmony.CreateAndPatchAll(typeof(TrippingController));
     }
 
     private void FixedUpdate()
     {
-        if (_characterController == null) return;
-
         if (_tripTimeLeft > 0f)
         {
-            _tripTimeLeft -= Time.fixedDeltaTime;
+            _tripTimeLeft -= Time.deltaTime;
         }
         else if (_isTripping && !PlayerState.IsDead())
         {
@@ -32,7 +32,7 @@ public class TrippingController : MonoBehaviour
 
         float trippingChance = SpeedController.Instance.IsSprinting ? Config.SprintingTripChance : Config.TripChance;
         bool canTrip = _tripTimeLeft <= 0 && _characterController.IsGrounded();
-        if (trippingChance != 0f && canTrip && Random.Range(0f, 1f) <= 1f - Mathf.Pow(1f - trippingChance, Time.fixedDeltaTime))
+        if (trippingChance != 0f && canTrip && Random.Range(0f, 1f) <= 1f - Mathf.Pow(1f - trippingChance, Time.deltaTime))
         {
             StartTripping();
         }
@@ -55,14 +55,6 @@ public class TrippingController : MonoBehaviour
         _isTripping = false;
         _characterController._owRigidbody.FreezeRotation();
         _characterController.GetComponent<AlignPlayerWithForce>().enabled = true;
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
-    private static void OnCharacterControllerStart()
-    {
-        Instance._characterController = Locator.GetPlayerController();
-        Instance._audioController = Locator.GetPlayerAudioController();
     }
 
     [HarmonyPostfix]

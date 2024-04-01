@@ -11,7 +11,8 @@ public class ScoutMisfireController : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        Harmony.CreateAndPatchAll(typeof(ScoutMisfireController));
+        _characterController = GetComponent<PlayerCharacterController>();
+        _characterController.GetComponentInChildren<ProbeLauncher>().OnLaunchProbe += OnProbeLaunched;
     }
 
     private void OnProbeLaunched(SurveyorProbe probe)
@@ -24,23 +25,6 @@ public class ScoutMisfireController : MonoBehaviour
             probe._owRigidbody.AddVelocityChange(probeVelocity);
             Instance._characterController._owRigidbody.AddAngularVelocityChange(new(Random.Range(-5f, 5f), Random.Range(-5f, 5f), Random.Range(-5f, 5f)));
             NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "ERROR: SCOUT LAUNCHER MISFIRE", 5f), false);
-        }
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
-    private static void OnCharacterControllerStart(PlayerCharacterController __instance)
-    {
-        Instance._characterController = __instance;
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(ProbeLauncher), nameof(ProbeLauncher.Start))]
-    private static void OnProbeLauncherStart(ProbeLauncher __instance)
-    {
-        if (__instance.GetComponentInParent<PlayerCharacterController>())
-        {
-            __instance.OnLaunchProbe += Instance.OnProbeLaunched;
         }
     }
 }
