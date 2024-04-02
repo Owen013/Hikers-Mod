@@ -1,11 +1,10 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 
 namespace HikersMod.Components;
 
-public class SprintController : MonoBehaviour
+public class SprintingController : MonoBehaviour
 {
-    public static SprintController Instance { get; private set; }
+    public static SprintingController Instance { get; private set; }
     public bool IsSprintActive { get; private set; }
 
     private PlayerCharacterController _characterController;
@@ -14,6 +13,7 @@ public class SprintController : MonoBehaviour
     private float _staminaSecondsLeft;
     private float _lastSprintTime;
 
+    // testing
     private bool temp_isSprinting;
     private float temp_groundVelocity;
 
@@ -24,7 +24,7 @@ public class SprintController : MonoBehaviour
         Vector2 inputVector = OWInput.GetAxisValue(InputLibrary.moveXZ);
         Vector3 groundVelocity = _characterController.GetRelativeGroundVelocity();
         groundVelocity.y = 0f;
-        return inputVector.magnitude > 0f && groundVelocity.magnitude > (groundVelocity.z > Config.StrafeSpeed ? Config.RunSpeed : Config.StrafeSpeed);
+        return inputVector.magnitude > 0f && groundVelocity.magnitude > Config.RunSpeed;
     }
 
     private void Awake()
@@ -79,8 +79,8 @@ public class SprintController : MonoBehaviour
         }
         else if (IsSprintActive)
         {
-            _characterController._runSpeed = Config.RunSpeed + (Config.RunSpeed * Config.SprintMultiplier - Config.RunSpeed) * (0.5f + 0.5f * _staminaSecondsLeft / Config.StaminaSeconds);
-            _characterController._strafeSpeed = Config.StrafeSpeed + (Config.StrafeSpeed * Config.SprintMultiplier - Config.StrafeSpeed) * (0.5f + 0.5f * _staminaSecondsLeft / Config.StaminaSeconds);
+            _characterController._runSpeed = Config.RunSpeed + (Config.RunSpeed * Config.SprintMultiplier - Config.RunSpeed) * (-0.5f * Mathf.Pow(_staminaSecondsLeft / Config.StaminaSeconds - 1f, 2f) + 1f);
+            _characterController._strafeSpeed = Config.StrafeSpeed + (Config.StrafeSpeed * Config.SprintMultiplier - Config.StrafeSpeed) * (-0.5f * -Mathf.Pow(_staminaSecondsLeft / Config.StaminaSeconds - 1f, 2f) + 1f);
         }
         else
         {

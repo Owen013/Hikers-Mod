@@ -32,6 +32,11 @@
 		"Experimental Features": {
 			"type": "separator"
 		},
+		"Enable Stamina": {
+			"tooltip": "Sprinting will now use up stamina, so you won't be able to sprint forever and will have to let your stamina replenish. Recommended: Disabled",
+			"type": "toggle",
+			"value": false
+		},
 		"Enable Emergency Boost": {
 			"tooltip": "Allows you to shoot up into the air by pressing space twice. Recommended: Disabled",
 			"type": "toggle",
@@ -112,6 +117,11 @@
 			"type": "number",
 			"value": 1
 		},
+		"Max Jetpack Fuel Amount": {
+			"tooltip": "The amount of fuel your jetpack can hold at full capacity. Vanilla: 100",
+			"type": "number",
+			"value": 100
+		},
 
 		"Advanced - Sprinting Settings": {
 			"type": "separator"
@@ -124,11 +134,6 @@
 		},
 		"Start Sprinting On Landing": {
 			"tooltip": "If you're holding the sprint button and a directional input when you land on the ground, you will stop thrusting and start sprinting. Recommended: Enabled",
-			"type": "toggle",
-			"value": true
-		},
-		"Enable Stamina": {
-			"tooltip": "",
 			"type": "toggle",
 			"value": true
 		},

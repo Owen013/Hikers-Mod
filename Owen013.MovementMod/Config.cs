@@ -23,6 +23,7 @@ public static class Config
     public static float JetpackAccel { get; private set; }
     public static float JetpackBoostAccel { get; private set; }
     public static float JetpackBoostTime { get; private set; }
+    public static float MaxJetpackFuel { get; private set; }
     public static float SprintMultiplier { get; private set; }
     public static bool ShouldSprintOnLanding { get; private set; }
     public static bool IsStaminaEnabled { get; private set; }
@@ -64,6 +65,7 @@ public static class Config
         JetpackAccel = config.GetSettingsValue<float>("Jetpack Acceleration");
         JetpackBoostAccel = config.GetSettingsValue<float>("Jetpack Boost Acceleration");
         JetpackBoostTime = config.GetSettingsValue<float>("Max Jetpack Boost Time");
+        MaxJetpackFuel = config.GetSettingsValue<float>("Max Jetpack Fuel Amount");
         SprintMultiplier = config.GetSettingsValue<float>("SprintMultiplier");
         IsStaminaEnabled = config.GetSettingsValue<bool>("Enable Stamina");
         StaminaSeconds = config.GetSettingsValue<float>("Seconds of Stamina");

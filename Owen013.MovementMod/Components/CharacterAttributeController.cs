@@ -2,7 +2,7 @@
 
 namespace HikersMod.Components;
 
-internal class CharacterAttributeController : MonoBehaviour
+public class CharacterAttributeController : MonoBehaviour
 {
     private PlayerCharacterController _characterController;
     private JetpackThrusterModel _jetpackModel;
@@ -33,5 +33,6 @@ internal class CharacterAttributeController : MonoBehaviour
         _jetpackModel._maxTranslationalThrust = Config.JetpackAccel;
         _jetpackModel._boostThrust = Config.JetpackBoostAccel;
         _jetpackModel._boostSeconds = Config.JetpackBoostTime;
+        PlayerResources._maxFuel = Config.MaxJetpackFuel;
     }
 }

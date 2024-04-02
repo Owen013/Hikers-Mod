@@ -14,7 +14,7 @@ public static class Patches
     private static void OnCharacterControllerStart(PlayerCharacterController __instance)
     {
         __instance.gameObject.AddComponent<CharacterAttributeController>();
-        __instance.gameObject.AddComponent<SprintController>();
+        __instance.gameObject.AddComponent<SprintingController>();
         __instance.gameObject.AddComponent<EmergencyBoostController>();
         __instance.gameObject.AddComponent<FloatyPhysicsController>();
         __instance.gameObject.AddComponent<WallJumpController>();
@@ -29,7 +29,7 @@ public static class Patches
         if (!__instance._isAlignedToForce && !__instance._isZeroGMovementEnabled) return false;
 
         // normal Update() function, but added isWearingSuit and IsSprinting to if statement. The rest of this method is unmodified.
-        if (!__instance._isWearingSuit || SprintController.Instance.IsSprintActive == true || OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f)
+        if (!__instance._isWearingSuit || SprintingController.Instance.IsSprintActive == true || OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f)
         {
             __instance.UpdateJumpInput();
         }
@@ -117,7 +117,7 @@ public static class Patches
     [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
     private static void OnGetJetpackInput(JetpackThrusterController __instance, ref Vector3 __result)
     {
-        if (__result.y != 0f && SprintController.Instance.IsSprintActive == true)
+        if (__result.y != 0f && SprintingController.Instance.IsSprintActive == true)
         {
             __result.y = 0f;
         }
@@ -128,7 +128,7 @@ public static class Patches
     [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
     private static void OnCheckIsBoosterAllowed(ref bool __result)
     {
-        if (SprintController.Instance.IsSprintActive == true) __result = false;
+        if (SprintingController.Instance.IsSprintActive == true) __result = false;
     }
 
     // makes ghosts run faster when player is sprinting
@@ -136,7 +136,7 @@ public static class Patches
     [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetMoveSpeed))]
     private static void GhostGetMoveSpeed(MoveType moveType, ref float __result)
     {
-        if (moveType == MoveType.CHASE && SprintController.Instance.IsSprinting() == true) __result *= Config.SprintMultiplier;
+        if (moveType == MoveType.CHASE && SprintingController.Instance.IsSprinting() == true) __result *= Config.SprintMultiplier;
     }
 
     // makes ghosts speed up faster when player is sprinting
@@ -144,6 +144,6 @@ public static class Patches
     [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetMoveAcceleration))]
     private static void GhostGetMoveAcceleration(MoveType moveType, ref float __result)
     {
-        if (moveType == MoveType.CHASE && SprintController.Instance.IsSprinting() == true) __result *= Config.SprintMultiplier;
+        if (moveType == MoveType.CHASE && SprintingController.Instance.IsSprinting() == true) __result *= Config.SprintMultiplier;
     }
 }
