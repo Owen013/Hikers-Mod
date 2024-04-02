@@ -5,7 +5,7 @@ namespace HikersMod.Components;
 public class SprintingController : MonoBehaviour
 {
     public static SprintingController Instance { get; private set; }
-    public bool IsSprintActive { get; private set; }
+    public bool IsSprintModeActive { get; private set; }
 
     private PlayerCharacterController _characterController;
     private IInputCommands _sprintButton;
@@ -19,7 +19,7 @@ public class SprintingController : MonoBehaviour
 
     public bool IsSprinting()
     {
-        if (!_characterController.IsGrounded() || !IsSprintActive || _isTired) return false;
+        if (!_characterController.IsGrounded() || !IsSprintModeActive || _isTired) return false;
 
         Vector2 inputVector = OWInput.GetAxisValue(InputLibrary.moveXZ);
         Vector3 groundVelocity = _characterController.GetRelativeGroundVelocity();
@@ -77,7 +77,7 @@ public class SprintingController : MonoBehaviour
             _characterController._runSpeed = Config.RunSpeed * Config.TiredMultiplier;
             _characterController._strafeSpeed = Config.StrafeSpeed * Config.TiredMultiplier;
         }
-        else if (IsSprintActive)
+        else if (IsSprintModeActive)
         {
             _characterController._runSpeed = Config.RunSpeed + (Config.RunSpeed * Config.SprintMultiplier - Config.RunSpeed) * (-0.5f * Mathf.Pow(_staminaSecondsLeft / Config.StaminaSeconds - 1f, 2f) + 1f);
             _characterController._strafeSpeed = Config.StrafeSpeed + (Config.StrafeSpeed * Config.SprintMultiplier - Config.StrafeSpeed) * (-0.5f * -Mathf.Pow(_staminaSecondsLeft / Config.StaminaSeconds - 1f, 2f) + 1f);
@@ -98,13 +98,13 @@ public class SprintingController : MonoBehaviour
     {
         bool isOnValidGround = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce();
 
-        if (Config.IsSprintingEnabled && isOnValidGround && OWInput.IsPressed(_sprintButton) && (IsSprintActive || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
+        if (Config.IsSprintingEnabled && isOnValidGround && OWInput.IsPressed(_sprintButton) && (IsSprintModeActive || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
         {
-            IsSprintActive = true;
+            IsSprintModeActive = true;
         }
         else
         {
-            IsSprintActive = false;
+            IsSprintModeActive = false;
         }
     }
 

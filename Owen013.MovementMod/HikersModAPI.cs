@@ -4,13 +4,13 @@ namespace HikersMod;
 
 public class HikersModAPI
 {
-    public bool IsSprinting()
+    public bool IsSprintModeActive()
     {
-        return SpeedController.Instance.IsSprinting();
+        return SprintingController.Instance.IsSprintModeActive;
     }
 
-    public bool IsEmergencyBoosting()
+    public bool IsSprinting()
     {
-        return EmergencyBoostController.Instance.IsEmergencyBoosting();
+        return SprintingController.Instance.IsSprinting();
     }
 }

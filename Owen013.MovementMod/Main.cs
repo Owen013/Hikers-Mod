@@ -13,6 +13,11 @@ public class Main : ModBehaviour
     public ICameraShaker CameraShakerAPI { get; private set; }
     public IImmersion ImmersionAPI { get; private set; }
 
+    public override object GetApi()
+    {
+        return new HikersModAPI();
+    }
+
     public override void Configure(IModConfig config)
     {
         Config.UpdateConfig(config);
