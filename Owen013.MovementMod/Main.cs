@@ -23,6 +23,11 @@ public class Main : ModBehaviour
         Config.UpdateConfig(config);
     }
 
+    public void WriteLine(string text, MessageType type = MessageType.Message)
+    {
+        Instance.ModHelper.Console.WriteLine(text, type);
+    }
+
     private void Awake()
     {
         // Static reference to HikersMod so it can be used in patches.
@@ -39,10 +44,5 @@ public class Main : ModBehaviour
 
         // Ready!
         WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
-    }
-
-    public void WriteLine(string text, MessageType type = MessageType.Message)
-    {
-        Instance.ModHelper.Console.WriteLine(text, type);
     }
 }
