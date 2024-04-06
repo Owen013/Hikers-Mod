@@ -50,6 +50,7 @@ public static class Config
         IsSprintingEnabled = config.GetSettingsValue<bool>("Enable Sprinting");
         SprintButton = config.GetSettingsValue<string>("Sprint Button");
         IsMidairTurningEnabled = config.GetSettingsValue<bool>("Enable Midair Turning");
+        IsStaminaEnabled = false; // config.GetSettingsValue<bool>("Enable Stamina");
         IsEmergencyBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
         IsFloatyPhysicsEnabled = config.GetSettingsValue<bool>("Enable Floaty Physics");
         WallJumpMode = config.GetSettingsValue<string>("Enable Wall Jumping");
@@ -67,11 +68,10 @@ public static class Config
         JetpackBoostTime = config.GetSettingsValue<float>("Max Jetpack Boost Time");
         MaxJetpackFuel = config.GetSettingsValue<float>("Max Jetpack Fuel Amount");
         SprintMultiplier = config.GetSettingsValue<float>("SprintMultiplier");
-        IsStaminaEnabled = config.GetSettingsValue<bool>("Enable Stamina");
-        StaminaSeconds = config.GetSettingsValue<float>("Seconds of Stamina");
         ShouldSprintOnLanding = config.GetSettingsValue<bool>("Start Sprinting On Landing");
-        StaminaRecoveryRate = config.GetSettingsValue<float>("Stamina Recovery Rate");
-        TiredMultiplier = config.GetSettingsValue<float>("TiredMultiplier");
+        StaminaSeconds = 8f; // config.GetSettingsValue<float>("Seconds of Stamina");
+        StaminaRecoveryRate = 1f; // = config.GetSettingsValue<float>("Stamina Recovery Rate");
+        TiredMultiplier = 0.75f; // config.GetSettingsValue<float>("TiredMultiplier");
         IsSprintEffectEnabled = config.GetSettingsValue<bool>("Show Thruster Effect while Sprinting");
         EmergencyBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");
         EmergencyBoostCost = config.GetSettingsValue<float>("Emergency Boost Cost");
@@ -85,4 +85,31 @@ public static class Config
 
         OnConfigure?.Invoke();
     }
+
+    /* put this shit in the config when you add stamina you bozo
+    
+		"Enable Stamina": {
+			"tooltip": "Sprinting will now use up stamina, so you won't be able to sprint forever and will have to let your stamina replenish. Recommended: Disabled",
+			"type": "toggle",
+			"value": false
+		},
+    
+		"Seconds of Stamina": {
+			"tooltip": "The amount of time you can sprint before running out of stamina. Recommended: 8",
+			"type": "number",
+			"value": 8
+		},
+		"Stamina Recovery Rate": {
+			"tooltip": "The amount of seconds of stamina you regain every second. Recommended: 1",
+			"type": "number",
+			"value": 1
+		},
+		"TiredMultiplier": {
+			"title": "Tired Speed Multiplier",
+			"tooltip": "How much your speed is multiplied when tired. Recommended: 0.75",
+			"type": "number",
+			"value": 0.75
+		},
+
+    */
 }

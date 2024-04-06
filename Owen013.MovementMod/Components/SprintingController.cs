@@ -79,8 +79,8 @@ public class SprintingController : MonoBehaviour
         }
         else if (IsSprintModeActive)
         {
-            _characterController._runSpeed = Config.RunSpeed + (Config.RunSpeed * Config.SprintMultiplier - Config.RunSpeed) * (-0.5f * Mathf.Pow(_staminaSecondsLeft / Config.StaminaSeconds - 1f, 2f) + 1f);
-            _characterController._strafeSpeed = Config.StrafeSpeed + (Config.StrafeSpeed * Config.SprintMultiplier - Config.StrafeSpeed) * (-0.5f * -Mathf.Pow(_staminaSecondsLeft / Config.StaminaSeconds - 1f, 2f) + 1f);
+            _characterController._runSpeed = Config.RunSpeed * Config.SprintMultiplier; // + (Config.RunSpeed * Config.SprintMultiplier - Config.RunSpeed) * (-0.5f * Mathf.Pow(_staminaSecondsLeft / Config.StaminaSeconds - 1f, 2f) + 1f);
+            _characterController._strafeSpeed = Config.StrafeSpeed * Config.SprintMultiplier; // + (Config.StrafeSpeed * Config.SprintMultiplier - Config.StrafeSpeed) * (-0.5f * -Mathf.Pow(_staminaSecondsLeft / Config.StaminaSeconds - 1f, 2f) + 1f);
         }
         else
         {
