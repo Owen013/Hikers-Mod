@@ -1,4 +1,4 @@
-﻿namespace HikersMod.APIs;
+﻿namespace HikersMod.Interfaces;
 
 public interface IImmersion
 {

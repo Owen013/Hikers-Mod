@@ -1,4 +1,5 @@
 ﻿using OWML.Common;
+using UnityEngine;
 
 namespace HikersMod;
 
@@ -83,10 +84,24 @@ public static class Config
         FloatyPhysicsMinGravity = config.GetSettingsValue<float>("Minimum Gravity");
         MaxWallJumps = config.GetSettingsValue<float>("Maximum Number of Wall Jumps");
 
+        if (ModMain.Instance.SmolHatchlingAPI != null && ModMain.Instance.SmolHatchlingAPI.UseScaledPlayerAttributes())
+        {
+            Vector3 playerScale = ModMain.Instance.SmolHatchlingAPI.GetTargetScale();
+            RunSpeed *= playerScale.x;
+            StrafeSpeed *= playerScale.x;
+            WalkSpeed *= playerScale.x;
+            DreamLanternSpeed *= playerScale.x;
+            AirSpeed *= playerScale.x;
+            GroundAccel *= playerScale.x;
+            AirAccel *= playerScale.x;
+            MinJumpPower *= Mathf.Sqrt(playerScale.y);
+            MaxJumpPower *= Mathf.Sqrt(playerScale.y);
+        }
+
         OnConfigure?.Invoke();
     }
 
-    /* put this shit in the config when you add stamina you bozo
+    /* stamina config
     
 		"Enable Stamina": {
 			"tooltip": "Sprinting will now use up stamina, so you won't be able to sprint forever and will have to let your stamina replenish. Recommended: Disabled",

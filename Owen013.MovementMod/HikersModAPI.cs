@@ -13,4 +13,10 @@ public class HikersModAPI
     {
         return SprintingController.Instance.IsSprinting();
     }
+
+    public void UpdateConfig()
+    {
+        if (ModMain.Instance.ModHelper == null) return;
+        Config.UpdateConfig(ModMain.Instance.ModHelper.Config);
+    }
 }

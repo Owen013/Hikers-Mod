@@ -1,4 +1,4 @@
-﻿namespace HikersMod.APIs;
+﻿namespace HikersMod.Interfaces;
 
 using UnityEngine;
 public interface ICameraShaker

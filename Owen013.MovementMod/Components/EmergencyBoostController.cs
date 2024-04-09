@@ -81,10 +81,10 @@ public class EmergencyBoostController : MonoBehaviour
         // if camerashaker is installed and camera shake is enabled, do a camera shake
         if (Config.EmergencyBoostCameraShakeAmount > 0f)
         {
-            Main.Instance.CameraShakerAPI?.ExplosionShake(strength: boostPower * Config.EmergencyBoostCameraShakeAmount);
+            ModMain.Instance.CameraShakerAPI?.ExplosionShake(strength: boostPower * Config.EmergencyBoostCameraShakeAmount);
         }
 
-        Main.Instance.WriteLine($"[{nameof(EmergencyBoostController)}] Super-Boosted", MessageType.Debug);
+        ModMain.Instance.WriteLine($"[{nameof(EmergencyBoostController)}] Super-Boosted", MessageType.Debug);
     }
 
     private void EndEmergencyBoost()

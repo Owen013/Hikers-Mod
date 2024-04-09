@@ -1,14 +1,14 @@
 ﻿using HarmonyLib;
-using HikersMod.APIs;
+using HikersMod.Interfaces;
 using OWML.Common;
 using OWML.ModHelper;
 using System.Reflection;
 
 namespace HikersMod;
 
-public class Main : ModBehaviour
+public class ModMain : ModBehaviour
 {
-    public static Main Instance { get; private set; }
+    public static ModMain Instance { get; private set; }
     public ISmolHatchling SmolHatchlingAPI { get; private set; }
     public ICameraShaker CameraShakerAPI { get; private set; }
     public IImmersion ImmersionAPI { get; private set; }
