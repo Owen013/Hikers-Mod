@@ -6,10 +6,15 @@ namespace HikersMod.Components;
 public class WallJumpController : MonoBehaviour
 {
     private PlayerCharacterController _characterController;
+
     private PlayerAnimController _animController;
+
     private PlayerImpactAudio _impactAudio;
+
     private float _wallJumpsLeft;
+
     private float _lastWallJumpTime;
+
     private float _lastWallJumpRefill;
 
     private void Awake()

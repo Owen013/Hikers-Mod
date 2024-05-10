@@ -6,43 +6,79 @@ namespace HikersMod;
 public static class Config
 {
     public static bool UseChargeJump { get; private set; }
+
     public static bool IsSprintingEnabled { get; private set; }
+
     public static string SprintButton { get; private set; }
+
     public static bool IsMidairTurningEnabled { get; private set; }
+
     public static bool IsEmergencyBoostEnabled { get; private set; }
+
     public static bool IsFloatyPhysicsEnabled { get; private set; }
+
     public static string WallJumpMode { get; private set; }
+
     public static float RunSpeed { get; private set; }
+
     public static float StrafeSpeed { get; private set; }
+
     public static float WalkSpeed { get; private set; }
+
     public static float DreamLanternSpeed { get; private set; }
+
     public static float GroundAccel { get; private set; }
+
     public static float AirSpeed { get; private set; }
+
     public static float AirAccel { get; private set; }
+
     public static float MinJumpPower { get; private set; }
+
     public static float MaxJumpPower { get; private set; }
+
     public static float JetpackAccel { get; private set; }
+
     public static float JetpackBoostAccel { get; private set; }
+
     public static float JetpackBoostTime { get; private set; }
+
     public static float MaxJetpackFuel { get; private set; }
+
     public static float SprintMultiplier { get; private set; }
+
     public static bool ShouldSprintOnLanding { get; private set; }
+
     public static bool IsStaminaEnabled { get; private set; }
+
     public static float StaminaSeconds { get; private set; }
+
     public static float StaminaRecoveryRate { get; private set; }
+
     public static float TiredMultiplier { get; private set; }
+
     public static bool IsSprintEffectEnabled { get; private set; }
+
     public static float EmergencyBoostPower { get; private set; }
+
     public static float EmergencyBoostCost { get; private set; }
+
     public static float EmergencyBoostVolume { get; private set; }
+
     public static float EmergencyBoostInputTime { get; private set; }
+
     public static float EmergencyBoostCameraShakeAmount { get; private set; }
+
     public static float FloatyPhysicsMinAccel { get; private set; }
+
     public static float FloatyPhysicsMaxGravity { get; private set; }
+
     public static float FloatyPhysicsMinGravity { get; private set; }
+
     public static float MaxWallJumps { get; private set; }
 
     public delegate void ConfigureEvent();
+
     public static event ConfigureEvent OnConfigure;
 
     public static void UpdateConfig(IModConfig config)

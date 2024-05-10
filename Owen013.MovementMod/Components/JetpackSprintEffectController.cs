@@ -5,9 +5,13 @@ namespace HikersMod.Components;
 public class JetpackSprintEffectController : MonoBehaviour
 {
     private GameObject _playerSuit;
+
     private GameObject _playerJetpack;
+
     private JetpackThrusterAudio _jetpackAudio;
+
     private ThrusterFlameController[] _thrusters;
+
     private Vector2 _thrusterVector;
 
     private void Awake()

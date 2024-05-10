@@ -5,6 +5,7 @@ namespace HikersMod.Components;
 public class CharacterAttributeController : MonoBehaviour
 {
     private PlayerCharacterController _characterController;
+
     private JetpackThrusterModel _jetpackModel;
 
     private void Awake()

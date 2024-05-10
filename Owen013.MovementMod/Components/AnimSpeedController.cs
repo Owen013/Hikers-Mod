@@ -5,6 +5,7 @@ namespace HikersMod.Components;
 public class AnimSpeedController : MonoBehaviour
 {
     private Animator _animator;
+
     private PlayerCharacterController _characterController;
 
     private void Awake()

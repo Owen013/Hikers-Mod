@@ -73,7 +73,7 @@ public static class Patches
             Vector3 newLocalVelocity = Vector3.ClampMagnitude(localVelocity + localVelocityChange, maxSpeed);
 
             // cancel out old velocity, add new one
-            __instance._owRigidbody.AddLocalVelocityChange(-localVelocity + newLocalVelocity);
+            __instance._owRigidbody.AddLocalVelocityChange(newLocalVelocity - localVelocity);
         }
         return false;
     }

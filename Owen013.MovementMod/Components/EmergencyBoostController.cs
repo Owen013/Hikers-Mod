@@ -6,14 +6,23 @@ namespace HikersMod.Components;
 public class EmergencyBoostController : MonoBehaviour
 {
     private OWAudioSource _superBoostAudio;
+
     private JetpackThrusterModel _jetpackModel;
+
     private JetpackThrusterController _jetpackController;
+
     private PlayerCharacterController _characterController;
+
     private PlayerAudioController _audioController;
+
     private ThrusterFlameController _downThrustFlame;
+
     private HUDHelmetAnimator _helmetAnimator;
+
     private float _lastEmergencyBoostInputTime;
+
     private float _lastEmergencyBoostTime;
+
     private bool _isEmergencyBoosting;
 
     private void Awake()

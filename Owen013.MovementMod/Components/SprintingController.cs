@@ -5,26 +5,35 @@ namespace HikersMod.Components;
 public class SprintingController : MonoBehaviour
 {
     public static SprintingController Instance { get; private set; }
+
     public bool IsSprintModeActive { get; private set; }
 
     private PlayerCharacterController _characterController;
+
     private IInputCommands _sprintButton;
-    private bool _isTired;
+
     private float _staminaSecondsLeft;
+
     private float _lastSprintTime;
 
-    // testing
     private bool temp_isSprinting;
+
     private float temp_groundVelocity;
+
+    private float temp_maxGroundVelocityUntilSprint;
 
     public bool IsSprinting()
     {
-        if (!_characterController.IsGrounded() || !IsSprintModeActive || _isTired) return false;
+        if (!_characterController.IsGrounded() || !IsSprintModeActive) return false;
 
         Vector2 inputVector = OWInput.GetAxisValue(InputLibrary.moveXZ);
+        Vector2 normalizedInputVector = inputVector.normalized;
         Vector3 groundVelocity = _characterController.GetRelativeGroundVelocity();
         groundVelocity.y = 0f;
-        return inputVector.magnitude > 0f && groundVelocity.magnitude > Config.RunSpeed;
+        float maxRunSpeed = new Vector3(Config.StrafeSpeed * normalizedInputVector.x, 0f, (inputVector.y > 0f ? Config.RunSpeed : Config.StrafeSpeed) * normalizedInputVector.y).magnitude;
+        temp_maxGroundVelocityUntilSprint = maxRunSpeed;
+
+        return inputVector.magnitude > 0f && groundVelocity.magnitude > maxRunSpeed;
     }
 
     private void Awake()
@@ -72,12 +81,7 @@ public class SprintingController : MonoBehaviour
             UpdateSprinting();
         }
 
-        if (_isTired)
-        {
-            _characterController._runSpeed = Config.RunSpeed * Config.TiredMultiplier;
-            _characterController._strafeSpeed = Config.StrafeSpeed * Config.TiredMultiplier;
-        }
-        else if (IsSprintModeActive)
+        if (IsSprintModeActive)
         {
             _characterController._runSpeed = Config.RunSpeed * Config.SprintMultiplier; // + (Config.RunSpeed * Config.SprintMultiplier - Config.RunSpeed) * (-0.5f * Mathf.Pow(_staminaSecondsLeft / Config.StaminaSeconds - 1f, 2f) + 1f);
             _characterController._strafeSpeed = Config.StrafeSpeed * Config.SprintMultiplier; // + (Config.StrafeSpeed * Config.SprintMultiplier - Config.StrafeSpeed) * (-0.5f * -Mathf.Pow(_staminaSecondsLeft / Config.StaminaSeconds - 1f, 2f) + 1f);
@@ -110,19 +114,13 @@ public class SprintingController : MonoBehaviour
 
     private void UpdateStamina()
     {
-        if (!Config.IsStaminaEnabled)
-        {
-            _isTired = false;
-            _staminaSecondsLeft = Config.StaminaSeconds;
-        }
-        else if (IsSprinting())
+        if (IsSprinting())
         {
             _staminaSecondsLeft -= Time.deltaTime;
             _lastSprintTime = Time.time;
             if (_staminaSecondsLeft <= 0f)
             {
                 _staminaSecondsLeft = 0f;
-                _isTired = true;
             }
         }
         else if (Time.time - _lastSprintTime >= 1f)
@@ -131,7 +129,6 @@ public class SprintingController : MonoBehaviour
             if (_staminaSecondsLeft >= Config.StaminaSeconds)
             {
                 _staminaSecondsLeft = Config.StaminaSeconds;
-                _isTired = false;
             }
         }
     }
