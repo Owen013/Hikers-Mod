@@ -9,8 +9,11 @@ namespace HikersMod;
 public class ModMain : ModBehaviour
 {
     public static ModMain Instance { get; private set; }
+
     public ISmolHatchling SmolHatchlingAPI { get; private set; }
+
     public ICameraShaker CameraShakerAPI { get; private set; }
+    
     public IImmersion ImmersionAPI { get; private set; }
 
     public override object GetApi()
