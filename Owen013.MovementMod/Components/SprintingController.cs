@@ -12,28 +12,23 @@ public class SprintingController : MonoBehaviour
 
     private IInputCommands _sprintButton;
 
-    private float _staminaSecondsLeft;
-
     private float _lastSprintTime;
 
-    private bool temp_isSprinting;
-
-    private float temp_groundVelocity;
-
-    private float temp_maxGroundVelocityUntilSprint;
+    private float _staminaSecondsLeft;
 
     public bool IsSprinting()
     {
         if (!_characterController.IsGrounded() || !IsSprintModeActive) return false;
 
         Vector2 inputVector = OWInput.GetAxisValue(InputLibrary.moveXZ);
-        Vector2 normalizedInputVector = inputVector.normalized;
         Vector3 groundVelocity = _characterController.GetRelativeGroundVelocity();
         groundVelocity.y = 0f;
-        float maxRunSpeed = new Vector3(Config.StrafeSpeed * normalizedInputVector.x, 0f, (inputVector.y > 0f ? Config.RunSpeed : Config.StrafeSpeed) * normalizedInputVector.y).magnitude;
-        temp_maxGroundVelocityUntilSprint = maxRunSpeed;
 
-        return inputVector.magnitude > 0f && groundVelocity.magnitude > maxRunSpeed;
+        // get minimum sprint speed by finding the max speed the player could be going without sprinting
+        Vector2 normalizedInputVector = inputVector.normalized;
+        float minSprintSpeed = new Vector3(Config.StrafeSpeed * normalizedInputVector.x, 0f, (inputVector.y > 0f ? Config.RunSpeed : Config.StrafeSpeed) * normalizedInputVector.y).magnitude;
+
+        return inputVector.magnitude > 0f && groundVelocity.magnitude > minSprintSpeed;
     }
 
     private void Awake()
@@ -81,10 +76,10 @@ public class SprintingController : MonoBehaviour
             UpdateSprinting();
         }
 
-        if (IsSprintModeActive)
+        if (IsSprintModeActive && (!Config.IsStaminaEnabled || _staminaSecondsLeft > 0f))
         {
-            _characterController._runSpeed = Config.RunSpeed * Config.SprintMultiplier; // + (Config.RunSpeed * Config.SprintMultiplier - Config.RunSpeed) * (-0.5f * Mathf.Pow(_staminaSecondsLeft / Config.StaminaSeconds - 1f, 2f) + 1f);
-            _characterController._strafeSpeed = Config.StrafeSpeed * Config.SprintMultiplier; // + (Config.StrafeSpeed * Config.SprintMultiplier - Config.StrafeSpeed) * (-0.5f * -Mathf.Pow(_staminaSecondsLeft / Config.StaminaSeconds - 1f, 2f) + 1f);
+            _characterController._runSpeed = Config.RunSpeed * Config.SprintMultiplier;
+            _characterController._strafeSpeed = Config.StrafeSpeed * Config.SprintMultiplier;
         }
         else
         {
@@ -93,9 +88,6 @@ public class SprintingController : MonoBehaviour
         }
 
         UpdateStamina();
-
-        temp_isSprinting = IsSprinting();
-        temp_groundVelocity = _characterController.GetRelativeGroundVelocity().magnitude;
     }
 
     private void UpdateSprinting()
@@ -114,22 +106,17 @@ public class SprintingController : MonoBehaviour
 
     private void UpdateStamina()
     {
-        if (IsSprinting())
+        if (Config.IsStaminaEnabled && IsSprinting())
         {
             _staminaSecondsLeft -= Time.deltaTime;
             _lastSprintTime = Time.time;
-            if (_staminaSecondsLeft <= 0f)
-            {
-                _staminaSecondsLeft = 0f;
-            }
         }
         else if (Time.time - _lastSprintTime >= 1f)
         {
             _staminaSecondsLeft += Time.deltaTime * Config.StaminaRecoveryRate;
-            if (_staminaSecondsLeft >= Config.StaminaSeconds)
-            {
-                _staminaSecondsLeft = Config.StaminaSeconds;
-            }
         }
+
+        // make sure stamina seconds left is within possible range
+        _staminaSecondsLeft = Mathf.Clamp(_staminaSecondsLeft, 0f, Config.StaminaSeconds);
     }
 }
