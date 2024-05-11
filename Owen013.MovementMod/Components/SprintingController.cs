@@ -28,7 +28,7 @@ public class SprintingController : MonoBehaviour
         Vector2 normalizedInputVector = inputVector.normalized;
         float minSprintSpeed = new Vector3(Config.StrafeSpeed * normalizedInputVector.x, 0f, (inputVector.y > 0f ? Config.RunSpeed : Config.StrafeSpeed) * normalizedInputVector.y).magnitude;
 
-        return inputVector.magnitude > 0f && groundVelocity.magnitude > minSprintSpeed;
+        return inputVector.magnitude > 1f / Config.SprintMultiplier && groundVelocity.magnitude > minSprintSpeed;
     }
 
     private void Awake()
