@@ -5,6 +5,10 @@ namespace HikersMod.Components;
 
 public class WallJumpController : MonoBehaviour
 {
+    public static WallJumpController Instance;
+
+    public float LastWallJumpTime {  get; private set; }
+
     private PlayerCharacterController _characterController;
 
     private PlayerAnimController _animController;
@@ -13,12 +17,11 @@ public class WallJumpController : MonoBehaviour
 
     private float _wallJumpsLeft;
 
-    private float _lastWallJumpTime;
-
     private float _lastWallJumpRefill;
 
     private void Awake()
     {
+        Instance = this;
         _characterController = GetComponent<PlayerCharacterController>();
         _animController = GetComponentInChildren<PlayerAnimController>();
         _impactAudio = FindObjectOfType<PlayerImpactAudio>();
@@ -56,7 +59,7 @@ public class WallJumpController : MonoBehaviour
                 _characterController._owRigidbody.AddLocalVelocityChange(climbVelocity);
                 _wallJumpsLeft -= 1;
                 _impactAudio._impactAudioSrc.PlayOneShot(AudioType.ImpactLowSpeed);
-                _lastWallJumpTime = _lastWallJumpRefill = Time.time;
+                LastWallJumpTime = _lastWallJumpRefill = Time.time;
                 ModMain.Instance.WriteLine($"[{nameof(WallJumpController)}] Wall-Jumped", MessageType.Debug);
             }
         }
@@ -70,7 +73,7 @@ public class WallJumpController : MonoBehaviour
 
         // Make player play fast freefall animation after each wall jump
         float freeFallSpeed = _animController._animator.GetFloat($"FreefallSpeed");
-        float climbFraction = Mathf.Max(0, 1 - (Time.time - _lastWallJumpTime));
+        float climbFraction = Mathf.Max(0, 1 - (Time.time - LastWallJumpTime));
         _animController._animator.SetFloat($"FreefallSpeed", Mathf.Max(freeFallSpeed, climbFraction));
     }
 }
