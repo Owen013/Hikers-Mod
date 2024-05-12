@@ -7,8 +7,6 @@ public class EmergencyBoostController : MonoBehaviour
 {
     private PlayerCharacterController _characterController;
 
-    private PlayerAudioController _audioController;
-
     private JetpackThrusterController _jetpackController;
 
     private JetpackThrusterModel _jetpackModel;
@@ -28,14 +26,13 @@ public class EmergencyBoostController : MonoBehaviour
     private void Awake()
     {
         _characterController = GetComponent<PlayerCharacterController>();
-        _audioController = GetComponentInChildren<PlayerAudioController>();
         _jetpackModel = GetComponent<JetpackThrusterModel>();
         _jetpackController = GetComponent<JetpackThrusterController>();
         _helmetAnimator = GetComponentInChildren<HUDHelmetAnimator>();
 
         // create super boost audio source
         _superBoostAudio = new GameObject("HikersMod_EmergencyBoostAudioSrc").AddComponent<OWAudioSource>();
-        _superBoostAudio.transform.parent = _audioController.transform;
+        _superBoostAudio.transform.parent = GetComponentInChildren<PlayerAudioController>().transform;
         _superBoostAudio.transform.localPosition = new Vector3(0, -1f, 1f);
 
         // get player's downward thruster flame
@@ -45,6 +42,7 @@ public class EmergencyBoostController : MonoBehaviour
             if (thrusters[i]._thruster == Thruster.Up_LeftThruster)
             {
                 _downThrustFlame = thrusters[i];
+                break;
             }
         }
 
