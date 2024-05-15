@@ -34,14 +34,9 @@ public class WallJumpController : MonoBehaviour
 
     private void Update()
     {
-        UpdateWallJump();
-    }
-
-    private void UpdateWallJump()
-    {
-        _characterController.UpdatePushable();
         bool isWallJumpAllowed = (Config.WallJumpMode == "When Unsuited" && !PlayerState.IsWearingSuit()) || Config.WallJumpMode == "Always";
-        bool canWallJump = isWallJumpAllowed && _characterController._isPushable && !PlayerState.InZeroG() && !_characterController._isGrounded && _wallJumpsLeft > 0;
+        _characterController.UpdatePushable();
+        bool canWallJump = _characterController._isPushable && !PlayerState.InZeroG() && !_characterController._isGrounded && _wallJumpsLeft > 0;
         if (isWallJumpAllowed && canWallJump && OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character))
         {
             Vector3 pointVelocity = _characterController._pushableBody.GetPointVelocity(_characterController._pushContactPt);
