@@ -13,6 +13,7 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Components\StaminaGuiController.cs" />
     <Compile Remove="Components\VaultingController.cs" />
   </ItemGroup>
   <ItemGroup>

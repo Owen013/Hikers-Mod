@@ -5,9 +5,9 @@ namespace HikersMod.Components;
 
 public class WallJumpController : MonoBehaviour
 {
-    public static WallJumpController Instance;
+    public static WallJumpController Instance { get; private set; }
 
-    public float LastWallJumpTime {  get; private set; }
+    public float LastWallJumpTime { get; private set; }
 
     private PlayerCharacterController _characterController;
 
@@ -44,9 +44,7 @@ public class WallJumpController : MonoBehaviour
         bool canWallJump = isWallJumpAllowed && _characterController._isPushable && !PlayerState.InZeroG() && !_characterController._isGrounded && _wallJumpsLeft > 0;
         if (isWallJumpAllowed && canWallJump && OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character))
         {
-            OWRigidbody pushBody = _characterController._pushableBody;
-            Vector3 pushPoint = _characterController._pushContactPt;
-            Vector3 pointVelocity = pushBody.GetPointVelocity(pushPoint);
+            Vector3 pointVelocity = _characterController._pushableBody.GetPointVelocity(_characterController._pushContactPt);
             Vector3 climbVelocity = new Vector3(0, Config.MaxJumpPower, 0f) * (_wallJumpsLeft / Config.MaxWallJumps);
 
             if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20f)

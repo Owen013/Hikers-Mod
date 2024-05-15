@@ -8,13 +8,13 @@ public class SprintingController : MonoBehaviour
 
     public bool IsSprintModeActive { get; private set; }
 
+    public float StaminaSecondsLeft { get; private set; }
+
     private PlayerCharacterController _characterController;
 
     private IInputCommands _sprintButton;
 
     private float _lastSprintTime;
-
-    private float _staminaSecondsLeft;
 
     public bool IsSprinting()
     {
@@ -35,7 +35,7 @@ public class SprintingController : MonoBehaviour
     {
         Instance = this;
         _characterController = GetComponent<PlayerCharacterController>();
-        _staminaSecondsLeft = Config.StaminaSeconds;
+        StaminaSecondsLeft = Config.StaminaSeconds;
 
         _characterController.OnBecomeGrounded += () =>
         {
@@ -76,7 +76,7 @@ public class SprintingController : MonoBehaviour
             UpdateSprinting();
         }
 
-        if (IsSprintModeActive && (!Config.IsStaminaEnabled || _staminaSecondsLeft > 0f))
+        if (IsSprintModeActive && (!Config.IsStaminaEnabled || StaminaSecondsLeft > 0f))
         {
             _characterController._runSpeed = Config.RunSpeed * Config.SprintMultiplier;
             _characterController._strafeSpeed = Config.StrafeSpeed * Config.SprintMultiplier;
@@ -108,15 +108,15 @@ public class SprintingController : MonoBehaviour
     {
         if (Config.IsStaminaEnabled && IsSprinting())
         {
-            _staminaSecondsLeft -= Time.deltaTime;
+            StaminaSecondsLeft -= Time.deltaTime;
             _lastSprintTime = Time.time;
         }
         else if (Time.time - _lastSprintTime >= 1f)
         {
-            _staminaSecondsLeft += Time.deltaTime * Config.StaminaRecoveryRate;
+            StaminaSecondsLeft += Time.deltaTime * Config.StaminaRecoveryRate;
         }
 
         // make sure stamina seconds left is within possible range
-        _staminaSecondsLeft = Mathf.Clamp(_staminaSecondsLeft, 0f, Config.StaminaSeconds);
+        StaminaSecondsLeft = Mathf.Clamp(StaminaSecondsLeft, 0f, Config.StaminaSeconds);
     }
 }
