@@ -11,7 +11,7 @@ public class EmergencyBoostController : MonoBehaviour
 
     private JetpackThrusterModel _jetpackModel;
 
-    private OWAudioSource _superBoostAudio;
+    private OWAudioSource _emergencyBoostAudio;
 
     private ThrusterFlameController _downThrustFlame;
 
@@ -31,22 +31,27 @@ public class EmergencyBoostController : MonoBehaviour
         _helmetAnimator = GetComponentInChildren<HUDHelmetAnimator>();
 
         // create super boost audio source
-        _superBoostAudio = new GameObject("HikersMod_EmergencyBoostAudioSrc").AddComponent<OWAudioSource>();
-        _superBoostAudio.transform.parent = GetComponentInChildren<PlayerAudioController>().transform;
-        _superBoostAudio.transform.localPosition = new Vector3(0, -1f, 1f);
+        _emergencyBoostAudio = new GameObject("HikersMod_EmergencyBoostAudioSrc").AddComponent<OWAudioSource>();
+        _emergencyBoostAudio.transform.parent = GetComponentInChildren<PlayerAudioController>().transform;
+        _emergencyBoostAudio.transform.localPosition = new Vector3(0, -1f, 1f);
 
         // get player's downward thruster flame
         var thrusters = _characterController.gameObject.GetComponentsInChildren<ThrusterFlameController>(includeInactive: true);
-        for (int i = 0; i < thrusters.Length; i++)
+        foreach (ThrusterFlameController thruster in thrusters)
         {
-            if (thrusters[i]._thruster == Thruster.Up_LeftThruster)
+            if (thruster._thruster == Thruster.Up_LeftThruster)
             {
-                _downThrustFlame = thrusters[i];
+                _downThrustFlame = thruster;
                 break;
             }
         }
 
         _characterController.OnBecomeGrounded += EndEmergencyBoost;
+    }
+
+    private void OnDestroy()
+    {
+        Destroy(_emergencyBoostAudio);
     }
 
     private void LateUpdate()
@@ -88,8 +93,8 @@ public class EmergencyBoostController : MonoBehaviour
         _characterController._owRigidbody.AddLocalVelocityChange(new Vector3(-localVelocity.x * 0.5f, boostPower - localVelocity.y * 0.5f, -localVelocity.z * 0.5f));
 
         // sound and visual effects
-        _superBoostAudio.pitch = Random.Range(1.0f, 1.4f);
-        _superBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, Config.EmergencyBoostVolume * 0.75f);
+        _emergencyBoostAudio.pitch = Random.Range(1.0f, 1.4f);
+        _emergencyBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, Config.EmergencyBoostVolume * 0.75f);
         _helmetAnimator.OnInstantDamage(boostPower, InstantDamageType.Impact);
         NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "EMERGENCY BOOST ACTIVATED", 5f), false);
 
