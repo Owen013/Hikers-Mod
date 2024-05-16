@@ -204,15 +204,6 @@
 			"tooltip": "The gravity at which the minimum acceleration will take effect. Recommended: 0.5",
 			"type": "number",
 			"value": 0.5
-		},
-
-		"Advanced - Wall Jump Settings": {
-			"type": "separator"
-		},
-		"Maximum Number of Wall Jumps": {
-			"tooltip": "How many times you can Wall Jump without touching the ground. Recommended: 5",
-			"type": "number",
-			"value": 5
 		}
 	}
 }

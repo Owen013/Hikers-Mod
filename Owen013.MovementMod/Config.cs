@@ -73,8 +73,6 @@ public static class Config
 
     public static float FloatyPhysicsMinGravity { get; private set; }
 
-    public static int MaxWallJumps { get; private set; }
-
     public delegate void ConfigureEvent();
 
     public static event ConfigureEvent OnConfigure;
@@ -115,7 +113,6 @@ public static class Config
         FloatyPhysicsMinAccel = config.GetSettingsValue<float>("Floaty Physics Minimum Acceleration");
         FloatyPhysicsMaxGravity = config.GetSettingsValue<float>("Floaty Physics Minimum Gravity");
         FloatyPhysicsMinGravity = config.GetSettingsValue<float>("Minimum Gravity");
-        MaxWallJumps = config.GetSettingsValue<int>("Maximum Number of Wall Jumps");
 
         if (ModMain.Instance.SmolHatchlingAPI != null && ModMain.Instance.SmolHatchlingAPI.UseScaledPlayerAttributes())
         {
