@@ -95,7 +95,12 @@ public static class Patches
         if (audioType != AudioType.None)
         {
             __instance._footstepAudio.pitch = Random.Range(0.9f, 1.1f);
-            __instance._footstepAudio.PlayOneShot(audioType, 1.4f * Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude / 6f);
+            float audioVolume = 1.4f * Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude / 6f;
+            if (ModMain.Instance.SmolHatchlingAPI != null)
+            {
+                audioVolume /= ModMain.Instance.SmolHatchlingAPI.GetPlayerScale();
+            }
+            __instance._footstepAudio.PlayOneShot(audioType, audioVolume);
         }
         return false;
     }

@@ -48,10 +48,9 @@
 			"value": false
 		},
 		"Enable Wall Jumping": {
-			"tooltip": "Allows you to climb up walls by jumping off of them. Recommended: Disabled",
-			"type": "selector",
-			"value": "No",
-			"options": [ "No", "When Unsuited", "Always" ]
+			"tooltip": "Allows you to jump off of walls. Recommended: Disabled",
+			"type": "toggle",
+			"value": false
 		},
 
 		"Advanced - Player Attributes": {

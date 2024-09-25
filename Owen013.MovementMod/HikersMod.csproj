@@ -19,8 +19,8 @@
     <Compile Remove="Components\VaultingController.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="OWML" Version="2.11.1" />
-    <PackageReference Include="OuterWildsGameLibs" Version="1.1.14.768" />
+    <PackageReference Include="OWML" Version="2.13.0" />
+    <PackageReference Include="OuterWildsGameLibs" Version="1.1.15.1018" />
   </ItemGroup>
   <ItemGroup>
     <None Include="default-config.json">

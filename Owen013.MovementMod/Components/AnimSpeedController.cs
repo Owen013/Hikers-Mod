@@ -19,7 +19,7 @@ public class AnimSpeedController : MonoBehaviour
         float groundSpeed = _characterController.GetRelativeGroundVelocity().magnitude;
         if (ModMain.Instance.SmolHatchlingAPI != null)
         {
-            groundSpeed *= ModMain.Instance.SmolHatchlingAPI.GetAnimSpeed();
+            groundSpeed *= 1 / ModMain.Instance.SmolHatchlingAPI.GetPlayerScale();
         }
         float animSpeedMultiplier = Mathf.Sqrt(groundSpeed / 6f);
         float floatyPhysicsMultiplier = Mathf.Sqrt(_characterController._acceleration / Config.GroundAccel);
