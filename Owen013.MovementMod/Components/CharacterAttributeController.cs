@@ -13,27 +13,27 @@ public class CharacterAttributeController : MonoBehaviour
         _characterController = GetComponent<PlayerCharacterController>();
         _jetpackModel = FindObjectOfType<JetpackThrusterModel>();
 
-        Config.OnConfigure += ApplyChanges;
+        ModMain.OnConfigure += ApplyChanges;
         ApplyChanges();
     }
 
     private void OnDestroy()
     {
-        Config.OnConfigure -= ApplyChanges;
+        ModMain.OnConfigure -= ApplyChanges;
     }
 
     private void ApplyChanges()
     {
         // Change built-in character attributes
-        _characterController._useChargeJump = Config.UseChargeJump;
-        if (!Config.IsFloatyPhysicsEnabled) _characterController._acceleration = Config.GroundAccel;
-        _characterController._airSpeed = Config.AirSpeed;
-        _characterController._airAcceleration = Config.AirAccel;
-        _characterController._minJumpSpeed = Config.MinJumpPower;
-        _characterController._maxJumpSpeed = Config.MaxJumpPower;
-        _jetpackModel._maxTranslationalThrust = Config.JetpackAccel;
-        _jetpackModel._boostThrust = Config.JetpackBoostAccel;
-        _jetpackModel._boostSeconds = Config.JetpackBoostTime;
-        PlayerResources._maxFuel = Config.MaxJetpackFuel;
+        _characterController._useChargeJump = ModMain.UseChargeJump;
+        if (!ModMain.IsFloatyPhysicsEnabled) _characterController._acceleration = ModMain.GroundAccel;
+        _characterController._airSpeed = ModMain.AirSpeed;
+        _characterController._airAcceleration = ModMain.AirAccel;
+        _characterController._minJumpSpeed = ModMain.MinJumpPower;
+        _characterController._maxJumpSpeed = ModMain.MaxJumpPower;
+        _jetpackModel._maxTranslationalThrust = ModMain.JetpackAccel;
+        _jetpackModel._boostThrust = ModMain.JetpackBoostAccel;
+        _jetpackModel._boostSeconds = ModMain.JetpackBoostTime;
+        PlayerResources._maxFuel = ModMain.MaxJetpackFuel;
     }
 }

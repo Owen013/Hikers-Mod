@@ -16,7 +16,7 @@ public class HikersModAPI
 
     public void UpdateConfig()
     {
-        if (ModMain.Instance.ModHelper == null) return;
-        Config.UpdateConfig(ModMain.Instance.ModHelper.Config);
+        if (ModMain.Instance == null || ModMain.Instance.ModHelper == null) return;
+        ModMain.Instance.Configure(ModMain.Instance.ModHelper.Config);
     }
 }

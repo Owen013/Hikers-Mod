@@ -54,7 +54,7 @@ public static class Patches
     private static bool UpdateAirControl(PlayerCharacterController __instance)
     {
         // if feature is disabled then just do the vanilla method
-        if (!Config.IsMidairTurningEnabled) return true;
+        if (!ModMain.IsMidairTurningEnabled) return true;
 
         if (__instance._lastGroundBody != null)
         {
@@ -96,9 +96,9 @@ public static class Patches
         {
             __instance._footstepAudio.pitch = Random.Range(0.9f, 1.1f);
             float audioVolume = 1.4f * Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude / 6f;
-            if (ModMain.Instance.SmolHatchlingAPI != null)
+            if (ModMain.SmolHatchlingAPI != null)
             {
-                audioVolume /= ModMain.Instance.SmolHatchlingAPI.GetPlayerScale();
+                audioVolume /= ModMain.SmolHatchlingAPI.GetPlayerScale();
             }
             __instance._footstepAudio.PlayOneShot(audioType, audioVolume);
         }
@@ -112,8 +112,8 @@ public static class Patches
     {
         float lerpPosition = 1f - __instance._lanternController.GetFocus();
         lerpPosition *= lerpPosition;
-        maxSpeedX = Mathf.Lerp(Config.DreamLanternSpeed, maxSpeedX, lerpPosition);
-        maxSpeedZ = Mathf.Lerp(Config.DreamLanternSpeed, maxSpeedZ, lerpPosition);
+        maxSpeedX = Mathf.Lerp(ModMain.DreamLanternSpeed, maxSpeedX, lerpPosition);
+        maxSpeedZ = Mathf.Lerp(ModMain.DreamLanternSpeed, maxSpeedZ, lerpPosition);
         return false;
     }
 
@@ -146,7 +146,7 @@ public static class Patches
     {
         if (moveType == MoveType.CHASE && SprintingController.Instance.IsSprinting() == true)
         {
-            __result *= Config.SprintMultiplier;
+            __result *= ModMain.SprintMultiplier;
         }
     }
 
@@ -157,7 +157,7 @@ public static class Patches
     {
         if (moveType == MoveType.CHASE && SprintingController.Instance.IsSprinting() == true)
         {
-            __result *= Config.SprintMultiplier;
+            __result *= ModMain.SprintMultiplier;
         }
     }
 }

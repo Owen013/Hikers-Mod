@@ -62,7 +62,7 @@ public class EmergencyBoostController : MonoBehaviour
         {
             EndEmergencyBoost();
         }
-        else if (Config.IsEmergencyBoostEnabled && isInputting && Time.time - _lastEmergencyBoostInputTime < Config.EmergencyBoostInputTime && Time.time - WallJumpController.Instance.LastWallJumpTime > 0.5f && _jetpackController._resources.GetFuel() > 0f && !_isEmergencyBoosting)
+        else if (ModMain.IsEmergencyBoostEnabled && isInputting && Time.time - _lastEmergencyBoostInputTime < ModMain.EmergencyBoostInputTime && Time.time - WallJumpController.Instance.LastWallJumpTime > 0.5f && _jetpackController._resources.GetFuel() > 0f && !_isEmergencyBoosting)
         {
             ApplyEmergencyBoost();
         }
@@ -84,8 +84,8 @@ public class EmergencyBoostController : MonoBehaviour
         _isEmergencyBoosting = true;
         _lastEmergencyBoostTime = Time.time;
         _jetpackModel._boostChargeFraction = 0f;
-        _jetpackController._resources._currentFuel = Mathf.Max(0f, _jetpackController._resources.GetFuel() - Config.EmergencyBoostCost);
-        float boostPower = Config.EmergencyBoostPower;
+        _jetpackController._resources._currentFuel = Mathf.Max(0f, _jetpackController._resources.GetFuel() - ModMain.EmergencyBoostCost);
+        float boostPower = ModMain.EmergencyBoostPower;
 
         // set player velocity
         Vector3 pointVelocity = _characterController._transform.InverseTransformDirection(_characterController._lastGroundBody.GetPointVelocity(_characterController._transform.position));
@@ -94,14 +94,14 @@ public class EmergencyBoostController : MonoBehaviour
 
         // sound and visual effects
         _emergencyBoostAudio.pitch = Random.Range(1.0f, 1.4f);
-        _emergencyBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, Config.EmergencyBoostVolume * 0.75f);
+        _emergencyBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, ModMain.EmergencyBoostVolume * 0.75f);
         _helmetAnimator.OnInstantDamage(boostPower, InstantDamageType.Impact);
         NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "EMERGENCY BOOST ACTIVATED", 5f), false);
 
         // if camerashaker is installed and camera shake is enabled, do a camera shake
-        if (Config.EmergencyBoostCameraShakeAmount > 0f)
+        if (ModMain.EmergencyBoostCameraShakeAmount > 0f)
         {
-            ModMain.Instance.CameraShakerAPI?.ExplosionShake(strength: boostPower * Config.EmergencyBoostCameraShakeAmount);
+            ModMain.CameraShakerAPI?.ExplosionShake(strength: boostPower * ModMain.EmergencyBoostCameraShakeAmount);
         }
 
         ModMain.Instance.WriteLine($"[{nameof(EmergencyBoostController)}] Super-Boosted", MessageType.Debug);

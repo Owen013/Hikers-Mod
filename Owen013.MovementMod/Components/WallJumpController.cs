@@ -25,14 +25,14 @@ public class WallJumpController : MonoBehaviour
 
     private void Update()
     {
-        if (!Config.IsWallJumpingEnabled) return;
+        if (!ModMain.IsWallJumpingEnabled) return;
 
         _characterController.UpdatePushable();
         bool canWallJump = Time.time - LastWallJumpTime > 0.25f && _characterController._isPushable && !PlayerState.InZeroG() && !_characterController._isGrounded;
         if (canWallJump && OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && !OWInput.IsPressed(InputLibrary.thrustUp))
         {
             Vector3 pointVelocity = _characterController._pushableBody.GetPointVelocity(_characterController._pushContactPt);
-            Vector3 climbVelocity = new Vector3(0, 1f, -1f).normalized * Config.MaxJumpPower;
+            Vector3 climbVelocity = new Vector3(0, 1f, -1f).normalized * ModMain.MaxJumpPower;
 
             if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20f)
             {
