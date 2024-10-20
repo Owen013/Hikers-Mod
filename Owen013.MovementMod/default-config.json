@@ -32,11 +32,6 @@
 		"Experimental Features": {
 			"type": "separator"
 		},
-		"Enable Stamina": {
-			"tooltip": "Sprinting will use up stamina, so you won't be able to sprint forever and will have to let your stamina replenish. Recommended: Disabled",
-			"type": "toggle",
-			"value": false
-		},
 		"Enable Emergency Boost": {
 			"tooltip": "Allows you to shoot up into the air by pressing space twice. Recommended: Disabled",
 			"type": "toggle",
@@ -122,7 +117,7 @@
 			"value": 100
 		},
 
-		"Advanced - Sprinting and Stamina Settings": {
+		"Advanced - Sprinting Settings": {
 			"type": "separator"
 		},
 		"SprintMultiplier": {
@@ -140,16 +135,6 @@
 			"tooltip": "Makes your jetpack thrusters fire as you sprint, as if they're boosting you. No gameplay effect. Recommended: Disabled",
 			"type": "toggle",
 			"value": false
-		},
-		"Seconds of Stamina": {
-			"tooltip": "The amount of time you can sprint before running out of stamina. Recommended: 10",
-			"type": "number",
-			"value": 10
-		},
-		"Stamina Recovery Rate": {
-			"tooltip": "The amount of seconds of stamina you regain every second. Recommended: 1",
-			"type": "number",
-			"value": 1
 		},
 
 		"Advanced - Emergency Boost Settings": {

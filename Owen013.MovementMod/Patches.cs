@@ -29,7 +29,7 @@ public static class Patches
         if (!__instance._isAlignedToForce && !__instance._isZeroGMovementEnabled) return false;
 
         // normal Update() function, but added isWearingSuit and IsSprintModeActive to if statement. The rest of this method is unmodified.
-        if (!__instance._isWearingSuit || SprintingController.Instance.IsSprintModeActive == true || OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f)
+        if (!__instance._isWearingSuit || SprintingController.Instance.IsSprinting == true || OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f)
         {
             __instance.UpdateJumpInput();
         }
@@ -122,7 +122,7 @@ public static class Patches
     [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
     private static void OnGetJetpackInput(ref Vector3 __result)
     {
-        if (__result.y != 0f && SprintingController.Instance.IsSprintModeActive == true)
+        if (__result.y != 0f && SprintingController.Instance.IsSprinting == true)
         {
             __result.y = 0f;
         }
@@ -133,7 +133,7 @@ public static class Patches
     [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
     private static void OnCheckIsBoosterAllowed(ref bool __result)
     {
-        if (SprintingController.Instance.IsSprintModeActive == true)
+        if (SprintingController.Instance.IsSprinting == true)
         {
             __result = false;
         }
@@ -144,7 +144,7 @@ public static class Patches
     [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetMoveSpeed))]
     private static void GhostGetMoveSpeed(MoveType moveType, ref float __result)
     {
-        if (moveType == MoveType.CHASE && SprintingController.Instance.IsSprinting() == true)
+        if (moveType == MoveType.CHASE && SprintingController.Instance.IsSprinting == true)
         {
             __result *= ModMain.SprintMultiplier;
         }
@@ -155,7 +155,7 @@ public static class Patches
     [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetMoveAcceleration))]
     private static void GhostGetMoveAcceleration(MoveType moveType, ref float __result)
     {
-        if (moveType == MoveType.CHASE && SprintingController.Instance.IsSprinting() == true)
+        if (moveType == MoveType.CHASE && SprintingController.Instance.IsSprinting == true)
         {
             __result *= ModMain.SprintMultiplier;
         }

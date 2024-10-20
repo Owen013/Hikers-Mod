@@ -28,7 +28,7 @@ public class JetpackSprintEffectController : MonoBehaviour
         bool jetpackVisible = _playerSuit.activeSelf && _playerJetpack.activeSelf;
 
         // get thruster vector IF the player is sprinting and the jetpack is visible. Otherwise, move towards zero
-        _thrusterVector = Vector2.MoveTowards(_thrusterVector, SprintingController.Instance.IsSprintModeActive && jetpackVisible && ModMain.IsSprintEffectEnabled ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
+        _thrusterVector = Vector2.MoveTowards(_thrusterVector, SprintingController.Instance.IsSprinting && jetpackVisible && ModMain.IsSprintEffectEnabled ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
         Vector2 flameVector = _thrusterVector;
 
         // clamp the vector so it doesn't become too big

@@ -24,8 +24,6 @@ public class ModMain : ModBehaviour
 
     public static bool IsMidairTurningEnabled { get; private set; }
 
-    public static bool IsStaminaEnabled { get; private set; }
-
     public static bool IsEmergencyBoostEnabled { get; private set; }
 
     public static bool IsFloatyPhysicsEnabled { get; private set; }
@@ -61,10 +59,6 @@ public class ModMain : ModBehaviour
     public static float SprintMultiplier { get; private set; }
 
     public static bool ShouldSprintOnLanding { get; private set; }
-
-    public static float StaminaSeconds { get; private set; }
-
-    public static float StaminaRecoveryRate { get; private set; }
 
     public static bool IsSprintEffectEnabled { get; private set; }
 
@@ -102,7 +96,6 @@ public class ModMain : ModBehaviour
         SprintButton = config.GetSettingsValue<string>("Sprint Button");
         IsMidairTurningEnabled = config.GetSettingsValue<bool>("Enable Midair Turning");
 
-        IsStaminaEnabled = config.GetSettingsValue<bool>("Enable Stamina");
         IsEmergencyBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
         IsFloatyPhysicsEnabled = config.GetSettingsValue<bool>("Enable Floaty Physics");
         IsWallJumpingEnabled = config.GetSettingsValue<bool>("Enable Wall Jumping");
@@ -123,8 +116,6 @@ public class ModMain : ModBehaviour
 
         SprintMultiplier = config.GetSettingsValue<float>("SprintMultiplier");
         ShouldSprintOnLanding = config.GetSettingsValue<bool>("Start Sprinting On Landing");
-        StaminaSeconds = config.GetSettingsValue<float>("Seconds of Stamina");
-        StaminaRecoveryRate = config.GetSettingsValue<float>("Stamina Recovery Rate");
         IsSprintEffectEnabled = config.GetSettingsValue<bool>("Show Thruster Effect while Sprinting");
 
         EmergencyBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");

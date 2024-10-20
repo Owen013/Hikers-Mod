@@ -6,36 +6,16 @@ public class SprintingController : MonoBehaviour
 {
     public static SprintingController Instance { get; private set; }
 
-    public bool IsSprintModeActive { get; private set; }
-
-    public float StaminaSecondsLeft { get; private set; }
+    public bool IsSprinting { get; private set; }
 
     private PlayerCharacterController _characterController;
 
     private IInputCommands _sprintButton;
 
-    private float _lastSprintTime;
-
-    public bool IsSprinting()
-    {
-        if (!_characterController.IsGrounded() || !IsSprintModeActive) return false;
-
-        Vector2 inputVector = OWInput.GetAxisValue(InputLibrary.moveXZ);
-        Vector3 groundVelocity = _characterController.GetRelativeGroundVelocity();
-        groundVelocity.y = 0f;
-
-        // get minimum sprint speed by finding the max speed the player could be going without sprinting
-        Vector2 normalizedInputVector = inputVector.normalized;
-        float minSprintSpeed = new Vector3(ModMain.StrafeSpeed * normalizedInputVector.x, 0f, (inputVector.y > 0f ? ModMain.RunSpeed : ModMain.StrafeSpeed) * normalizedInputVector.y).magnitude;
-
-        return inputVector.magnitude > 1f / ModMain.SprintMultiplier && groundVelocity.magnitude > minSprintSpeed;
-    }
-
     private void Awake()
     {
         Instance = this;
         _characterController = GetComponent<PlayerCharacterController>();
-        StaminaSecondsLeft = ModMain.StaminaSeconds;
 
         _characterController.OnBecomeGrounded += () =>
         {
@@ -76,7 +56,7 @@ public class SprintingController : MonoBehaviour
             UpdateSprinting();
         }
 
-        if (IsSprintModeActive && (!ModMain.IsStaminaEnabled || StaminaSecondsLeft > 0f))
+        if (IsSprinting)
         {
             _characterController._runSpeed = ModMain.RunSpeed * ModMain.SprintMultiplier;
             _characterController._strafeSpeed = ModMain.StrafeSpeed * ModMain.SprintMultiplier;
@@ -86,37 +66,24 @@ public class SprintingController : MonoBehaviour
             _characterController._runSpeed = ModMain.RunSpeed;
             _characterController._strafeSpeed = ModMain.StrafeSpeed;
         }
+    }
 
-        UpdateStamina();
+    private void OnDisable()
+    {
+        IsSprinting = false;
     }
 
     private void UpdateSprinting()
     {
         bool isOnValidGround = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce();
 
-        if (ModMain.IsSprintingEnabled && isOnValidGround && OWInput.IsPressed(_sprintButton) && (IsSprintModeActive || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
+        if (ModMain.IsSprintingEnabled && isOnValidGround && OWInput.IsPressed(_sprintButton) && (IsSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
         {
-            IsSprintModeActive = true;
+            IsSprinting = true;
         }
         else
         {
-            IsSprintModeActive = false;
+            IsSprinting = false;
         }
-    }
-
-    private void UpdateStamina()
-    {
-        if (ModMain.IsStaminaEnabled && IsSprinting())
-        {
-            StaminaSecondsLeft -= Time.deltaTime;
-            _lastSprintTime = Time.time;
-        }
-        else if (Time.time - _lastSprintTime >= 1f)
-        {
-            StaminaSecondsLeft += Time.deltaTime * ModMain.StaminaRecoveryRate;
-        }
-
-        // make sure stamina seconds left is within possible range
-        StaminaSecondsLeft = Mathf.Clamp(StaminaSecondsLeft, 0f, ModMain.StaminaSeconds);
     }
 }
