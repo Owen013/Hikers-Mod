@@ -129,7 +129,7 @@
 			"title": "Sprint Speed Multiplier",
 			"tooltip": "How much your speed is multiplied while sprinting. Recommended: 1.75",
 			"type": "number",
-			"value": 1.75
+			"value": 2
 		},
 		"Start Sprinting On Landing": {
 			"tooltip": "If you're holding the sprint button and a directional input when you land on the ground, you will stop thrusting and start sprinting. Recommended: Enabled",
