@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using HarmonyLib;
+using UnityEngine;
 
 namespace HikersMod.Components;
 
+[HarmonyPatch]
 public class AnimSpeedController : MonoBehaviour
 {
     private Animator _animator;
@@ -26,5 +28,13 @@ public class AnimSpeedController : MonoBehaviour
         float underwaterMultiplier = ModMain.ImmersionAPI != null ? ModMain.ImmersionAPI.GetAnimSpeed() : 1f;
 
         _animator.speed = _characterController.IsGrounded() ? Mathf.Max(animSpeedMultiplier * floatyPhysicsMultiplier, floatyPhysicsMultiplier) : underwaterMultiplier;
+    }
+
+    // add component to animator(s)
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PlayerAnimController), nameof(PlayerAnimController.Start))]
+    private static void OnAnimControllerStart(PlayerAnimController __instance)
+    {
+        __instance.gameObject.AddComponent<AnimSpeedController>();
     }
 }

@@ -1,11 +1,14 @@
 ﻿using HarmonyLib;
+using HikersMod.Components;
 using HikersMod.Interfaces;
 using OWML.Common;
 using OWML.ModHelper;
 using System.Reflection;
+using UnityEngine;
 
 namespace HikersMod;
 
+[HarmonyPatch]
 public class ModMain : ModBehaviour
 {
     public static ModMain Instance { get; private set; }
@@ -167,5 +170,79 @@ public class ModMain : ModBehaviour
 
         // Ready!
         WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
+    }
+
+    // Add components to character
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
+    private static void OnCharacterControllerStart(PlayerCharacterController __instance)
+    {
+        __instance.gameObject.AddComponent<CharacterAttributeController>();
+        __instance.gameObject.AddComponent<SprintingController>();
+        __instance.gameObject.AddComponent<EmergencyBoostController>();
+        __instance.gameObject.AddComponent<FloatyPhysicsController>();
+        __instance.gameObject.AddComponent<WallJumpController>();
+        __instance.gameObject.AddComponent<JetpackSprintEffectController>();
+    }
+
+    // allows turning in midair
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.UpdateAirControl))]
+    private static bool UpdateAirControl(PlayerCharacterController __instance)
+    {
+        // if feature is disabled then just do the vanilla method
+        if (!ModMain.IsMidairTurningEnabled) return true;
+
+        if (__instance._lastGroundBody != null)
+        {
+            // get player's horizontal velocity
+            Vector3 pointVelocity = __instance._transform.InverseTransformDirection(__instance._lastGroundBody.GetPointVelocity(__instance._transform.position));
+            Vector3 localVelocity = __instance._transform.InverseTransformDirection(__instance._owRigidbody.GetVelocity()) - pointVelocity;
+            localVelocity.y = 0f;
+
+            float physicsTime = Time.fixedDeltaTime * 60f;
+            float acceleration = __instance._airAcceleration * physicsTime;
+            Vector2 moveInput = OWInput.GetAxisValue(InputLibrary.moveXZ, InputMode.Character | InputMode.NomaiRemoteCam);
+            Vector3 localVelocityChange = new(acceleration * moveInput.x, 0f, acceleration * moveInput.y);
+
+            // new velocity can't be more than old velocity and airspeed
+            float maxSpeed = Mathf.Max(localVelocity.magnitude, __instance._airSpeed);
+            Vector3 newLocalVelocity = Vector3.ClampMagnitude(localVelocity + localVelocityChange, maxSpeed);
+
+            // cancel out old velocity, add new one
+            __instance._owRigidbody.AddLocalVelocityChange(newLocalVelocity - localVelocity);
+        }
+        return false;
+    }
+
+    // adjusts footstep sound based on player speed
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(PlayerMovementAudio), nameof(PlayerMovementAudio.PlayFootstep))]
+    private static bool PlayFootstep(PlayerMovementAudio __instance)
+    {
+        AudioType audioType = (!PlayerState.IsCameraUnderwater() && __instance._fluidDetector.InFluidType(FluidVolume.Type.WATER)) ? AudioType.MovementShallowWaterFootstep : PlayerMovementAudio.GetFootstepAudioType(__instance._playerController.GetGroundSurface());
+        if (audioType != AudioType.None)
+        {
+            __instance._footstepAudio.pitch = Random.Range(0.9f, 1.1f);
+            float audioVolume = 1.4f * Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude / 6f;
+            if (ModMain.SmolHatchlingAPI != null)
+            {
+                audioVolume /= ModMain.SmolHatchlingAPI.GetPlayerScale();
+            }
+            __instance._footstepAudio.PlayOneShot(audioType, audioVolume);
+        }
+        return false;
+    }
+
+    // changes dream lantern max speed to config setting
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(DreamLanternItem), nameof(DreamLanternItem.OverrideMaxRunSpeed))]
+    private static bool OverrideMaxRunSpeed(ref float maxSpeedX, ref float maxSpeedZ, DreamLanternItem __instance)
+    {
+        float lerpPosition = 1f - __instance._lanternController.GetFocus();
+        lerpPosition *= lerpPosition;
+        maxSpeedX = Mathf.Lerp(ModMain.DreamLanternSpeed, maxSpeedX, lerpPosition);
+        maxSpeedZ = Mathf.Lerp(ModMain.DreamLanternSpeed, maxSpeedZ, lerpPosition);
+        return false;
     }
 }
