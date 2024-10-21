@@ -67,8 +67,15 @@ public class EmergencyBoostController : MonoBehaviour
             ApplyEmergencyBoost();
         }
 
-        if (isInputting && canEmergencyBoost) _lastEmergencyBoostInputTime = Time.time;
-        if (_isEmergencyBoosting) _jetpackModel._chargeSeconds = float.PositiveInfinity;
+        if (isInputting && canEmergencyBoost)
+        {
+            _lastEmergencyBoostInputTime = Time.time;
+        }
+
+        if (_isEmergencyBoosting)
+        {
+            _jetpackModel._chargeSeconds = float.PositiveInfinity;
+        }
 
         float timeSinceBoost = Time.time - _lastEmergencyBoostTime;
         float thrusterCurve = -Mathf.Pow(5f * timeSinceBoost - 1f, 2f) + 1f;
