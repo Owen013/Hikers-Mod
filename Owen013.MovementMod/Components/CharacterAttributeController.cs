@@ -13,27 +13,27 @@ public class CharacterAttributeController : MonoBehaviour
         _characterController = GetComponent<PlayerCharacterController>();
         _jetpackModel = FindObjectOfType<JetpackThrusterModel>();
 
-        ModMain.OnConfigure += ApplyChanges;
+        ModMain.Instance.OnConfigure += ApplyChanges;
         ApplyChanges();
     }
 
     private void OnDestroy()
     {
-        ModMain.OnConfigure -= ApplyChanges;
+        ModMain.Instance.OnConfigure -= ApplyChanges;
     }
 
     private void ApplyChanges()
     {
         // Change built-in character attributes
-        _characterController._useChargeJump = ModMain.UseChargeJump;
-        if (!ModMain.IsFloatyPhysicsEnabled) _characterController._acceleration = ModMain.GroundAccel;
-        _characterController._airSpeed = ModMain.AirSpeed;
-        _characterController._airAcceleration = ModMain.AirAccel;
-        _characterController._minJumpSpeed = ModMain.MinJumpPower;
-        _characterController._maxJumpSpeed = ModMain.MaxJumpPower;
-        _jetpackModel._maxTranslationalThrust = ModMain.JetpackAccel;
-        _jetpackModel._boostThrust = ModMain.JetpackBoostAccel;
-        _jetpackModel._boostSeconds = ModMain.JetpackBoostTime;
-        PlayerResources._maxFuel = ModMain.MaxJetpackFuel;
+        _characterController._useChargeJump = ModMain.Instance.UseChargeJump;
+        if (!ModMain.Instance.IsFloatyPhysicsEnabled) _characterController._acceleration = ModMain.Instance.GroundAccel;
+        _characterController._airSpeed = ModMain.Instance.AirSpeed;
+        _characterController._airAcceleration = ModMain.Instance.AirAccel;
+        _characterController._minJumpSpeed = ModMain.Instance.MinJumpPower;
+        _characterController._maxJumpSpeed = ModMain.Instance.MaxJumpPower;
+        _jetpackModel._maxTranslationalThrust = ModMain.Instance.JetpackAccel;
+        _jetpackModel._boostThrust = ModMain.Instance.JetpackBoostAccel;
+        _jetpackModel._boostSeconds = ModMain.Instance.JetpackBoostTime;
+        PlayerResources._maxFuel = ModMain.Instance.MaxJetpackFuel;
     }
 }

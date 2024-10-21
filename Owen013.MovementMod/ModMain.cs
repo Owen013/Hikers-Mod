@@ -13,77 +13,77 @@ public class ModMain : ModBehaviour
 {
     public static ModMain Instance { get; private set; }
 
-    public static ISmolHatchling SmolHatchlingAPI { get; private set; }
+    public ISmolHatchling SmolHatchlingAPI { get; private set; }
 
-    public static ICameraShaker CameraShakerAPI { get; private set; }
+    public ICameraShaker CameraShakerAPI { get; private set; }
     
-    public static IImmersion ImmersionAPI { get; private set; }
+    public IImmersion ImmersionAPI { get; private set; }
 
-    public static bool UseChargeJump { get; private set; }
+    public bool UseChargeJump { get; private set; }
 
-    public static bool IsSprintingEnabled { get; private set; }
+    public bool IsSprintingEnabled { get; private set; }
 
-    public static string SprintButton { get; private set; }
+    public string SprintButton { get; private set; }
 
-    public static bool IsMidairTurningEnabled { get; private set; }
+    public bool IsMidairTurningEnabled { get; private set; }
 
-    public static bool IsEmergencyBoostEnabled { get; private set; }
+    public bool IsEmergencyBoostEnabled { get; private set; }
 
-    public static bool IsFloatyPhysicsEnabled { get; private set; }
+    public bool IsFloatyPhysicsEnabled { get; private set; }
 
-    public static bool IsWallJumpingEnabled { get; private set; }
+    public bool IsWallJumpingEnabled { get; private set; }
 
-    public static float RunSpeed { get; private set; }
+    public float RunSpeed { get; private set; }
 
-    public static float StrafeSpeed { get; private set; }
+    public float StrafeSpeed { get; private set; }
 
-    public static float WalkSpeed { get; private set; }
+    public float WalkSpeed { get; private set; }
 
-    public static float DreamLanternSpeed { get; private set; }
+    public float DreamLanternSpeed { get; private set; }
 
-    public static float GroundAccel { get; private set; }
+    public float GroundAccel { get; private set; }
 
-    public static float AirSpeed { get; private set; }
+    public float AirSpeed { get; private set; }
 
-    public static float AirAccel { get; private set; }
+    public float AirAccel { get; private set; }
 
-    public static float MinJumpPower { get; private set; }
+    public float MinJumpPower { get; private set; }
 
-    public static float MaxJumpPower { get; private set; }
+    public float MaxJumpPower { get; private set; }
 
-    public static float JetpackAccel { get; private set; }
+    public float JetpackAccel { get; private set; }
 
-    public static float JetpackBoostAccel { get; private set; }
+    public float JetpackBoostAccel { get; private set; }
 
-    public static float JetpackBoostTime { get; private set; }
+    public float JetpackBoostTime { get; private set; }
 
-    public static float MaxJetpackFuel { get; private set; }
+    public float MaxJetpackFuel { get; private set; }
 
-    public static float SprintMultiplier { get; private set; }
+    public float SprintMultiplier { get; private set; }
 
-    public static bool ShouldSprintOnLanding { get; private set; }
+    public bool ShouldSprintOnLanding { get; private set; }
 
-    public static bool IsSprintEffectEnabled { get; private set; }
+    public bool IsSprintEffectEnabled { get; private set; }
 
-    public static float EmergencyBoostPower { get; private set; }
+    public float EmergencyBoostPower { get; private set; }
 
-    public static float EmergencyBoostCost { get; private set; }
+    public float EmergencyBoostCost { get; private set; }
 
-    public static float EmergencyBoostVolume { get; private set; }
+    public float EmergencyBoostVolume { get; private set; }
 
-    public static float EmergencyBoostInputTime { get; private set; }
+    public float EmergencyBoostInputTime { get; private set; }
 
-    public static float EmergencyBoostCameraShakeAmount { get; private set; }
+    public float EmergencyBoostCameraShakeAmount { get; private set; }
 
-    public static float FloatyPhysicsMinAccel { get; private set; }
+    public float FloatyPhysicsMinAccel { get; private set; }
 
-    public static float FloatyPhysicsMaxGravity { get; private set; }
+    public float FloatyPhysicsMaxGravity { get; private set; }
 
-    public static float FloatyPhysicsMinGravity { get; private set; }
+    public float FloatyPhysicsMinGravity { get; private set; }
 
     public delegate void ConfigureEvent();
 
-    public static event ConfigureEvent OnConfigure;
+    public event ConfigureEvent OnConfigure;
 
     public override object GetApi()
     {
@@ -191,7 +191,7 @@ public class ModMain : ModBehaviour
     private static bool UpdateAirControl(PlayerCharacterController __instance)
     {
         // if feature is disabled then just do the vanilla method
-        if (!ModMain.IsMidairTurningEnabled) return true;
+        if (!ModMain.Instance.IsMidairTurningEnabled) return true;
 
         if (__instance._lastGroundBody != null)
         {
@@ -225,9 +225,9 @@ public class ModMain : ModBehaviour
         {
             __instance._footstepAudio.pitch = Random.Range(0.9f, 1.1f);
             float audioVolume = 1.4f * Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude / 6f;
-            if (ModMain.SmolHatchlingAPI != null)
+            if (ModMain.Instance.SmolHatchlingAPI != null)
             {
-                audioVolume /= ModMain.SmolHatchlingAPI.GetPlayerScale();
+                audioVolume /= ModMain.Instance.SmolHatchlingAPI.GetPlayerScale();
             }
             __instance._footstepAudio.PlayOneShot(audioType, audioVolume);
         }
@@ -241,8 +241,8 @@ public class ModMain : ModBehaviour
     {
         float lerpPosition = 1f - __instance._lanternController.GetFocus();
         lerpPosition *= lerpPosition;
-        maxSpeedX = Mathf.Lerp(ModMain.DreamLanternSpeed, maxSpeedX, lerpPosition);
-        maxSpeedZ = Mathf.Lerp(ModMain.DreamLanternSpeed, maxSpeedZ, lerpPosition);
+        maxSpeedX = Mathf.Lerp(ModMain.Instance.DreamLanternSpeed, maxSpeedX, lerpPosition);
+        maxSpeedZ = Mathf.Lerp(ModMain.Instance.DreamLanternSpeed, maxSpeedZ, lerpPosition);
         return false;
     }
 }

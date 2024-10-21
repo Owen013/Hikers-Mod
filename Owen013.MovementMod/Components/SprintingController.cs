@@ -21,30 +21,30 @@ public class SprintingController : MonoBehaviour
 
         _characterController.OnBecomeGrounded += () =>
         {
-            if (ModMain.ShouldSprintOnLanding)
+            if (ModMain.Instance.ShouldSprintOnLanding)
             {
                 UpdateSprinting();
             }
         };
 
-        ModMain.OnConfigure += ApplyChanges;
+        ModMain.Instance.OnConfigure += ApplyChanges;
         ApplyChanges();
     }
 
     private void OnDestroy()
     {
-        ModMain.OnConfigure -= ApplyChanges;
+        ModMain.Instance.OnConfigure -= ApplyChanges;
     }
 
     private void ApplyChanges()
     {
         // Change built-in character attributes
-        _characterController._runSpeed = ModMain.RunSpeed;
-        _characterController._strafeSpeed = ModMain.StrafeSpeed;
-        _characterController._walkSpeed = ModMain.WalkSpeed;
-        _characterController._airSpeed = ModMain.AirSpeed;
-        _characterController._airAcceleration = ModMain.AirAccel;
-        _sprintButton = ModMain.SprintButton == "Up Thrust" ? InputLibrary.thrustUp : InputLibrary.thrustDown;
+        _characterController._runSpeed = ModMain.Instance.RunSpeed;
+        _characterController._strafeSpeed = ModMain.Instance.StrafeSpeed;
+        _characterController._walkSpeed = ModMain.Instance.WalkSpeed;
+        _characterController._airSpeed = ModMain.Instance.AirSpeed;
+        _characterController._airAcceleration = ModMain.Instance.AirAccel;
+        _sprintButton = ModMain.Instance.SprintButton == "Up Thrust" ? InputLibrary.thrustUp : InputLibrary.thrustDown;
 
         UpdateSprinting();
     }
@@ -60,13 +60,13 @@ public class SprintingController : MonoBehaviour
 
         if (IsSprinting)
         {
-            _characterController._runSpeed = ModMain.RunSpeed * ModMain.SprintMultiplier;
-            _characterController._strafeSpeed = ModMain.StrafeSpeed * ModMain.SprintMultiplier;
+            _characterController._runSpeed = ModMain.Instance.RunSpeed * ModMain.Instance.SprintMultiplier;
+            _characterController._strafeSpeed = ModMain.Instance.StrafeSpeed * ModMain.Instance.SprintMultiplier;
         }
         else
         {
-            _characterController._runSpeed = ModMain.RunSpeed;
-            _characterController._strafeSpeed = ModMain.StrafeSpeed;
+            _characterController._runSpeed = ModMain.Instance.RunSpeed;
+            _characterController._strafeSpeed = ModMain.Instance.StrafeSpeed;
         }
     }
 
@@ -79,7 +79,7 @@ public class SprintingController : MonoBehaviour
     {
         bool isOnValidGround = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce();
 
-        if (ModMain.IsSprintingEnabled && isOnValidGround && OWInput.IsPressed(_sprintButton) && (IsSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
+        if (ModMain.Instance.IsSprintingEnabled && isOnValidGround && OWInput.IsPressed(_sprintButton) && (IsSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
         {
             IsSprinting = true;
         }
@@ -145,7 +145,7 @@ public class SprintingController : MonoBehaviour
     {
         if (moveType == GhostEnums.MoveType.CHASE && Instance.IsSprinting == true)
         {
-            __result *= ModMain.SprintMultiplier;
+            __result *= ModMain.Instance.SprintMultiplier;
         }
     }
 
@@ -156,7 +156,7 @@ public class SprintingController : MonoBehaviour
     {
         if (moveType == GhostEnums.MoveType.CHASE && Instance.IsSprinting == true)
         {
-            __result *= ModMain.SprintMultiplier;
+            __result *= ModMain.Instance.SprintMultiplier;
         }
     }
 }
