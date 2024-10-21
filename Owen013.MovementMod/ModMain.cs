@@ -81,7 +81,7 @@ public class ModMain : ModBehaviour
 
     public float FloatyPhysicsMinGravity { get; private set; }
 
-    public static float MaxWallJumps { get; private set; }
+    public int MaxWallJumps { get; private set; }
 
     public delegate void ConfigureEvent();
 
@@ -133,7 +133,7 @@ public class ModMain : ModBehaviour
         FloatyPhysicsMaxGravity = config.GetSettingsValue<float>("Floaty Physics Minimum Gravity");
         FloatyPhysicsMinGravity = config.GetSettingsValue<float>("Minimum Gravity");
 
-        MaxWallJumps = config.GetSettingsValue<float>("Maximum Number of Wall Jumps");
+        MaxWallJumps = config.GetSettingsValue<int>("Maximum Number of Wall Jumps");
 
         if (SmolHatchlingAPI != null && SmolHatchlingAPI.UseScaledPlayerAttributes())
         {

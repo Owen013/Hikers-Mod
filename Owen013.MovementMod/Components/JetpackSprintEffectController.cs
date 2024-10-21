@@ -32,8 +32,8 @@ public class JetpackSprintEffectController : MonoBehaviour
         Vector2 flameVector = _thrusterVector;
 
         // clamp the vector so it doesn't become too big
-        flameVector.x = Mathf.Clamp(flameVector.x, -20, 20);
-        flameVector.y = Mathf.Clamp(flameVector.y, -20, 20);
+        flameVector.x = Mathf.Clamp(flameVector.x, -20f, 20f);
+        flameVector.y = Mathf.Clamp(flameVector.y, -20f, 20f);
 
         // update thruster sound, as long as it's not being set by the actual audio controller
         if (_jetpackAudio.isActiveAndEnabled == false)

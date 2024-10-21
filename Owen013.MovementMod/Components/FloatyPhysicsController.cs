@@ -20,7 +20,7 @@ public class FloatyPhysicsController : MonoBehaviour
                 float currentGravity = _characterController.GetNormalAccelerationScalar() / 12f;
                 float maxGravity = ModMain.Instance.FloatyPhysicsMaxGravity;
                 float minGravity = ModMain.Instance.FloatyPhysicsMinGravity;
-                _characterController._acceleration = Mathf.Lerp(ModMain.Instance.FloatyPhysicsMinAccel, ModMain.Instance.GroundAccel, Mathf.Clamp((currentGravity - minGravity) / (maxGravity - minGravity), 0f, 1f));
+                _characterController._acceleration = Mathf.Lerp(ModMain.Instance.FloatyPhysicsMinAccel, ModMain.Instance.GroundAccel, Mathf.Clamp01((currentGravity - minGravity) / (maxGravity - minGravity)));
             }
             else
             {

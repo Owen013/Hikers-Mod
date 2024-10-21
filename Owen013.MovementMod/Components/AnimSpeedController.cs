@@ -18,7 +18,7 @@ public class AnimSpeedController : MonoBehaviour
 
     private void LateUpdate()
     {
-        float groundSpeed = _characterController.GetRelativeGroundVelocity().magnitude * ModMain.Instance.SmolHatchlingAPI?.GetPlayerAnimSpeed() ?? 1;
+        float groundSpeed = _characterController.GetRelativeGroundVelocity().magnitude * ModMain.Instance.SmolHatchlingAPI?.GetPlayerAnimSpeed() ?? 1f;
         float animSpeedMultiplier = Mathf.Sqrt(groundSpeed / 6f);
         float floatyPhysicsMultiplier = Mathf.Sqrt(_characterController._acceleration / ModMain.Instance.GroundAccel);
         float underwaterMultiplier = ModMain.Instance.ImmersionAPI != null ? ModMain.Instance.ImmersionAPI.GetAnimSpeed() : 1f;

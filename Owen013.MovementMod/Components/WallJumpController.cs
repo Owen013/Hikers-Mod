@@ -15,7 +15,7 @@ public class WallJumpController : MonoBehaviour
 
     private PlayerImpactAudio _impactAudio;
 
-    private float _wallJumpsLeft;
+    private int _wallJumpsLeft;
 
     private float _lastWallJumpRefill;
 
@@ -28,7 +28,7 @@ public class WallJumpController : MonoBehaviour
 
         _characterController.OnBecomeGrounded += () =>
         {
-            _wallJumpsLeft = ModMain.MaxWallJumps;
+            _wallJumpsLeft = ModMain.Instance.MaxWallJumps;
         };
     }
 
@@ -49,7 +49,7 @@ public class WallJumpController : MonoBehaviour
             else
             {
                 _characterController._owRigidbody.SetVelocity(pointVelocity);
-                _characterController._owRigidbody.AddLocalVelocityChange(Vector3.up * ModMain.Instance.MaxJumpPower * (_wallJumpsLeft / ModMain.MaxWallJumps));
+                _characterController._owRigidbody.AddLocalVelocityChange(Vector3.up * ModMain.Instance.MaxJumpPower * (_wallJumpsLeft / (float)ModMain.Instance.MaxWallJumps));
                 _impactAudio._impactAudioSrc.PlayOneShot(AudioType.ImpactLowSpeed);
                 _wallJumpsLeft--;
                 LastWallJumpTime = Time.time;
@@ -58,7 +58,7 @@ public class WallJumpController : MonoBehaviour
             }
         }
 
-        if (Time.time - _lastWallJumpRefill > 5 && _wallJumpsLeft < ModMain.MaxWallJumps)
+        if (Time.time - _lastWallJumpRefill > 5f && _wallJumpsLeft < ModMain.Instance.MaxWallJumps)
         {
             _wallJumpsLeft++;
             _lastWallJumpRefill = Time.time;
@@ -66,7 +66,7 @@ public class WallJumpController : MonoBehaviour
 
         // Make player play fast freefall animation after each wall jump
         float freeFallSpeed = _animController._animator.GetFloat($"FreefallSpeed");
-        float climbFraction = 1 - (Time.time - LastWallJumpTime);
+        float climbFraction = 1f - (Time.time - LastWallJumpTime);
         _animController._animator.SetFloat($"FreefallSpeed", Mathf.Max(freeFallSpeed, climbFraction));
     }
 }
