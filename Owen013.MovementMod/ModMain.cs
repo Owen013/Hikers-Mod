@@ -153,11 +153,6 @@ public class ModMain : ModBehaviour
         OnConfigure?.Invoke();
     }
 
-    public void WriteLine(string text, MessageType type = MessageType.Message)
-    {
-        Instance.ModHelper.Console.WriteLine(text, type);
-    }
-
     private void Awake()
     {
         // Static reference to HikersMod so it can be used in patches.
@@ -173,7 +168,7 @@ public class ModMain : ModBehaviour
         ImmersionAPI = ModHelper.Interaction.TryGetModApi<IImmersion>("Owen_013.FirstPersonPresence");
 
         // Ready!
-        WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
+        ModHelper.Console.WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
     }
 
     // Add components to character

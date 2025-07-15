@@ -44,7 +44,7 @@ public class WallJumpController : MonoBehaviour
 
             if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20f)
             {
-                ModMain.Instance.WriteLine($"[{nameof(WallJumpController)}] Can't Wall-Jump; going too fast", MessageType.Debug);
+                ModMain.Instance.ModHelper.Console.WriteLine($"[{nameof(WallJumpController)}] Can't Wall-Jump; going too fast", MessageType.Debug);
             }
             else
             {
@@ -54,7 +54,7 @@ public class WallJumpController : MonoBehaviour
                 _wallJumpsLeft--;
                 LastWallJumpTime = Time.time;
                 _lastWallJumpRefill = Time.time;
-                ModMain.Instance.WriteLine($"[{nameof(WallJumpController)}] Wall-Jumped", MessageType.Debug);
+                ModMain.Instance.ModHelper.Console.WriteLine($"[{nameof(WallJumpController)}] Wall-Jumped", MessageType.Debug);
             }
         }
 

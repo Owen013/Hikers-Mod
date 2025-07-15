@@ -111,7 +111,7 @@ public class EmergencyBoostController : MonoBehaviour
             ModMain.Instance.CameraShakerAPI?.ExplosionShake(strength: boostPower * ModMain.Instance.EmergencyBoostCameraShakeAmount);
         }
 
-        ModMain.Instance.WriteLine($"[{nameof(EmergencyBoostController)}] Super-Boosted", MessageType.Debug);
+        ModMain.Instance.ModHelper.Console.WriteLine($"[{nameof(EmergencyBoostController)}] Super-Boosted", MessageType.Debug);
     }
 
     private void EndEmergencyBoost()
