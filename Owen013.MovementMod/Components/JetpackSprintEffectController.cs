@@ -14,6 +14,29 @@ public class JetpackSprintEffectController : MonoBehaviour
 
     private Vector2 _thrusterVector;
 
+    private static void SetThrusterScale(ThrusterFlameController thruster, float thrusterScale)
+    {
+        if (thruster._underwater) thrusterScale = 0f;
+
+        // reset scale spring if it's rly small so it doesn't bounce back up
+        if (thruster._currentScale <= 0.001f)
+        {
+            thruster._currentScale = 0f;
+            thruster._scaleSpring.ResetVelocity();
+        }
+
+        thruster._currentScale = thruster._scaleSpring.Update(thruster._currentScale, thrusterScale, Time.deltaTime);
+        thruster.transform.localScale = Vector3.one * thruster._currentScale;
+        thruster._light.range = thruster._baseLightRadius * thruster._currentScale;
+        thruster._thrusterRenderer.enabled = thruster._currentScale > 0f;
+        thruster._light.enabled = thruster._currentScale > 0f;
+    }
+
+    private void OnConfigure()
+    {
+        base.enabled = ModMain.Instance.IsSprintEffectEnabled;
+    }
+
     private void Awake()
     {
         _jetpackAudio = GetComponentInChildren<JetpackThrusterAudio>();
@@ -21,6 +44,9 @@ public class JetpackSprintEffectController : MonoBehaviour
         _playerSuit = GetComponentInChildren<PlayerAnimController>().transform.Find("Traveller_Mesh_v01:Traveller_Geo").gameObject;
         _playerJetpack = _playerSuit.transform.Find("Traveller_Mesh_v01:Props_HEA_Jetpack").gameObject;
         _thrusterVector = Vector2.zero;
+
+        ModMain.Instance.OnConfigure += OnConfigure;
+        OnConfigure();
     }
 
     private void LateUpdate()
@@ -28,7 +54,7 @@ public class JetpackSprintEffectController : MonoBehaviour
         bool jetpackVisible = _playerSuit.activeSelf && _playerJetpack.activeSelf;
 
         // get thruster vector IF the player is sprinting and the jetpack is visible. Otherwise, move towards zero
-        _thrusterVector = Vector2.MoveTowards(_thrusterVector, SprintingController.Instance.IsSprinting && jetpackVisible && ModMain.Instance.IsSprintEffectEnabled ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
+        _thrusterVector = Vector2.MoveTowards(_thrusterVector, SprintingController.Instance.IsSprinting && jetpackVisible ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
         Vector2 flameVector = _thrusterVector;
 
         // clamp the vector so it doesn't become too big
@@ -76,21 +102,13 @@ public class JetpackSprintEffectController : MonoBehaviour
         }
     }
 
-    private static void SetThrusterScale(ThrusterFlameController thruster, float thrusterScale)
+    private void OnDisable()
     {
-        if (thruster._underwater) thrusterScale = 0f;
+        _thrusterVector = Vector2.zero;
+    }
 
-        // reset scale spring if it's rly small so it doesn't bounce back up
-        if (thruster._currentScale <= 0.001f)
-        {
-            thruster._currentScale = 0f;
-            thruster._scaleSpring.ResetVelocity();
-        }
-
-        thruster._currentScale = thruster._scaleSpring.Update(thruster._currentScale, thrusterScale, Time.deltaTime);
-        thruster.transform.localScale = Vector3.one * thruster._currentScale;
-        thruster._light.range = thruster._baseLightRadius * thruster._currentScale;
-        thruster._thrusterRenderer.enabled = thruster._currentScale > 0f;
-        thruster._light.enabled = thruster._currentScale > 0f;
+    private void OnDestroy()
+    {
+        ModMain.Instance.OnConfigure -= OnConfigure;
     }
 }

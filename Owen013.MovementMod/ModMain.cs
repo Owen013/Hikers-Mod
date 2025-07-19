@@ -176,7 +176,7 @@ public class ModMain : ModBehaviour
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
     private static void OnCharacterControllerStart(PlayerCharacterController __instance)
     {
-        __instance.gameObject.AddComponent<CharacterAttributeController>();
+        __instance.gameObject.AddComponent<PlayerStatsController>();
         __instance.gameObject.AddComponent<SprintingController>();
         __instance.gameObject.AddComponent<EmergencyBoostController>();
         __instance.gameObject.AddComponent<FloatyPhysicsController>();

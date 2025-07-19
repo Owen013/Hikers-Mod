@@ -19,6 +19,11 @@ public class WallJumpController : MonoBehaviour
 
     private float _lastWallJumpRefill;
 
+    private void OnConfigure()
+    {
+        base.enabled = ModMain.Instance.IsWallJumpingEnabled;
+    }
+
     private void Awake()
     {
         Instance = this;
@@ -30,12 +35,13 @@ public class WallJumpController : MonoBehaviour
         {
             _wallJumpsLeft = ModMain.Instance.MaxWallJumps;
         };
+
+        ModMain.Instance.OnConfigure += OnConfigure;
+        OnConfigure();
     }
 
     private void Update()
     {
-        if (!ModMain.Instance.IsWallJumpingEnabled) return;
-
         _characterController.UpdatePushable();
         bool canWallJump = _wallJumpsLeft > 0 && _characterController._isPushable && !PlayerState.InZeroG() && !_characterController._isGrounded;
         if (canWallJump && OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && !OWInput.IsPressed(InputLibrary.thrustUp))
@@ -68,5 +74,10 @@ public class WallJumpController : MonoBehaviour
         float freeFallSpeed = _animController._animator.GetFloat($"FreefallSpeed");
         float climbFraction = 1f - (Time.time - LastWallJumpTime);
         _animController._animator.SetFloat($"FreefallSpeed", Mathf.Max(freeFallSpeed, climbFraction));
+    }
+
+    private void OnDestroy()
+    {
+        ModMain.Instance.OnConfigure -= OnConfigure;
     }
 }

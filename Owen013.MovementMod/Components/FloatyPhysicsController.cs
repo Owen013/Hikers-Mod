@@ -6,26 +6,41 @@ public class FloatyPhysicsController : MonoBehaviour
 {
     private PlayerCharacterController _characterController;
 
+    private void OnConfigure()
+    {
+        base.enabled = ModMain.Instance.IsFloatyPhysicsEnabled;
+    }
+
     private void Awake()
     {
         _characterController = GetComponent<PlayerCharacterController>();
+
+        ModMain.Instance.OnConfigure += OnConfigure;
+        OnConfigure();
     }
 
     private void Update()
     {
-        if (ModMain.Instance.IsFloatyPhysicsEnabled)
+        if (_characterController.IsGrounded() && !_characterController.IsSlidingOnIce())
         {
-            if (_characterController.IsGrounded() && !_characterController.IsSlidingOnIce())
-            {
-                float currentGravity = _characterController.GetNormalAccelerationScalar() / 12f;
-                float maxGravity = ModMain.Instance.FloatyPhysicsMaxGravity;
-                float minGravity = ModMain.Instance.FloatyPhysicsMinGravity;
-                _characterController._acceleration = Mathf.Lerp(ModMain.Instance.FloatyPhysicsMinAccel, ModMain.Instance.GroundAccel, Mathf.Clamp01((currentGravity - minGravity) / (maxGravity - minGravity)));
-            }
-            else
-            {
-                _characterController._acceleration = ModMain.Instance.GroundAccel;
-            }
+            float currentGravity = _characterController.GetNormalAccelerationScalar() / 12f;
+            float maxGravity = ModMain.Instance.FloatyPhysicsMaxGravity;
+            float minGravity = ModMain.Instance.FloatyPhysicsMinGravity;
+            _characterController._acceleration = Mathf.Lerp(ModMain.Instance.FloatyPhysicsMinAccel, ModMain.Instance.GroundAccel, Mathf.Clamp01((currentGravity - minGravity) / (maxGravity - minGravity)));
         }
+        else
+        {
+            _characterController._acceleration = ModMain.Instance.GroundAccel;
+        }
+    }
+
+    private void OnDisable()
+    {
+        _characterController._acceleration = ModMain.Instance.GroundAccel;
+    }
+
+    private void OnDestroy()
+    {
+        ModMain.Instance.OnConfigure -= OnConfigure;
     }
 }

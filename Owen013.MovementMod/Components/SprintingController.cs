@@ -14,6 +14,43 @@ public class SprintingController : MonoBehaviour
 
     private IInputCommands _sprintButton;
 
+    private void StartSprinting()
+    {
+        IsSprinting = true;
+        _characterController._runSpeed = ModMain.Instance.RunSpeed * ModMain.Instance.SprintMultiplier;
+        _characterController._strafeSpeed = ModMain.Instance.StrafeSpeed * ModMain.Instance.SprintMultiplier;
+    }
+
+    private void StopSprinting()
+    {
+        IsSprinting = false;
+        _characterController._runSpeed = ModMain.Instance.RunSpeed;
+        _characterController._strafeSpeed = ModMain.Instance.StrafeSpeed;
+    }
+
+    private void UpdateSprintingState()
+    {
+        bool isOnValidGround = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce();
+        if (base.enabled && isOnValidGround && OWInput.IsPressed(_sprintButton) && (IsSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
+        {
+            StartSprinting();
+        }
+        else
+        {
+            StopSprinting();
+        }
+    }
+
+    private void OnConfigure()
+    {
+        base.enabled = ModMain.Instance.IsSprintingEnabled;
+
+        // Change built-in character attributes
+        _sprintButton = ModMain.Instance.SprintButton == "Up Thrust" ? InputLibrary.thrustUp : InputLibrary.thrustDown;
+
+        UpdateSprintingState();
+    }
+
     private void Awake()
     {
         Instance = this;
@@ -23,70 +60,32 @@ public class SprintingController : MonoBehaviour
         {
             if (ModMain.Instance.ShouldSprintOnLanding)
             {
-                UpdateSprinting();
+                UpdateSprintingState();
             }
         };
 
-        ModMain.Instance.OnConfigure += ApplyChanges;
-        ApplyChanges();
-    }
-
-    private void OnDestroy()
-    {
-        ModMain.Instance.OnConfigure -= ApplyChanges;
-    }
-
-    private void ApplyChanges()
-    {
-        // Change built-in character attributes
-        _characterController._runSpeed = ModMain.Instance.RunSpeed;
-        _characterController._strafeSpeed = ModMain.Instance.StrafeSpeed;
-        _characterController._walkSpeed = ModMain.Instance.WalkSpeed;
-        _characterController._airSpeed = ModMain.Instance.AirSpeed;
-        _characterController._airAcceleration = ModMain.Instance.AirAccel;
-        _sprintButton = ModMain.Instance.SprintButton == "Up Thrust" ? InputLibrary.thrustUp : InputLibrary.thrustDown;
-
-        UpdateSprinting();
+        ModMain.Instance.OnConfigure += OnConfigure;
+        OnConfigure();
     }
 
     private void Update()
     {
-        bool hasVerticalThrustChanged = OWInput.IsNewlyPressed(InputLibrary.thrustUp) || OWInput.IsNewlyReleased(InputLibrary.thrustUp) || OWInput.IsNewlyPressed(InputLibrary.thrustDown) || OWInput.IsNewlyReleased(InputLibrary.thrustDown);
-
+        // check both thrust buttons so that the player can thrust out of a sprint
+        bool hasVerticalThrustChanged = OWInput.IsNewlyPressed(_sprintButton) || OWInput.IsNewlyReleased(_sprintButton) || OWInput.IsNewlyPressed(InputLibrary.thrustDown) || OWInput.IsNewlyReleased(InputLibrary.thrustDown);
         if (hasVerticalThrustChanged || (OWInput.IsNewlyPressed(InputLibrary.boost) && !_characterController.IsGrounded()))
         {
-            UpdateSprinting();
-        }
-
-        if (IsSprinting)
-        {
-            _characterController._runSpeed = ModMain.Instance.RunSpeed * ModMain.Instance.SprintMultiplier;
-            _characterController._strafeSpeed = ModMain.Instance.StrafeSpeed * ModMain.Instance.SprintMultiplier;
-        }
-        else
-        {
-            _characterController._runSpeed = ModMain.Instance.RunSpeed;
-            _characterController._strafeSpeed = ModMain.Instance.StrafeSpeed;
+            UpdateSprintingState();
         }
     }
 
     private void OnDisable()
     {
-        IsSprinting = false;
+        StopSprinting();
     }
 
-    private void UpdateSprinting()
+    private void OnDestroy()
     {
-        bool isOnValidGround = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce();
-
-        if (ModMain.Instance.IsSprintingEnabled && isOnValidGround && OWInput.IsPressed(_sprintButton) && (IsSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
-        {
-            IsSprinting = true;
-        }
-        else
-        {
-            IsSprinting = false;
-        }
+        ModMain.Instance.OnConfigure -= OnConfigure;
     }
 
     // allows the player to jump while sprinting
