@@ -8,14 +8,14 @@ public class FloatyPhysicsController : MonoBehaviour
 
     private void OnConfigure()
     {
-        base.enabled = ModMain.Instance.IsFloatyPhysicsEnabled;
+        base.enabled = Config.IsFloatyPhysicsEnabled;
     }
 
     private void Awake()
     {
         _characterController = GetComponent<PlayerCharacterController>();
 
-        ModMain.Instance.OnConfigure += OnConfigure;
+        Config.OnConfigure += OnConfigure;
         OnConfigure();
     }
 
@@ -24,23 +24,23 @@ public class FloatyPhysicsController : MonoBehaviour
         if (_characterController.IsGrounded() && !_characterController.IsSlidingOnIce())
         {
             float currentGravity = _characterController.GetNormalAccelerationScalar() / 12f;
-            float maxGravity = ModMain.Instance.FloatyPhysicsMaxGravity;
-            float minGravity = ModMain.Instance.FloatyPhysicsMinGravity;
-            _characterController._acceleration = Mathf.Lerp(ModMain.Instance.FloatyPhysicsMinAccel, ModMain.Instance.GroundAccel, Mathf.Clamp01((currentGravity - minGravity) / (maxGravity - minGravity)));
+            float maxGravity = Config.FloatyPhysicsMaxGravity;
+            float minGravity = Config.FloatyPhysicsMinGravity;
+            _characterController._acceleration = Mathf.Lerp(Config.FloatyPhysicsMinAccel, Config.GroundAccel, Mathf.Clamp01((currentGravity - minGravity) / (maxGravity - minGravity)));
         }
         else
         {
-            _characterController._acceleration = ModMain.Instance.GroundAccel;
+            _characterController._acceleration = Config.GroundAccel;
         }
     }
 
     private void OnDisable()
     {
-        _characterController._acceleration = ModMain.Instance.GroundAccel;
+        _characterController._acceleration = Config.GroundAccel;
     }
 
     private void OnDestroy()
     {
-        ModMain.Instance.OnConfigure -= OnConfigure;
+        Config.OnConfigure -= OnConfigure;
     }
 }

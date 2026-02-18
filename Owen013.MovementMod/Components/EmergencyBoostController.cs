@@ -28,8 +28,8 @@ public class EmergencyBoostController : MonoBehaviour
         _isEmergencyBoosting = true;
         _lastEmergencyBoostTime = Time.time;
         _jetpackModel._boostChargeFraction = 0f;
-        _jetpackController._resources._currentFuel = Mathf.Max(0f, _jetpackController._resources.GetFuel() - ModMain.Instance.EmergencyBoostCost);
-        float boostPower = ModMain.Instance.EmergencyBoostPower;
+        _jetpackController._resources._currentFuel = Mathf.Max(0f, _jetpackController._resources.GetFuel() - Config.EmergencyBoostCost);
+        float boostPower = Config.EmergencyBoostPower;
 
         // set player velocity
         Vector3 pointVelocity = _characterController._transform.InverseTransformDirection(_characterController._lastGroundBody.GetPointVelocity(_characterController._transform.position));
@@ -38,14 +38,14 @@ public class EmergencyBoostController : MonoBehaviour
 
         // sound and visual effects
         _emergencyBoostAudio.pitch = Random.Range(1.0f, 1.4f);
-        _emergencyBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, ModMain.Instance.EmergencyBoostVolume * 0.75f);
+        _emergencyBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, Config.EmergencyBoostVolume * 0.75f);
         _helmetAnimator.OnInstantDamage(boostPower, InstantDamageType.Impact);
         NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "EMERGENCY BOOST ACTIVATED", 5f), false);
 
         // if camerashaker is installed and camera shake is enabled, do a camera shake
-        if (ModMain.Instance.EmergencyBoostCameraShakeAmount > 0f)
+        if (Config.EmergencyBoostCameraShakeAmount > 0f)
         {
-            ModMain.Instance.CameraShakerAPI?.ExplosionShake(strength: boostPower * ModMain.Instance.EmergencyBoostCameraShakeAmount);
+            ModMain.CameraShakerAPI?.ExplosionShake(strength: boostPower * Config.EmergencyBoostCameraShakeAmount);
         }
 
         ModMain.Instance.ModHelper.Console.WriteLine($"[{nameof(EmergencyBoostController)}] Super-Boosted", MessageType.Debug);
@@ -59,7 +59,7 @@ public class EmergencyBoostController : MonoBehaviour
 
     private void OnConfigure()
     {
-        base.enabled = ModMain.Instance.IsEmergencyBoostEnabled;
+        base.enabled = Config.IsEmergencyBoostEnabled;
     }
 
     private void Awake()
@@ -87,7 +87,7 @@ public class EmergencyBoostController : MonoBehaviour
 
         _characterController.OnBecomeGrounded += EndEmergencyBoost;
 
-        ModMain.Instance.OnConfigure += OnConfigure;
+        Config.OnConfigure += OnConfigure;
         OnConfigure();
     }
 
@@ -99,7 +99,7 @@ public class EmergencyBoostController : MonoBehaviour
         {
             EndEmergencyBoost();
         }
-        else if (isInputting && Time.time - _lastEmergencyBoostInputTime < ModMain.Instance.EmergencyBoostInputTime && Time.time - WallJumpController.Instance.LastWallJumpTime > 0.5f && _jetpackController._resources.GetFuel() > 0f && !_isEmergencyBoosting)
+        else if (isInputting && Time.time - _lastEmergencyBoostInputTime < Config.EmergencyBoostInputTime && Time.time - WallJumpController.Instance.LastWallJumpTime > 0.5f && _jetpackController._resources.GetFuel() > 0f && !_isEmergencyBoosting)
         {
             ApplyEmergencyBoost();
         }
@@ -132,6 +132,6 @@ public class EmergencyBoostController : MonoBehaviour
     {
         Destroy(_emergencyBoostAudio);
         _characterController.OnBecomeGrounded -= EndEmergencyBoost;
-        ModMain.Instance.OnConfigure -= OnConfigure;
+        Config.OnConfigure -= OnConfigure;
     }
 }

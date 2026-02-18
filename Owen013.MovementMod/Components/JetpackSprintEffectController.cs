@@ -34,7 +34,7 @@ public class JetpackSprintEffectController : MonoBehaviour
 
     private void OnConfigure()
     {
-        base.enabled = ModMain.Instance.IsSprintEffectEnabled;
+        base.enabled = Config.IsSprintEffectEnabled;
     }
 
     private void Awake()
@@ -45,7 +45,7 @@ public class JetpackSprintEffectController : MonoBehaviour
         _playerJetpack = _playerSuit.transform.Find("Traveller_Mesh_v01:Props_HEA_Jetpack").gameObject;
         _thrusterVector = Vector2.zero;
 
-        ModMain.Instance.OnConfigure += OnConfigure;
+        Config.OnConfigure += OnConfigure;
         OnConfigure();
     }
 
@@ -109,6 +109,6 @@ public class JetpackSprintEffectController : MonoBehaviour
 
     private void OnDestroy()
     {
-        ModMain.Instance.OnConfigure -= OnConfigure;
+        Config.OnConfigure -= OnConfigure;
     }
 }

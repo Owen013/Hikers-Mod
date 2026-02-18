@@ -21,7 +21,7 @@ public class WallJumpController : MonoBehaviour
 
     private void OnConfigure()
     {
-        base.enabled = ModMain.Instance.IsWallJumpingEnabled;
+        base.enabled = Config.IsWallJumpingEnabled;
     }
 
     private void Awake()
@@ -33,10 +33,10 @@ public class WallJumpController : MonoBehaviour
 
         _characterController.OnBecomeGrounded += () =>
         {
-            _wallJumpsLeft = ModMain.Instance.MaxWallJumps;
+            _wallJumpsLeft = Config.MaxWallJumps;
         };
 
-        ModMain.Instance.OnConfigure += OnConfigure;
+        Config.OnConfigure += OnConfigure;
         OnConfigure();
     }
 
@@ -55,7 +55,7 @@ public class WallJumpController : MonoBehaviour
             else
             {
                 _characterController._owRigidbody.SetVelocity(pointVelocity);
-                _characterController._owRigidbody.AddLocalVelocityChange(Vector3.up * ModMain.Instance.MaxJumpPower * (_wallJumpsLeft / (float)ModMain.Instance.MaxWallJumps));
+                _characterController._owRigidbody.AddLocalVelocityChange(Vector3.up * Config.MaxJumpPower * (_wallJumpsLeft / (float)Config.MaxWallJumps));
                 _impactAudio._impactAudioSrc.PlayOneShot(AudioType.ImpactLowSpeed);
                 _wallJumpsLeft--;
                 LastWallJumpTime = Time.time;
@@ -64,7 +64,7 @@ public class WallJumpController : MonoBehaviour
             }
         }
 
-        if (Time.time - _lastWallJumpRefill > 5f && _wallJumpsLeft < ModMain.Instance.MaxWallJumps)
+        if (Time.time - _lastWallJumpRefill > 5f && _wallJumpsLeft < Config.MaxWallJumps)
         {
             _wallJumpsLeft++;
             _lastWallJumpRefill = Time.time;
@@ -78,6 +78,6 @@ public class WallJumpController : MonoBehaviour
 
     private void OnDestroy()
     {
-        ModMain.Instance.OnConfigure -= OnConfigure;
+        Config.OnConfigure -= OnConfigure;
     }
 }
