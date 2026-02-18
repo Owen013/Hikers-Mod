@@ -13,8 +13,6 @@ public class ModMain : ModBehaviour
     public static ISmolHatchling SmolHatchlingAPI { get; private set; }
 
     public static ICameraShaker CameraShakerAPI { get; private set; }
-    
-    public static IImmersion ImmersionAPI { get; private set; }
 
     public override object GetApi()
     {
@@ -38,7 +36,6 @@ public class ModMain : ModBehaviour
         // Get APIs
         SmolHatchlingAPI = ModHelper.Interaction.TryGetModApi<ISmolHatchling>("Owen013.TeenyHatchling");
         CameraShakerAPI = ModHelper.Interaction.TryGetModApi<ICameraShaker>("SBtT.CameraShake");
-        ImmersionAPI = ModHelper.Interaction.TryGetModApi<IImmersion>("Owen_013.FirstPersonPresence");
 
         // Ready!
         ModHelper.Console.WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
