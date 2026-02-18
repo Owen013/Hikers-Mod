@@ -24,7 +24,7 @@ public static class Patches
     [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetMoveSpeed))]
     private static void GhostConstants_GetMoveSpeed_Postfix(GhostEnums.MoveType moveType, ref float __result)
     {
-        if (moveType == GhostEnums.MoveType.CHASE && SprintingController.Instance.IsSprinting == true)
+        if (Config.SpeedUpGhostsWhileSprinting && SprintingController.Instance.IsSprinting && moveType == GhostEnums.MoveType.CHASE)
             __result *= Config.SprintMultiplier;
     }
 
@@ -33,7 +33,7 @@ public static class Patches
     [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetMoveAcceleration))]
     private static void GhostConstants_GetMoveAcceleration_Postfix(GhostEnums.MoveType moveType, ref float __result)
     {
-        if (moveType == GhostEnums.MoveType.CHASE && SprintingController.Instance.IsSprinting == true)
+        if (Config.SpeedUpGhostsWhileSprinting && SprintingController.Instance.IsSprinting && moveType == GhostEnums.MoveType.CHASE)
             __result *= Config.SprintMultiplier;
     }
 

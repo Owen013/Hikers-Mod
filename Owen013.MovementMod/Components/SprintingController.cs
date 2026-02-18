@@ -39,8 +39,11 @@ public class SprintingController : MonoBehaviour
     {
         enabled = Config.IsSprintingEnabled;
 
-        // Change built-in character attributes
-        _sprintButton = Config.SprintButton == "Up Thrust" ? InputLibrary.thrustUp : InputLibrary.thrustDown;
+        _sprintButton = Config.SprintButton switch
+        {
+            "Down Thrust" => InputLibrary.thrustDown,
+            _ => InputLibrary.thrustUp
+        };
 
         UpdateSprinting();
     }
@@ -63,8 +66,7 @@ public class SprintingController : MonoBehaviour
     private void Update()
     {
         // check both thrust buttons so that the player can thrust out of a sprint
-        bool hasVerticalThrustChanged = OWInput.IsNewlyPressed(_sprintButton) || OWInput.IsNewlyReleased(_sprintButton) || OWInput.IsNewlyPressed(InputLibrary.thrustDown) || OWInput.IsNewlyReleased(InputLibrary.thrustDown);
-        if (hasVerticalThrustChanged || (OWInput.IsNewlyPressed(InputLibrary.boost) && !_characterController.IsGrounded()))
+        if (OWInput.IsNewlyPressed(_sprintButton) || OWInput.IsNewlyReleased(_sprintButton) || (OWInput.IsNewlyPressed(InputLibrary.boost) && !_characterController.IsGrounded()))
             UpdateSprinting();
     }
 

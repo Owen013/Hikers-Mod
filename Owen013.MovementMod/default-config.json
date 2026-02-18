@@ -105,7 +105,7 @@
       "title": "Sprint Speed Multiplier",
       "tooltip": "How much your speed is multiplied while sprinting. Default: 1.75",
       "type": "number",
-      "value": 2
+      "value": 1.5
     },
     "Start Sprinting On Landing": {
       "tooltip": "If you're holding the sprint button and a directional input when you land on the ground, you will stop thrusting and start sprinting.",
@@ -116,6 +116,11 @@
       "tooltip": "Makes your jetpack thrusters fire as you sprint, as if they're boosting you. No gameplay effect.",
       "type": "toggle",
       "value": false
+    },
+    "Speed Up Ghosts while Sprinting": {
+      "tooltip": "Makes ghosts move faster while you're sprinting.",
+      "type": "toggle",
+      "value": true
     },
 
     "Emergency Boost": {

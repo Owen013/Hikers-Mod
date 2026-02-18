@@ -40,13 +40,11 @@ public class EmergencyBoostController : MonoBehaviour
         _emergencyBoostAudio.pitch = Random.Range(1.0f, 1.4f);
         _emergencyBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, Config.EmergencyBoostVolume * 0.75f);
         _helmetAnimator.OnInstantDamage(boostPower, InstantDamageType.Impact);
-        NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "EMERGENCY BOOST ACTIVATED", 5f), false);
+        NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "EMERGENCY BOOST ACTIVATED", 3f), false);
 
         // if camerashaker is installed and camera shake is enabled, do a camera shake
         if (Config.EmergencyBoostCameraShakeAmount > 0f)
-        {
             ModMain.CameraShakerAPI?.ExplosionShake(strength: boostPower * Config.EmergencyBoostCameraShakeAmount);
-        }
 
         ModMain.Instance.ModHelper.Console.WriteLine($"[{nameof(EmergencyBoostController)}] Super-Boosted", MessageType.Debug);
     }

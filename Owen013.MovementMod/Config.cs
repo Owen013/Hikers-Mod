@@ -45,6 +45,8 @@ public static class Config
 
     public static bool IsSprintEffectEnabled { get; private set; }
 
+    public static bool SpeedUpGhostsWhileSprinting { get; private set; }
+
     public static bool IsEmergencyBoostEnabled { get; private set; }
 
     public static float EmergencyBoostPower { get; private set; }
@@ -95,6 +97,7 @@ public static class Config
         SprintMultiplier = config.GetSettingsValue<float>("SprintMultiplier");
         ShouldSprintOnLanding = config.GetSettingsValue<bool>("Start Sprinting On Landing");
         IsSprintEffectEnabled = config.GetSettingsValue<bool>("Show Thruster Effect while Sprinting");
+        SpeedUpGhostsWhileSprinting = config.GetSettingsValue<bool>("Speed Up Ghosts while Sprinting");
 
         IsEmergencyBoostEnabled = config.GetSettingsValue<bool>("Enable Emergency Boost");
         EmergencyBoostPower = config.GetSettingsValue<float>("Emergency Boost Power");
