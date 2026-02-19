@@ -7,7 +7,6 @@ namespace HikersMod;
 [HarmonyPatch]
 public static class Patches
 {
-    // changes dream lantern max speed to config setting
     [HarmonyPrefix]
     [HarmonyPatch(typeof(DreamLanternItem), nameof(DreamLanternItem.OverrideMaxRunSpeed))]
     private static bool DreamLanternItem_OverrideMaxRunSpeed_Prefix(ref float maxSpeedX, ref float maxSpeedZ, DreamLanternItem __instance)
@@ -19,40 +18,38 @@ public static class Patches
         return false;
     }
 
-    // makes ghosts run faster when player is sprinting
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetMoveSpeed))]
-    private static void GhostConstants_GetMoveSpeed_Postfix(GhostEnums.MoveType moveType, ref float __result)
+    [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetMoveAcceleration))]
+    private static void GhostConstants_GetMoveSpeed_GetMoveAcceleration_Postfix(GhostEnums.MoveType moveType, ref float __result)
     {
         if (Config.SpeedUpGhostsWhileSprinting && SprintingController.Instance.IsSprinting && moveType == GhostEnums.MoveType.CHASE)
             __result *= Config.SprintMultiplier;
     }
 
-    // makes ghosts speed up faster when player is sprinting
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetMoveAcceleration))]
-    private static void GhostConstants_GetMoveAcceleration_Postfix(GhostEnums.MoveType moveType, ref float __result)
+    [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetTurnSpeed))]
+    [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetTurnAcceleration))]
+    private static void GhostConstants_GetTurnSpeed_GetTurnAcceleration_Postfix(GhostEnums.TurnSpeed turnSpeed, ref float __result)
     {
-        if (Config.SpeedUpGhostsWhileSprinting && SprintingController.Instance.IsSprinting && moveType == GhostEnums.MoveType.CHASE)
+        if (Config.SpeedUpGhostsWhileSprinting && SprintingController.Instance.IsSprinting && turnSpeed == GhostEnums.TurnSpeed.FAST)
             __result *= Config.SprintMultiplier;
     }
 
     // prevents player from using jetpack while they are sprinting
     [HarmonyPostfix]
     [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
-    private static void JetpackThrusterController_GetRawInput_Postfix(ref Vector3 __result)
+    private static void OnGetJetpackInput(ref Vector3 __result)
     {
         if (__result.y != 0f && SprintingController.Instance.IsSprinting == true)
             __result.y = 0f;
     }
 
-    // add component to animator(s)
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerAnimController), nameof(PlayerAnimController.Start))]
     private static void PlayerAnimController_Start_Postfix(PlayerAnimController __instance) =>
         __instance.gameObject.AddComponent<AnimSpeedController>();
 
-    // Add components to character
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
     private static void PlayerCharacterController_Start_Postfix(PlayerCharacterController __instance)
@@ -88,7 +85,6 @@ public static class Patches
         return false;
     }
 
-    // allows turning in midair
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.UpdateAirControl))]
     private static bool PlayerCharacterController_UpdateAirControl_Prefix(PlayerCharacterController __instance)
@@ -118,7 +114,6 @@ public static class Patches
         return false;
     }
 
-    // adjusts footstep sound based on player speed
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerMovementAudio), nameof(PlayerMovementAudio.PlayFootstep))]
     private static bool PlayerMovementAudio_PlayFootstep_Prefix(PlayerMovementAudio __instance)
@@ -135,7 +130,6 @@ public static class Patches
         return false;
     }
 
-    // prevents player from using booster on the very first frame after jumping out of a sprint
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
     private static void PlayerResources_IsBoosterAllowed_Postfix(ref bool __result)

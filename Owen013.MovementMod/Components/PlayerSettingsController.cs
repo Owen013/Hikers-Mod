@@ -8,7 +8,7 @@ public class PlayerSettingsController : MonoBehaviour
 
     private JetpackThrusterModel _jetpackModel;
 
-    private void SetPlayerStats()
+    private void SetPlayerSettings()
     {
         // Change built-in character attributes
         _characterController._useChargeJump = Config.UseChargeJump;
@@ -31,12 +31,12 @@ public class PlayerSettingsController : MonoBehaviour
         _characterController = GetComponent<PlayerCharacterController>();
         _jetpackModel = FindObjectOfType<JetpackThrusterModel>();
 
-        Config.OnConfigure += SetPlayerStats;
-        SetPlayerStats();
+        Config.OnConfigure += SetPlayerSettings;
+        SetPlayerSettings();
     }
 
     private void OnDestroy()
     {
-        Config.OnConfigure -= SetPlayerStats;
+        Config.OnConfigure -= SetPlayerSettings;
     }
 }
