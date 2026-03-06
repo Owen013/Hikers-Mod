@@ -10,6 +10,8 @@ namespace HikersMod
     {
         public static ModMain Instance { get; private set; }
 
+        public static IModConsole Console => Instance.ModHelper.Console;
+
         public static ISmolHatchling SmolHatchlingAPI { get; private set; }
 
         public static ICameraShaker CameraShakerAPI { get; private set; }
@@ -38,7 +40,7 @@ namespace HikersMod
             CameraShakerAPI = ModHelper.Interaction.TryGetModApi<ICameraShaker>("SBtT.CameraShake");
 
             // Ready!
-            ModHelper.Console.WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
+            Console.WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
         }
     }
 }

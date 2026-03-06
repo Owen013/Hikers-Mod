@@ -16,7 +16,10 @@ namespace HikersMod.Components
 
         private static void SetThrusterScale(ThrusterFlameController thruster, float thrusterScale)
         {
-            if (thruster._underwater) thrusterScale = 0f;
+            if (thruster._underwater)
+            {
+                thrusterScale = 0f;
+            }
 
             // reset scale spring if it's rly small so it doesn't bounce back up
             if (thruster._currentScale <= 0.001f)
@@ -34,7 +37,7 @@ namespace HikersMod.Components
 
         private void OnConfigure()
         {
-            base.enabled = Config.IsSprintEffectEnabled;
+            enabled = Config.IsSprintEffectEnabled;
         }
 
         private void Awake()

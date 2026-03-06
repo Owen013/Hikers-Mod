@@ -48,7 +48,7 @@ namespace HikersMod.Components
                 ModMain.CameraShakerAPI?.ExplosionShake(strength: boostPower * Config.EmergencyBoostCameraShakeAmount);
             }
 
-            ModMain.Instance.ModHelper.Console.WriteLine($"[{nameof(EmergencyBoostController)}] Super-Boosted", MessageType.Debug);
+            ModMain.Console.WriteLine($"[{nameof(EmergencyBoostController)}] Super-Boosted", MessageType.Debug);
         }
 
         private void EndEmergencyBoost()
@@ -59,7 +59,7 @@ namespace HikersMod.Components
 
         private void OnConfigure()
         {
-            base.enabled = Config.IsEmergencyBoostEnabled;
+            enabled = Config.IsEmergencyBoostEnabled;
         }
 
         private void Awake()

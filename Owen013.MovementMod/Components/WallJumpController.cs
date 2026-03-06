@@ -50,7 +50,7 @@ namespace HikersMod.Components
 
                 if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20f)
                 {
-                    ModMain.Instance.ModHelper.Console.WriteLine($"[{nameof(WallJumpController)}] Can't Wall-Jump; going too fast", MessageType.Debug);
+                    ModMain.Console.WriteLine($"[{nameof(WallJumpController)}] Can't Wall-Jump; going too fast", MessageType.Debug);
                 }
                 else
                 {
@@ -60,7 +60,7 @@ namespace HikersMod.Components
                     _wallJumpsLeft--;
                     LastWallJumpTime = Time.time;
                     _lastWallJumpRefill = Time.time;
-                    ModMain.Instance.ModHelper.Console.WriteLine($"[{nameof(WallJumpController)}] Wall-Jumped", MessageType.Debug);
+                    ModMain.Console.WriteLine($"[{nameof(WallJumpController)}] Wall-Jumped", MessageType.Debug);
                 }
             }
 

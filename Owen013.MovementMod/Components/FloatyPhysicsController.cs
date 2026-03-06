@@ -8,7 +8,7 @@ namespace HikersMod.Components
 
         private void OnConfigure()
         {
-            base.enabled = Config.IsFloatyPhysicsEnabled;
+            enabled = Config.IsFloatyPhysicsEnabled;
         }
 
         private void Awake()

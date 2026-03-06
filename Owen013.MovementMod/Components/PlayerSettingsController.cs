@@ -12,7 +12,10 @@ namespace HikersMod.Components
         {
             // Change built-in character attributes
             _characterController._useChargeJump = Config.UseChargeJump;
-            if (!Config.IsFloatyPhysicsEnabled) _characterController._acceleration = Config.GroundAccel;
+            if (!Config.IsFloatyPhysicsEnabled)
+            {
+                _characterController._acceleration = Config.GroundAccel;
+            }
             _characterController._runSpeed = Config.RunSpeed;
             _characterController._strafeSpeed = Config.StrafeSpeed;
             _characterController._walkSpeed = Config.WalkSpeed;
