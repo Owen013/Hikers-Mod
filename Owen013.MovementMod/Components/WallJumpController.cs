@@ -1,83 +1,84 @@
 ﻿using OWML.Common;
 using UnityEngine;
 
-namespace HikersMod.Components;
-
-public class WallJumpController : MonoBehaviour
+namespace HikersMod.Components
 {
-    public static WallJumpController Instance { get; private set; }
-
-    public float LastWallJumpTime { get; private set; }
-
-    private PlayerCharacterController _characterController;
-
-    private PlayerAnimController _animController;
-
-    private PlayerImpactAudio _impactAudio;
-
-    private int _wallJumpsLeft;
-
-    private float _lastWallJumpRefill;
-
-    private void OnConfigure()
+    public class WallJumpController : MonoBehaviour
     {
-        base.enabled = Config.IsWallJumpingEnabled;
-    }
+        public static WallJumpController Instance { get; private set; }
 
-    private void Awake()
-    {
-        Instance = this;
-        _characterController = GetComponent<PlayerCharacterController>();
-        _animController = GetComponentInChildren<PlayerAnimController>();
-        _impactAudio = FindObjectOfType<PlayerImpactAudio>();
+        public float LastWallJumpTime { get; private set; }
 
-        _characterController.OnBecomeGrounded += () =>
+        private PlayerCharacterController _characterController;
+
+        private PlayerAnimController _animController;
+
+        private PlayerImpactAudio _impactAudio;
+
+        private int _wallJumpsLeft;
+
+        private float _lastWallJumpRefill;
+
+        private void OnConfigure()
         {
-            _wallJumpsLeft = Config.MaxWallJumps;
-        };
+            base.enabled = Config.IsWallJumpingEnabled;
+        }
 
-        Config.OnConfigure += OnConfigure;
-        OnConfigure();
-    }
-
-    private void Update()
-    {
-        _characterController.UpdatePushable();
-        bool canWallJump = _wallJumpsLeft > 0 && _characterController._isPushable && !PlayerState.InZeroG() && !_characterController._isGrounded;
-        if (canWallJump && OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && !OWInput.IsPressed(InputLibrary.thrustUp))
+        private void Awake()
         {
-            Vector3 pointVelocity = _characterController._pushableBody.GetPointVelocity(_characterController._pushContactPt);
+            Instance = this;
+            _characterController = GetComponent<PlayerCharacterController>();
+            _animController = GetComponentInChildren<PlayerAnimController>();
+            _impactAudio = FindObjectOfType<PlayerImpactAudio>();
 
-            if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20f)
+            _characterController.OnBecomeGrounded += () =>
             {
-                ModMain.Instance.ModHelper.Console.WriteLine($"[{nameof(WallJumpController)}] Can't Wall-Jump; going too fast", MessageType.Debug);
+                _wallJumpsLeft = Config.MaxWallJumps;
+            };
+
+            Config.OnConfigure += OnConfigure;
+            OnConfigure();
+        }
+
+        private void Update()
+        {
+            _characterController.UpdatePushable();
+            bool canWallJump = _wallJumpsLeft > 0 && _characterController._isPushable && !PlayerState.InZeroG() && !_characterController._isGrounded;
+            if (canWallJump && OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && !OWInput.IsPressed(InputLibrary.thrustUp))
+            {
+                Vector3 pointVelocity = _characterController._pushableBody.GetPointVelocity(_characterController._pushContactPt);
+
+                if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20f)
+                {
+                    ModMain.Instance.ModHelper.Console.WriteLine($"[{nameof(WallJumpController)}] Can't Wall-Jump; going too fast", MessageType.Debug);
+                }
+                else
+                {
+                    _characterController._owRigidbody.SetVelocity(pointVelocity);
+                    _characterController._owRigidbody.AddLocalVelocityChange(Vector3.up * Config.MaxJumpPower * (_wallJumpsLeft / (float)Config.MaxWallJumps));
+                    _impactAudio._impactAudioSrc.PlayOneShot(AudioType.ImpactLowSpeed);
+                    _wallJumpsLeft--;
+                    LastWallJumpTime = Time.time;
+                    _lastWallJumpRefill = Time.time;
+                    ModMain.Instance.ModHelper.Console.WriteLine($"[{nameof(WallJumpController)}] Wall-Jumped", MessageType.Debug);
+                }
             }
-            else
+
+            if (Time.time - _lastWallJumpRefill > 5f && _wallJumpsLeft < Config.MaxWallJumps)
             {
-                _characterController._owRigidbody.SetVelocity(pointVelocity);
-                _characterController._owRigidbody.AddLocalVelocityChange(Vector3.up * Config.MaxJumpPower * (_wallJumpsLeft / (float)Config.MaxWallJumps));
-                _impactAudio._impactAudioSrc.PlayOneShot(AudioType.ImpactLowSpeed);
-                _wallJumpsLeft--;
-                LastWallJumpTime = Time.time;
+                _wallJumpsLeft++;
                 _lastWallJumpRefill = Time.time;
-                ModMain.Instance.ModHelper.Console.WriteLine($"[{nameof(WallJumpController)}] Wall-Jumped", MessageType.Debug);
             }
+
+            // Make player play fast freefall animation after each wall jump
+            float freeFallSpeed = _animController._animator.GetFloat($"FreefallSpeed");
+            float climbFraction = 1f - (Time.time - LastWallJumpTime);
+            _animController._animator.SetFloat($"FreefallSpeed", Mathf.Max(freeFallSpeed, climbFraction));
         }
 
-        if (Time.time - _lastWallJumpRefill > 5f && _wallJumpsLeft < Config.MaxWallJumps)
+        private void OnDestroy()
         {
-            _wallJumpsLeft++;
-            _lastWallJumpRefill = Time.time;
+            Config.OnConfigure -= OnConfigure;
         }
-
-        // Make player play fast freefall animation after each wall jump
-        float freeFallSpeed = _animController._animator.GetFloat($"FreefallSpeed");
-        float climbFraction = 1f - (Time.time - LastWallJumpTime);
-        _animController._animator.SetFloat($"FreefallSpeed", Mathf.Max(freeFallSpeed, climbFraction));
-    }
-
-    private void OnDestroy()
-    {
-        Config.OnConfigure -= OnConfigure;
     }
 }

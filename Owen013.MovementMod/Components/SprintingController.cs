@@ -1,82 +1,91 @@
 ﻿using UnityEngine;
 
-namespace HikersMod.Components;
-
-public class SprintingController : MonoBehaviour
+namespace HikersMod.Components
 {
-    public static SprintingController Instance { get; private set; }
-
-    public bool IsSprinting { get; private set; }
-
-    private PlayerCharacterController _characterController;
-
-    private IInputCommands _sprintButton;
-
-    private void StartSprinting()
+    public class SprintingController : MonoBehaviour
     {
-        IsSprinting = true;
-        _characterController._runSpeed = Config.RunSpeed * Config.SprintMultiplier;
-        _characterController._strafeSpeed = Config.StrafeSpeed * Config.SprintMultiplier;
-    }
+        public static SprintingController Instance { get; private set; }
 
-    private void StopSprinting()
-    {
-        IsSprinting = false;
-        _characterController._runSpeed = Config.RunSpeed;
-        _characterController._strafeSpeed = Config.StrafeSpeed;
-    }
+        public bool IsSprinting { get; private set; }
 
-    private void UpdateSprinting()
-    {
-        bool isOnValidGround = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce();
-        if (enabled && isOnValidGround && OWInput.IsPressed(_sprintButton) && (IsSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
-            StartSprinting();
-        else
-            StopSprinting();
-    }
+        private PlayerCharacterController _characterController;
 
-    private void OnConfigure()
-    {
-        enabled = Config.IsSprintingEnabled;
+        private IInputCommands _sprintButton;
 
-        _sprintButton = Config.SprintButton switch
+        private void StartSprinting()
         {
-            "Down Thrust" => InputLibrary.thrustDown,
-            _ => InputLibrary.thrustUp
-        };
+            IsSprinting = true;
+            _characterController._runSpeed = Config.RunSpeed * Config.SprintMultiplier;
+            _characterController._strafeSpeed = Config.StrafeSpeed * Config.SprintMultiplier;
+        }
 
-        UpdateSprinting();
-    }
-
-    private void Awake()
-    {
-        Instance = this;
-        _characterController = GetComponent<PlayerCharacterController>();
-
-        _characterController.OnBecomeGrounded += () =>
+        private void StopSprinting()
         {
-            if (Config.ShouldSprintOnLanding)
-                UpdateSprinting();
-        };
+            IsSprinting = false;
+            _characterController._runSpeed = Config.RunSpeed;
+            _characterController._strafeSpeed = Config.StrafeSpeed;
+        }
 
-        Config.OnConfigure += OnConfigure;
-        OnConfigure();
-    }
+        private void UpdateSprinting()
+        {
+            bool isOnValidGround = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce();
+            if (enabled && isOnValidGround && OWInput.IsPressed(_sprintButton) && (IsSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
+            {
+                StartSprinting();
+            }
+            else
+            {
+                StopSprinting();
+            }
+        }
 
-    private void Update()
-    {
-        // check both thrust buttons so that the player can thrust out of a sprint
-        if (OWInput.IsNewlyPressed(_sprintButton) || OWInput.IsNewlyReleased(_sprintButton) || (OWInput.IsNewlyPressed(InputLibrary.boost) && !_characterController.IsGrounded()))
+        private void OnConfigure()
+        {
+            enabled = Config.IsSprintingEnabled;
+
+            _sprintButton = Config.SprintButton switch
+            {
+                "Down Thrust" => InputLibrary.thrustDown,
+                _ => InputLibrary.thrustUp
+            };
+
             UpdateSprinting();
-    }
+        }
 
-    private void OnDisable()
-    {
-        StopSprinting();
-    }
+        private void Awake()
+        {
+            Instance = this;
+            _characterController = GetComponent<PlayerCharacterController>();
 
-    private void OnDestroy()
-    {
-        Config.OnConfigure -= OnConfigure;
+            _characterController.OnBecomeGrounded += () =>
+            {
+                if (Config.ShouldSprintOnLanding)
+                {
+                    UpdateSprinting();
+                }
+            };
+
+            Config.OnConfigure += OnConfigure;
+            OnConfigure();
+        }
+
+        private void Update()
+        {
+            // check both thrust buttons so that the player can thrust out of a sprint
+            if (OWInput.IsNewlyPressed(_sprintButton) || OWInput.IsNewlyReleased(_sprintButton) || (OWInput.IsNewlyPressed(InputLibrary.boost) && !_characterController.IsGrounded()))
+            {
+                UpdateSprinting();
+            }
+        }
+
+        private void OnDisable()
+        {
+            StopSprinting();
+        }
+
+        private void OnDestroy()
+        {
+            Config.OnConfigure -= OnConfigure;
+        }
     }
 }

@@ -4,40 +4,41 @@ using OWML.Common;
 using OWML.ModHelper;
 using System.Reflection;
 
-namespace HikersMod;
-
-public class ModMain : ModBehaviour
+namespace HikersMod
 {
-    public static ModMain Instance { get; private set; }
-
-    public static ISmolHatchling SmolHatchlingAPI { get; private set; }
-
-    public static ICameraShaker CameraShakerAPI { get; private set; }
-
-    public override object GetApi()
+    public class ModMain : ModBehaviour
     {
-        return new HikersModAPI();
-    }
+        public static ModMain Instance { get; private set; }
 
-    public override void Configure(IModConfig config)
-    {
-        Config.Configure(config);
-    }
+        public static ISmolHatchling SmolHatchlingAPI { get; private set; }
 
-    private void Awake()
-    {
-        // Static reference to HikersMod so it can be used in patches.
-        Instance = this;
-        new Harmony("Owen013.MovementMod").PatchAll(Assembly.GetExecutingAssembly());
-    }
+        public static ICameraShaker CameraShakerAPI { get; private set; }
 
-    private void Start()
-    {
-        // Get APIs
-        SmolHatchlingAPI = ModHelper.Interaction.TryGetModApi<ISmolHatchling>("Owen013.TeenyHatchling");
-        CameraShakerAPI = ModHelper.Interaction.TryGetModApi<ICameraShaker>("SBtT.CameraShake");
+        public override object GetApi()
+        {
+            return new HikersModAPI();
+        }
 
-        // Ready!
-        ModHelper.Console.WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
+        public override void Configure(IModConfig config)
+        {
+            Config.Configure(config);
+        }
+
+        private void Awake()
+        {
+            // Static reference to HikersMod so it can be used in patches.
+            Instance = this;
+            new Harmony("Owen013.MovementMod").PatchAll(Assembly.GetExecutingAssembly());
+        }
+
+        private void Start()
+        {
+            // Get APIs
+            SmolHatchlingAPI = ModHelper.Interaction.TryGetModApi<ISmolHatchling>("Owen013.TeenyHatchling");
+            CameraShakerAPI = ModHelper.Interaction.TryGetModApi<ICameraShaker>("SBtT.CameraShake");
+
+            // Ready!
+            ModHelper.Console.WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
+        }
     }
 }
