@@ -24,9 +24,7 @@ static class Patches
     static void GhostConstants_GetMoveSpeed_GetMoveAcceleration_Postfix(GhostEnums.MoveType moveType, ref float __result)
     {
         if (Config.SpeedUpGhostsWhileSprinting && SprintingController.Instance.IsSprinting && moveType == GhostEnums.MoveType.CHASE)
-        {
             __result *= Config.SprintMultiplier;
-        }
     }
 
     [HarmonyPostfix]
@@ -35,20 +33,16 @@ static class Patches
     static void GhostConstants_GetTurnSpeed_GetTurnAcceleration_Postfix(GhostEnums.TurnSpeed turnSpeed, ref float __result)
     {
         if (Config.SpeedUpGhostsWhileSprinting && SprintingController.Instance.IsSprinting && turnSpeed == GhostEnums.TurnSpeed.FAST)
-        {
             __result *= Config.SprintMultiplier;
-        }
     }
 
-    // prevents player from using jetpack while they are sprinting
     [HarmonyPostfix]
     [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
     static void OnGetJetpackInput(ref Vector3 __result)
     {
+        // Prevent player from using vertical jetpack input while they are sprinting, as these actions both use the same key.
         if (__result.y != 0f && SprintingController.Instance.IsSprinting == true)
-        {
             __result.y = 0f;
-        }
     }
 
     [HarmonyPostfix]
@@ -77,11 +71,9 @@ static class Patches
     {
         if (!__instance._isAlignedToForce && !__instance._isZeroGMovementEnabled) return false;
 
-        // normal Update() function, but added isWearingSuit and IsSprintModeActive to if statement. The rest of this method is unmodified.
+        // Vanilla Update() function, but added isWearingSuit and IsSprinting to if statement. The rest of this method is unmodified.
         if (!__instance._isWearingSuit || SprintingController.Instance.IsSprinting == true || OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f)
-        {
             __instance.UpdateJumpInput();
-        }
         else
         {
             __instance._jumpChargeTime = 0f;
@@ -90,9 +82,7 @@ static class Patches
         }
 
         if (__instance._isZeroGMovementEnabled)
-        {
             __instance._pushPrompt.SetVisibility(OWInput.IsInputMode(InputMode.Character | InputMode.NomaiRemoteCam) && __instance._isPushable);
-        }
 
         return false;
     }
@@ -101,12 +91,10 @@ static class Patches
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.UpdateAirControl))]
     static bool PlayerCharacterController_UpdateAirControl_Prefix(PlayerCharacterController __instance)
     {
-        // if feature is disabled then just do the vanilla method
         if (!Config.IsMidairTurningEnabled) return true;
 
         if (__instance._lastGroundBody != null)
         {
-            // get player's horizontal velocity
             Vector3 pointVelocity = __instance._transform.InverseTransformDirection(__instance._lastGroundBody.GetPointVelocity(__instance._transform.position));
             Vector3 localVelocity = __instance._transform.InverseTransformDirection(__instance._owRigidbody.GetVelocity()) - pointVelocity;
             localVelocity.y = 0f;
@@ -116,11 +104,9 @@ static class Patches
             Vector2 moveInput = OWInput.GetAxisValue(InputLibrary.moveXZ, InputMode.Character | InputMode.NomaiRemoteCam);
             Vector3 localVelocityChange = new(acceleration * moveInput.x, 0f, acceleration * moveInput.y);
 
-            // new velocity can't be more than old velocity and airspeed
             float maxSpeed = Mathf.Max(localVelocity.magnitude, __instance._airSpeed);
             Vector3 newLocalVelocity = Vector3.ClampMagnitude(localVelocity + localVelocityChange, maxSpeed);
 
-            // cancel out old velocity, add new one
             __instance._owRigidbody.AddLocalVelocityChange(newLocalVelocity - localVelocity);
         }
         return false;
@@ -130,15 +116,14 @@ static class Patches
     [HarmonyPatch(typeof(PlayerMovementAudio), nameof(PlayerMovementAudio.PlayFootstep))]
     static bool PlayerMovementAudio_PlayFootstep_Prefix(PlayerMovementAudio __instance)
     {
-        AudioType audioType = (!PlayerState.IsCameraUnderwater() && __instance._fluidDetector.InFluidType(FluidVolume.Type.WATER)) ? AudioType.MovementShallowWaterFootstep : PlayerMovementAudio.GetFootstepAudioType(__instance._playerController.GetGroundSurface());
+        bool isStandingInWater = !PlayerState.IsCameraUnderwater() && __instance._fluidDetector.InFluidType(FluidVolume.Type.WATER);
+        AudioType audioType = isStandingInWater ? AudioType.MovementShallowWaterFootstep : PlayerMovementAudio.GetFootstepAudioType(__instance._playerController.GetGroundSurface());
         if (audioType != AudioType.None)
         {
             __instance._footstepAudio.pitch = Random.Range(0.9f, 1.1f);
             float audioVolume = 1.4f * Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude / 6f;
             if (ModMain.SmolHatchlingAPI != null)
-            {
                 audioVolume /= ModMain.SmolHatchlingAPI.GetPlayerScale();
-            }
             __instance._footstepAudio.PlayOneShot(audioType, audioVolume);
         }
         return false;
@@ -149,8 +134,6 @@ static class Patches
     static void PlayerResources_IsBoosterAllowed_Postfix(ref bool __result)
     {
         if (SprintingController.Instance.IsSprinting == true)
-        {
             __result = false;
-        }
     }
 }

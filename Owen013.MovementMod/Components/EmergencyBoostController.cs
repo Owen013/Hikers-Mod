@@ -6,7 +6,7 @@ namespace HikersMod.Components;
 
 class EmergencyBoostController : MonoBehaviour
 {
-    PlayerCharacterController _characterController;
+    PlayerCharacterController _playerController;
 
     JetpackThrusterController _jetpackController;
 
@@ -31,23 +31,21 @@ class EmergencyBoostController : MonoBehaviour
         _jetpackModel._boostChargeFraction = 0f;
         _jetpackController._resources._currentFuel = Mathf.Max(0f, _jetpackController._resources.GetFuel() - Config.EmergencyBoostCost);
         float boostPower = Config.EmergencyBoostPower;
+        
+        // Change player velocity.
+        Vector3 pointVelocity = _playerController._transform.InverseTransformDirection(_playerController._lastGroundBody.GetPointVelocity(_playerController._transform.position));
+        Vector3 localVelocity = _playerController._transform.InverseTransformDirection(_playerController._owRigidbody.GetVelocity()) - pointVelocity;
+        _playerController._owRigidbody.AddLocalVelocityChange(new Vector3(-localVelocity.x * 0.5f, boostPower - localVelocity.y * 0.5f, -localVelocity.z * 0.5f));
 
-        // set player velocity
-        Vector3 pointVelocity = _characterController._transform.InverseTransformDirection(_characterController._lastGroundBody.GetPointVelocity(_characterController._transform.position));
-        Vector3 localVelocity = _characterController._transform.InverseTransformDirection(_characterController._owRigidbody.GetVelocity()) - pointVelocity;
-        _characterController._owRigidbody.AddLocalVelocityChange(new Vector3(-localVelocity.x * 0.5f, boostPower - localVelocity.y * 0.5f, -localVelocity.z * 0.5f));
-
-        // sound and visual effects
+        // Play audio effect and show notification.
         _emergencyBoostAudio.pitch = Random.Range(1.0f, 1.4f);
         _emergencyBoostAudio.PlayOneShot(AudioType.ShipDamageShipExplosion, Config.EmergencyBoostVolume * 0.75f);
         _helmetAnimator.OnInstantDamage(boostPower, InstantDamageType.Impact);
         NotificationManager.s_instance.PostNotification(new NotificationData(NotificationTarget.Player, "EMERGENCY BOOST ACTIVATED", 3f), false);
 
-        // if camerashaker is installed and camera shake is enabled, do a camera shake
+        // Shake camera if enabled.
         if (Config.EmergencyBoostCameraShakeAmount > 0f)
-        {
             CameraShakerAPI?.ExplosionShake(strength: boostPower * Config.EmergencyBoostCameraShakeAmount);
-        }
 
         ModConsole?.WriteLine($"[{nameof(EmergencyBoostController)}] Super-Boosted", MessageType.Debug);
     }
@@ -55,7 +53,7 @@ class EmergencyBoostController : MonoBehaviour
     void EndEmergencyBoost()
     {
         _isEmergencyBoosting = false;
-        _jetpackModel._chargeSeconds = _characterController.IsGrounded() ? _jetpackModel._chargeSecondsGround : _jetpackModel._chargeSecondsAir;
+        _jetpackModel._chargeSeconds = _playerController.IsGrounded() ? _jetpackModel._chargeSecondsGround : _jetpackModel._chargeSecondsAir;
     }
 
     void OnConfigure()
@@ -65,18 +63,18 @@ class EmergencyBoostController : MonoBehaviour
 
     void Awake()
     {
-        _characterController = GetComponent<PlayerCharacterController>();
+        _playerController = GetComponent<PlayerCharacterController>();
         _jetpackModel = GetComponent<JetpackThrusterModel>();
         _jetpackController = GetComponent<JetpackThrusterController>();
         _helmetAnimator = GetComponentInChildren<HUDHelmetAnimator>();
 
-        // create super boost audio source
+        // Create audio source.
         _emergencyBoostAudio = new GameObject("HikersMod_EmergencyBoostAudioSrc").AddComponent<OWAudioSource>();
         _emergencyBoostAudio.transform.parent = GetComponentInChildren<PlayerAudioController>().transform;
         _emergencyBoostAudio.transform.localPosition = new Vector3(0, -1f, 1f);
 
-        // get player's downward thruster flame
-        var thrusters = _characterController.gameObject.GetComponentsInChildren<ThrusterFlameController>(includeInactive: true);
+        // Grab player model's downward thruster flame effect.
+        var thrusters = _playerController.gameObject.GetComponentsInChildren<ThrusterFlameController>(true);
         foreach (ThrusterFlameController thruster in thrusters)
         {
             if (thruster._thruster == Thruster.Up_LeftThruster)
@@ -86,7 +84,7 @@ class EmergencyBoostController : MonoBehaviour
             }
         }
 
-        _characterController.OnBecomeGrounded += EndEmergencyBoost;
+        _playerController.OnBecomeGrounded += EndEmergencyBoost;
 
         Config.OnConfigure += OnConfigure;
         OnConfigure();
@@ -95,25 +93,19 @@ class EmergencyBoostController : MonoBehaviour
     void LateUpdate()
     {
         bool isInputting = OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && !OWInput.IsPressed(InputLibrary.thrustUp, InputMode.Character);
-        bool canEmergencyBoost = _characterController._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
+        bool canEmergencyBoost = _playerController._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
+        bool hasDoubleTappedEmergencyBoost = isInputting && Time.time - _lastEmergencyBoostInputTime < Config.EmergencyBoostInputTime;
+        float lastWallJumpTime = Time.time - WallJumpController.Instance?.LastWallJumpTime ?? 0f;
         if (!canEmergencyBoost)
-        {
             EndEmergencyBoost();
-        }
-        else if (isInputting && Time.time - _lastEmergencyBoostInputTime < Config.EmergencyBoostInputTime && Time.time - WallJumpController.Instance.LastWallJumpTime > 0.5f && _jetpackController._resources.GetFuel() > 0f && !_isEmergencyBoosting)
-        {
+        else if (hasDoubleTappedEmergencyBoost && lastWallJumpTime > 0.5f && _jetpackController._resources.GetFuel() > 0f && !_isEmergencyBoosting)
             ApplyEmergencyBoost();
-        }
 
         if (isInputting && canEmergencyBoost)
-        {
             _lastEmergencyBoostInputTime = Time.time;
-        }
 
         if (_isEmergencyBoosting)
-        {
             _jetpackModel._chargeSeconds = float.PositiveInfinity;
-        }
 
         float timeSinceBoost = Time.time - _lastEmergencyBoostTime;
         float thrusterCurve = -Mathf.Pow(5f * timeSinceBoost - 1f, 2f) + 1f;
@@ -132,7 +124,7 @@ class EmergencyBoostController : MonoBehaviour
     void OnDestroy()
     {
         Destroy(_emergencyBoostAudio);
-        _characterController.OnBecomeGrounded -= EndEmergencyBoost;
+        _playerController.OnBecomeGrounded -= EndEmergencyBoost;
         Config.OnConfigure -= OnConfigure;
     }
 }

@@ -4,7 +4,7 @@ namespace HikersMod.Components;
 
 class FloatyPhysicsController : MonoBehaviour
 {
-    PlayerCharacterController _characterController;
+    PlayerCharacterController _playerController;
 
     void OnConfigure()
     {
@@ -13,7 +13,7 @@ class FloatyPhysicsController : MonoBehaviour
 
     void Awake()
     {
-        _characterController = GetComponent<PlayerCharacterController>();
+        _playerController = GetComponent<PlayerCharacterController>();
 
         Config.OnConfigure += OnConfigure;
         OnConfigure();
@@ -21,22 +21,20 @@ class FloatyPhysicsController : MonoBehaviour
 
     void Update()
     {
-        if (_characterController.IsGrounded() && !_characterController.IsSlidingOnIce())
+        if (_playerController.IsGrounded() && !_playerController.IsSlidingOnIce())
         {
-            float currentGravity = _characterController.GetNormalAccelerationScalar() / 12f;
+            float currentGravity = _playerController.GetNormalAccelerationScalar() / 12f;
             float maxGravity = Config.FloatyPhysicsMaxGravity;
             float minGravity = Config.FloatyPhysicsMinGravity;
-            _characterController._acceleration = Mathf.Lerp(Config.FloatyPhysicsMinAccel, Config.GroundAccel, Mathf.Clamp01((currentGravity - minGravity) / (maxGravity - minGravity)));
+            _playerController._acceleration = Mathf.Lerp(Config.FloatyPhysicsMinAccel, Config.GroundAccel, Mathf.Clamp01((currentGravity - minGravity) / (maxGravity - minGravity)));
         }
         else
-        {
-            _characterController._acceleration = Config.GroundAccel;
-        }
+            _playerController._acceleration = Config.GroundAccel;
     }
 
     void OnDisable()
     {
-        _characterController._acceleration = Config.GroundAccel;
+        _playerController._acceleration = Config.GroundAccel;
     }
 
     void OnDestroy()

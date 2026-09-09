@@ -8,35 +8,31 @@ class SprintingController : MonoBehaviour
 
     public bool IsSprinting { get; private set; }
 
-    PlayerCharacterController _characterController;
+    PlayerCharacterController _playerController;
 
     IInputCommands _sprintButton;
 
     void StartSprinting()
     {
         IsSprinting = true;
-        _characterController._runSpeed = Config.RunSpeed * Config.SprintMultiplier;
-        _characterController._strafeSpeed = Config.StrafeSpeed * Config.SprintMultiplier;
+        _playerController._runSpeed = Config.RunSpeed * Config.SprintMultiplier;
+        _playerController._strafeSpeed = Config.StrafeSpeed * Config.SprintMultiplier;
     }
 
     void StopSprinting()
     {
         IsSprinting = false;
-        _characterController._runSpeed = Config.RunSpeed;
-        _characterController._strafeSpeed = Config.StrafeSpeed;
+        _playerController._runSpeed = Config.RunSpeed;
+        _playerController._strafeSpeed = Config.StrafeSpeed;
     }
 
     void UpdateSprinting()
     {
-        bool isOnValidGround = _characterController.IsGrounded() && !_characterController.IsSlidingOnIce();
+        bool isOnValidGround = _playerController.IsGrounded() && !_playerController.IsSlidingOnIce();
         if (enabled && isOnValidGround && OWInput.IsPressed(_sprintButton) && (IsSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
-        {
             StartSprinting();
-        }
         else
-        {
             StopSprinting();
-        }
     }
 
     void OnConfigure()
@@ -55,14 +51,12 @@ class SprintingController : MonoBehaviour
     void Awake()
     {
         Instance = this;
-        _characterController = GetComponent<PlayerCharacterController>();
+        _playerController = GetComponent<PlayerCharacterController>();
 
-        _characterController.OnBecomeGrounded += () =>
+        _playerController.OnBecomeGrounded += () =>
         {
             if (Config.ShouldSprintOnLanding)
-            {
                 UpdateSprinting();
-            }
         };
 
         Config.OnConfigure += OnConfigure;
@@ -72,10 +66,8 @@ class SprintingController : MonoBehaviour
     void Update()
     {
         // check both thrust buttons so that the player can thrust out of a sprint
-        if (OWInput.IsNewlyPressed(_sprintButton) || OWInput.IsNewlyReleased(_sprintButton) || (OWInput.IsNewlyPressed(InputLibrary.boost) && !_characterController.IsGrounded()))
-        {
+        if (OWInput.IsNewlyPressed(_sprintButton) || OWInput.IsNewlyReleased(_sprintButton) || (OWInput.IsNewlyPressed(InputLibrary.boost) && !_playerController.IsGrounded()))
             UpdateSprinting();
-        }
     }
 
     void OnDisable()

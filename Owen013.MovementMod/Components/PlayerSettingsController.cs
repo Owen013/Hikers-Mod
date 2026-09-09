@@ -4,25 +4,23 @@ namespace HikersMod.Components;
 
 class PlayerSettingsController : MonoBehaviour
 {
-    PlayerCharacterController _characterController;
+    PlayerCharacterController _playerController;
 
     JetpackThrusterModel _jetpackModel;
 
     void SetPlayerSettings()
     {
         // Change built-in character attributes
-        _characterController._useChargeJump = Config.UseChargeJump;
+        _playerController._useChargeJump = Config.UseChargeJump;
         if (!Config.IsFloatyPhysicsEnabled)
-        {
-            _characterController._acceleration = Config.GroundAccel;
-        }
-        _characterController._runSpeed = Config.RunSpeed;
-        _characterController._strafeSpeed = Config.StrafeSpeed;
-        _characterController._walkSpeed = Config.WalkSpeed;
-        _characterController._airSpeed = Config.AirSpeed;
-        _characterController._airAcceleration = Config.AirAccel;
-        _characterController._minJumpSpeed = Config.MinJumpPower;
-        _characterController._maxJumpSpeed = Config.MaxJumpPower;
+            _playerController._acceleration = Config.GroundAccel;
+        _playerController._runSpeed = Config.RunSpeed;
+        _playerController._strafeSpeed = Config.StrafeSpeed;
+        _playerController._walkSpeed = Config.WalkSpeed;
+        _playerController._airSpeed = Config.AirSpeed;
+        _playerController._airAcceleration = Config.AirAccel;
+        _playerController._minJumpSpeed = Config.MinJumpPower;
+        _playerController._maxJumpSpeed = Config.MaxJumpPower;
         _jetpackModel._maxTranslationalThrust = Config.JetpackAccel;
         _jetpackModel._boostThrust = Config.JetpackBoostAccel;
         _jetpackModel._boostSeconds = Config.JetpackBoostTime;
@@ -31,7 +29,7 @@ class PlayerSettingsController : MonoBehaviour
 
     void Awake()
     {
-        _characterController = GetComponent<PlayerCharacterController>();
+        _playerController = GetComponent<PlayerCharacterController>();
         _jetpackModel = FindObjectOfType<JetpackThrusterModel>();
 
         Config.OnConfigure += SetPlayerSettings;

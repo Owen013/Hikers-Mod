@@ -10,11 +10,11 @@ class WallJumpController : MonoBehaviour
 
     public float LastWallJumpTime { get; private set; }
 
-    PlayerCharacterController _characterController;
+    PlayerCharacterController _playerController;
 
-    PlayerAnimController _animController;
+    PlayerAnimController _playerAnimController;
 
-    PlayerImpactAudio _impactAudio;
+    PlayerImpactAudio _playerImpactAudio;
 
     int _wallJumpsLeft;
 
@@ -28,11 +28,12 @@ class WallJumpController : MonoBehaviour
     void Awake()
     {
         Instance = this;
-        _characterController = GetComponent<PlayerCharacterController>();
-        _animController = GetComponentInChildren<PlayerAnimController>();
-        _impactAudio = FindObjectOfType<PlayerImpactAudio>();
+        _playerController = GetComponent<PlayerCharacterController>();
+        _playerAnimController = GetComponentInChildren<PlayerAnimController>();
+        _playerImpactAudio = FindObjectOfType<PlayerImpactAudio>();
 
-        _characterController.OnBecomeGrounded += () =>
+        // Reset wall jump budget when player lands.
+        _playerController.OnBecomeGrounded += () =>
         {
             _wallJumpsLeft = Config.MaxWallJumps;
         };
@@ -43,21 +44,21 @@ class WallJumpController : MonoBehaviour
 
     void Update()
     {
-        _characterController.UpdatePushable();
-        bool canWallJump = _wallJumpsLeft > 0 && _characterController._isPushable && !PlayerState.InZeroG() && !_characterController._isGrounded;
+        _playerController.UpdatePushable();
+        bool canWallJump = _wallJumpsLeft > 0 && _playerController._isPushable && !PlayerState.InZeroG() && !_playerController._isGrounded;
         if (canWallJump && OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && !OWInput.IsPressed(InputLibrary.thrustUp))
         {
-            Vector3 pointVelocity = _characterController._pushableBody.GetPointVelocity(_characterController._pushContactPt);
+            Vector3 pointVelocity = _playerController._pushableBody.GetPointVelocity(_playerController._pushContactPt);
 
-            if ((pointVelocity - _characterController._owRigidbody.GetVelocity()).magnitude > 20f)
+            if ((pointVelocity - _playerController._owRigidbody.GetVelocity()).magnitude > 20f)
             {
                 ModConsole?.WriteLine($"[{nameof(WallJumpController)}] Can't Wall-Jump; going too fast", MessageType.Debug);
             }
             else
             {
-                _characterController._owRigidbody.SetVelocity(pointVelocity);
-                _characterController._owRigidbody.AddLocalVelocityChange(Vector3.up * Config.MaxJumpPower * (_wallJumpsLeft / (float)Config.MaxWallJumps));
-                _impactAudio._impactAudioSrc.PlayOneShot(AudioType.ImpactLowSpeed);
+                _playerController._owRigidbody.SetVelocity(pointVelocity);
+                _playerController._owRigidbody.AddLocalVelocityChange(Vector3.up * Config.MaxJumpPower * (_wallJumpsLeft / (float)Config.MaxWallJumps));
+                _playerImpactAudio._impactAudioSrc.PlayOneShot(AudioType.ImpactLowSpeed);
                 _wallJumpsLeft--;
                 LastWallJumpTime = Time.time;
                 _lastWallJumpRefill = Time.time;
@@ -72,9 +73,9 @@ class WallJumpController : MonoBehaviour
         }
 
         // Make player play fast freefall animation after each wall jump
-        float freeFallSpeed = _animController._animator.GetFloat($"FreefallSpeed");
+        float freeFallSpeed = _playerAnimController._animator.GetFloat($"FreefallSpeed");
         float climbFraction = 1f - (Time.time - LastWallJumpTime);
-        _animController._animator.SetFloat($"FreefallSpeed", Mathf.Max(freeFallSpeed, climbFraction));
+        _playerAnimController._animator.SetFloat($"FreefallSpeed", Mathf.Max(freeFallSpeed, climbFraction));
     }
 
     void OnDestroy()
