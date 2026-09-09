@@ -1,4 +1,5 @@
 ﻿using HikersMod.Components;
+using static HikersMod.ModMain;
 
 namespace HikersMod;
 
@@ -11,7 +12,9 @@ public class HikersModAPI
 
     public void UpdateConfig()
     {
-        if (ModMain.Instance?.ModHelper == null) return;
-        Config.Configure(ModMain.Instance.ModHelper.Config);
+        if (ModConfig != null)
+        {
+            Config.Configure(ModConfig);
+        }
     }
 }

@@ -1,41 +1,40 @@
 ﻿using UnityEngine;
 
-namespace HikersMod.Components
+namespace HikersMod.Components;
+
+class AnimSpeedController : MonoBehaviour
 {
-    public class AnimSpeedController : MonoBehaviour
+    Animator _animator;
+
+    PlayerCharacterController _characterController;
+
+    void Awake()
     {
-        private Animator _animator;
+        _animator = GetComponent<Animator>();
+        _characterController = Locator.GetPlayerController();
+    }
 
-        private PlayerCharacterController _characterController;
-
-        private void Awake()
+    void LateUpdate()
+    {
+        // change viewbob strength quickly if on ground
+        Vector3 groundVel = _characterController.GetRelativeGroundVelocity();
+        groundVel.y = 0f;
+        if (Mathf.Abs(groundVel.x) < 0.05f)
         {
-            _animator = GetComponent<Animator>();
-            _characterController = Locator.GetPlayerController();
+            groundVel.x = 0f;
         }
-
-        private void LateUpdate()
+        if (Mathf.Abs(groundVel.z) < 0.05f)
         {
-            // change viewbob strength quickly if on ground
-            Vector3 groundVel = _characterController.GetRelativeGroundVelocity();
-            groundVel.y = 0f;
-            if (Mathf.Abs(groundVel.x) < 0.05f)
-            {
-                groundVel.x = 0f;
-            }
-            if (Mathf.Abs(groundVel.z) < 0.05f)
-            {
-                groundVel.z = 0f;
-            }
-            float groundSpeed = groundVel.magnitude;
-            if (ModMain.SmolHatchlingAPI != null)
-            {
-                groundSpeed *= ModMain.SmolHatchlingAPI.GetPlayerAnimSpeed();
-            }
-            float animSpeedMultiplier = Mathf.Sqrt(groundSpeed / 6);
-            float floatyPhysicsMultiplier = Mathf.Sqrt(_characterController._acceleration / Config.GroundAccel);
-
-            _animator.speed = Mathf.Max(animSpeedMultiplier * floatyPhysicsMultiplier, floatyPhysicsMultiplier);
+            groundVel.z = 0f;
         }
+        float groundSpeed = groundVel.magnitude;
+        if (ModMain.SmolHatchlingAPI != null)
+        {
+            groundSpeed *= ModMain.SmolHatchlingAPI.GetPlayerAnimSpeed();
+        }
+        float animSpeedMultiplier = Mathf.Sqrt(groundSpeed / 6);
+        float floatyPhysicsMultiplier = Mathf.Sqrt(_characterController._acceleration / Config.GroundAccel);
+
+        _animator.speed = Mathf.Max(animSpeedMultiplier * floatyPhysicsMultiplier, floatyPhysicsMultiplier);
     }
 }
