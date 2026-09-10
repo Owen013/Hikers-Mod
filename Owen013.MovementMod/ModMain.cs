@@ -8,9 +8,9 @@ namespace HikersMod;
 
 public class ModMain : ModBehaviour
 {
-    public static IModConsole ModConsole => s_instance?.ModHelper?.Console;
+    public static IModConsole ModConsole => s_instance != null ? s_instance.ModHelper?.Console : null;
 
-    public static IModConfig ModConfig => s_instance?.ModHelper?.Config;
+    public static IModConfig ModConfig => s_instance != null ? s_instance.ModHelper?.Config : null;
 
     public static ISmolHatchling SmolHatchlingAPI { get; private set; }
 

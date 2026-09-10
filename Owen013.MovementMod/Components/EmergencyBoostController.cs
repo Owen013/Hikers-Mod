@@ -95,7 +95,7 @@ public class EmergencyBoostController : MonoBehaviour
         bool isInputting = OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && !OWInput.IsPressed(InputLibrary.thrustUp, InputMode.Character);
         bool canEmergencyBoost = _playerController._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
         bool hasDoubleTappedEmergencyBoost = isInputting && Time.time - _lastEmergencyBoostInputTime < Config.EmergencyBoostInputTime;
-        float lastWallJumpTime = Time.time - WallJumpController.Instance?.LastWallJumpTime ?? 0f;
+        float lastWallJumpTime = WallJumpController.Instance != null ? Time.time - WallJumpController.Instance.LastWallJumpTime : 0f;
         if (!canEmergencyBoost)
             EndEmergencyBoost();
         else if (hasDoubleTappedEmergencyBoost && lastWallJumpTime > 0.5f && _jetpackThruster._resources.GetFuel() > 0f && !_isEmergencyBoosting)
