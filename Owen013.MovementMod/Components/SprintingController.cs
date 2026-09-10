@@ -2,7 +2,7 @@
 
 namespace HikersMod.Components;
 
-class SprintingController : MonoBehaviour
+public class SprintingController : MonoBehaviour
 {
     public static SprintingController Instance { get; private set; }
 

@@ -3,7 +3,7 @@ using System;
 
 namespace HikersMod;
 
-static class Config
+public static class Config
 {
     public static bool UseChargeJump { get; private set; }
 

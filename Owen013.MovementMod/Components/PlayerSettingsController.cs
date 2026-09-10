@@ -2,11 +2,11 @@
 
 namespace HikersMod.Components;
 
-class PlayerSettingsController : MonoBehaviour
+public class PlayerSettingsController : MonoBehaviour
 {
     PlayerCharacterController _playerController;
 
-    JetpackThrusterModel _jetpackModel;
+    JetpackThrusterModel _jetpackThrusterModel;
 
     void SetPlayerSettings()
     {
@@ -21,16 +21,16 @@ class PlayerSettingsController : MonoBehaviour
         _playerController._airAcceleration = Config.AirAccel;
         _playerController._minJumpSpeed = Config.MinJumpPower;
         _playerController._maxJumpSpeed = Config.MaxJumpPower;
-        _jetpackModel._maxTranslationalThrust = Config.JetpackAccel;
-        _jetpackModel._boostThrust = Config.JetpackBoostAccel;
-        _jetpackModel._boostSeconds = Config.JetpackBoostTime;
+        _jetpackThrusterModel._maxTranslationalThrust = Config.JetpackAccel;
+        _jetpackThrusterModel._boostThrust = Config.JetpackBoostAccel;
+        _jetpackThrusterModel._boostSeconds = Config.JetpackBoostTime;
         PlayerResources._maxFuel = Config.MaxJetpackFuel;
     }
 
     void Awake()
     {
         _playerController = GetComponent<PlayerCharacterController>();
-        _jetpackModel = FindObjectOfType<JetpackThrusterModel>();
+        _jetpackThrusterModel = FindObjectOfType<JetpackThrusterModel>();
 
         Config.OnConfigure += SetPlayerSettings;
         SetPlayerSettings();

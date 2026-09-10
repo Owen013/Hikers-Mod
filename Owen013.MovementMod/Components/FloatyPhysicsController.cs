@@ -2,7 +2,7 @@
 
 namespace HikersMod.Components;
 
-class FloatyPhysicsController : MonoBehaviour
+public class FloatyPhysicsController : MonoBehaviour
 {
     PlayerCharacterController _playerController;
 

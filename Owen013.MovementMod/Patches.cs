@@ -5,7 +5,7 @@ using UnityEngine;
 namespace HikersMod;
 
 [HarmonyPatch]
-static class Patches
+public static class Patches
 {
     [HarmonyPrefix]
     [HarmonyPatch(typeof(DreamLanternItem), nameof(DreamLanternItem.OverrideMaxRunSpeed))]

@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace HikersMod;
 
-class ModMain : ModBehaviour
+public class ModMain : ModBehaviour
 {
     public static IModConsole ModConsole => s_instance?.ModHelper?.Console;
 

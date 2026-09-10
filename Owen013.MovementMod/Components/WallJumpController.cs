@@ -4,7 +4,7 @@ using static HikersMod.ModMain;
 
 namespace HikersMod.Components;
 
-class WallJumpController : MonoBehaviour
+public class WallJumpController : MonoBehaviour
 {
     public static WallJumpController Instance { get; private set; }
 

@@ -2,7 +2,7 @@
 
 namespace HikersMod.Components;
 
-class AnimSpeedController : MonoBehaviour
+public class AnimSpeedController : MonoBehaviour
 {
     Animator _animator;
 

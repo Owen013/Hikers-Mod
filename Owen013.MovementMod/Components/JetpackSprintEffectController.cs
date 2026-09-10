@@ -2,15 +2,15 @@
 
 namespace HikersMod.Components;
 
-class JetpackSprintEffectController : MonoBehaviour
+public class JetpackSprintEffectController : MonoBehaviour
 {
     GameObject _playerSuit;
 
     GameObject _playerJetpack;
 
-    JetpackThrusterAudio _jetpackAudio;
+    JetpackThrusterAudio _jetpackThrusterAudio;
 
-    ThrusterFlameController[] _thrusters;
+    ThrusterFlameController[] _thrusterFlames;
 
     Vector2 _thrusterVector;
 
@@ -40,8 +40,8 @@ class JetpackSprintEffectController : MonoBehaviour
 
     void Awake()
     {
-        _jetpackAudio = GetComponentInChildren<JetpackThrusterAudio>();
-        _thrusters = GetComponentsInChildren<ThrusterFlameController>(includeInactive: true);
+        _jetpackThrusterAudio = GetComponentInChildren<JetpackThrusterAudio>();
+        _thrusterFlames = GetComponentsInChildren<ThrusterFlameController>(includeInactive: true);
         _playerSuit = GetComponentInChildren<PlayerAnimController>().transform.Find("Traveller_Mesh_v01:Traveller_Geo").gameObject;
         _playerJetpack = _playerSuit.transform.Find("Traveller_Mesh_v01:Props_HEA_Jetpack").gameObject;
         _thrusterVector = Vector2.zero;
@@ -63,41 +63,41 @@ class JetpackSprintEffectController : MonoBehaviour
         flameVector.y = Mathf.Clamp(flameVector.y, -20f, 20f);
 
         // update thruster sound, as long as it's not being set by the actual audio controller
-        if (_jetpackAudio.isActiveAndEnabled == false)
+        if (_jetpackThrusterAudio.isActiveAndEnabled == false)
         {
             float soundVolume = flameVector.magnitude;
             float soundPan = -flameVector.x * 0.4f;
-            bool hasFuel = _jetpackAudio._playerResources.GetFuel() > 0f;
-            bool isUnderwater = _jetpackAudio._underwater;
-            _jetpackAudio.UpdateTranslationalSource(_jetpackAudio._translationalSource, soundVolume, soundPan, !isUnderwater && hasFuel);
-            _jetpackAudio.UpdateTranslationalSource(_jetpackAudio._underwaterSource, soundVolume, soundPan, isUnderwater);
-            _jetpackAudio.UpdateTranslationalSource(_jetpackAudio._oxygenSource, soundVolume, soundPan, !isUnderwater && !hasFuel);
+            bool hasFuel = _jetpackThrusterAudio._playerResources.GetFuel() > 0f;
+            bool isUnderwater = _jetpackThrusterAudio._underwater;
+            _jetpackThrusterAudio.UpdateTranslationalSource(_jetpackThrusterAudio._translationalSource, soundVolume, soundPan, !isUnderwater && hasFuel);
+            _jetpackThrusterAudio.UpdateTranslationalSource(_jetpackThrusterAudio._underwaterSource, soundVolume, soundPan, isUnderwater);
+            _jetpackThrusterAudio.UpdateTranslationalSource(_jetpackThrusterAudio._oxygenSource, soundVolume, soundPan, !isUnderwater && !hasFuel);
         }
 
         // update thruster visuals as long as their controllers are inactive
-        for (int i = 0; i < _thrusters.Length; i++)
+        for (int i = 0; i < _thrusterFlames.Length; i++)
         {
-            if (_thrusters[i].isActiveAndEnabled) break;
+            if (_thrusterFlames[i].isActiveAndEnabled) break;
 
-            switch (_thrusters[i]._thruster)
+            switch (_thrusterFlames[i]._thruster)
             {
                 case Thruster.Forward_LeftThruster:
-                    SetThrusterScale(_thrusters[i], flameVector.y);
+                    SetThrusterScale(_thrusterFlames[i], flameVector.y);
                     break;
                 case Thruster.Forward_RightThruster:
-                    SetThrusterScale(_thrusters[i], flameVector.y);
+                    SetThrusterScale(_thrusterFlames[i], flameVector.y);
                     break;
                 case Thruster.Left_Thruster:
-                    SetThrusterScale(_thrusters[i], -flameVector.x);
+                    SetThrusterScale(_thrusterFlames[i], -flameVector.x);
                     break;
                 case Thruster.Right_Thruster:
-                    SetThrusterScale(_thrusters[i], flameVector.x);
+                    SetThrusterScale(_thrusterFlames[i], flameVector.x);
                     break;
                 case Thruster.Backward_LeftThruster:
-                    SetThrusterScale(_thrusters[i], -flameVector.y);
+                    SetThrusterScale(_thrusterFlames[i], -flameVector.y);
                     break;
                 case Thruster.Backward_RightThruster:
-                    SetThrusterScale(_thrusters[i], -flameVector.y);
+                    SetThrusterScale(_thrusterFlames[i], -flameVector.y);
                     break;
             }
         }

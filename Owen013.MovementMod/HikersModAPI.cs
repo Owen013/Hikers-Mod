@@ -3,7 +3,7 @@ using static HikersMod.ModMain;
 
 namespace HikersMod;
 
-public class HikersModAPI
+public public class HikersModAPI
 {
     public bool IsSprinting()
     {
