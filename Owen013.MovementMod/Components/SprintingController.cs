@@ -28,12 +28,21 @@ public class SprintingController : MonoBehaviour
     void UpdateSprinting()
     {
         bool isOnValidGround = _playerController.IsGrounded() && !_playerController.IsSlidingOnIce();
-        bool sprintKeyPressed = Keyboard.current != null && Keyboard.current[Config.SprintKey].isPressed;
-        bool sprintButtonPressed = Gamepad.current != null && Gamepad.current[Config.SprintGamepadButton].isPressed;
-        if (enabled && isOnValidGround && (sprintKeyPressed || sprintButtonPressed) && (IsSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
+        bool isSprintKeyboardKeyPressed = Keyboard.current != null && Keyboard.current[Config.SprintKey].isPressed;
+        bool isSprintGamepadButtonPressed = Gamepad.current != null && Gamepad.current[Config.SprintGamepadButton].isPressed;
+        bool isSprintButtonPressed = isSprintKeyboardKeyPressed || isSprintGamepadButtonPressed;
+        bool isTryingToMove = OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f;
+        bool isHoldingBoost = OWInput.IsPressed(InputLibrary.boost);
+        bool canStartSprint = isOnValidGround && isTryingToMove && isSprintButtonPressed;
+        bool canMaintainSprint = isTryingToMove && isSprintButtonPressed && !isHoldingBoost;
+        if (enabled && canStartSprint || (IsSprinting && canMaintainSprint))
+        {
             StartSprinting();
+        }
         else
+        {
             StopSprinting();
+        }
     }
 
     void OnConfigure()
@@ -51,7 +60,9 @@ public class SprintingController : MonoBehaviour
         _playerController.OnBecomeGrounded += () =>
         {
             if (Config.ShouldSprintOnLanding)
+            {
                 UpdateSprinting();
+            }
         };
 
         Config.OnConfigure += OnConfigure;
@@ -60,10 +71,26 @@ public class SprintingController : MonoBehaviour
 
     void Update()
     {
-        bool sprintKeyChanged = Keyboard.current != null && (Keyboard.current[Config.SprintKey].wasPressedThisFrame || Keyboard.current[Config.SprintKey].wasReleasedThisFrame);
-        bool sprintButtonChanged = Gamepad.current != null && (Gamepad.current[Config.SprintGamepadButton].wasPressedThisFrame || Gamepad.current[Config.SprintGamepadButton].wasReleasedThisFrame);
-        if (sprintKeyChanged || sprintButtonChanged || (OWInput.IsNewlyPressed(InputLibrary.boost) && !_playerController.IsGrounded()))
-            UpdateSprinting();
+        //bool wasSprintButtonPressed = false;
+        //bool wasSprintButtonReleased = false;
+        //if (Keyboard.current != null)
+        //{
+        //    wasSprintButtonPressed = Keyboard.current[Config.SprintKey].wasPressedThisFrame;
+        //    wasSprintButtonReleased = Keyboard.current[Config.SprintKey].wasReleasedThisFrame;
+        //}
+        //if (Gamepad.current != null)
+        //{
+        //    wasSprintButtonPressed = wasSprintButtonPressed || Gamepad.current[Config.SprintGamepadButton].wasPressedThisFrame;
+        //    wasSprintButtonReleased = wasSprintButtonReleased || Gamepad.current[Config.SprintGamepadButton].wasReleasedThisFrame;
+        //}
+
+        //bool isBoostingInAir = OWInput.IsNewlyPressed(InputLibrary.boost) && !_playerController.IsGrounded();
+        //if (wasSprintButtonPressed || wasSprintButtonReleased || isBoostingInAir)
+        //{
+        //    UpdateSprinting();
+        //}
+
+        UpdateSprinting();
     }
 
     void OnDisable()
