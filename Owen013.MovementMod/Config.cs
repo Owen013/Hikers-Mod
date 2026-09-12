@@ -17,6 +17,8 @@ public static class Config
 
     public static GamepadButton SprintGamepadButton { get; private set; }
 
+    public static bool IsHoldToSprintEnabled { get; private set; }
+
     public static float SprintMultiplier { get; private set; }
 
     public static bool ShouldSprintOnLanding { get; private set; }
@@ -107,6 +109,7 @@ public static class Config
             SprintGamepadButton = GamepadButton.RightTrigger;
         }
 
+        IsHoldToSprintEnabled = config.GetSettingsValue<bool>("Hold to Sprint");
         SprintMultiplier = config.GetSettingsValue<float>("SprintMultiplier");
         ShouldSprintOnLanding = config.GetSettingsValue<bool>("Start Sprinting On Landing");
         IsSprintEffectEnabled = config.GetSettingsValue<bool>("Show Thruster Effect while Sprinting");

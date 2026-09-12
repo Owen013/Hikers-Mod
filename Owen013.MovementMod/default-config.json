@@ -36,6 +36,11 @@
             "type": "text",
             "value": "RightTrigger"
         },
+        "Hold to Sprint": {
+            "tooltip": "",
+            "type": "toggle",
+            "value": true
+        },
         "SprintMultiplier": {
             "title": "Sprint Speed Multiplier",
             "tooltip": "How much your speed is multiplied while sprinting. Default: 1.75",

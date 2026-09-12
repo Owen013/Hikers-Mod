@@ -32,9 +32,19 @@ public class SprintingController : MonoBehaviour
         bool isSprintGamepadButtonPressed = Gamepad.current != null && Gamepad.current[Config.SprintGamepadButton].isPressed;
         bool isSprintButtonPressed = isSprintKeyboardKeyPressed || isSprintGamepadButtonPressed;
         bool isTryingToMove = OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f;
-        bool isHoldingBoost = OWInput.IsPressed(InputLibrary.boost);
         bool canStartSprint = isOnValidGround && isTryingToMove && isSprintButtonPressed;
-        bool canMaintainSprint = isTryingToMove && isSprintButtonPressed && !isHoldingBoost;
+        bool canMaintainSprint;
+        if (Config.IsHoldToSprintEnabled)
+        {
+            bool isTryingToBoost = OWInput.IsPressed(InputLibrary.thrustUp) && OWInput.IsPressed(InputLibrary.boost);
+            canMaintainSprint = isTryingToMove && isSprintButtonPressed && !isTryingToBoost;
+        }
+        else
+        {
+            bool isUsingVerticalThrust = OWInput.IsPressed(InputLibrary.thrustUp) || OWInput.IsPressed(InputLibrary.thrustDown);
+            canMaintainSprint = isTryingToMove && (isOnValidGround || !isUsingVerticalThrust);
+        }
+
         if (enabled && canStartSprint || (IsSprinting && canMaintainSprint))
         {
             StartSprinting();
