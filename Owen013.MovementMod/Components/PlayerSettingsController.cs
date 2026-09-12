@@ -13,7 +13,9 @@ public class PlayerSettingsController : MonoBehaviour
         // Change built-in character attributes
         _playerController._useChargeJump = Config.UseChargeJump;
         if (!Config.IsFloatyPhysicsEnabled)
+        {
             _playerController._acceleration = Config.GroundAccel;
+        }
         _playerController._runSpeed = Config.RunSpeed;
         _playerController._strafeSpeed = Config.StrafeSpeed;
         _playerController._walkSpeed = Config.WalkSpeed;

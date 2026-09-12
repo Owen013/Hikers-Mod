@@ -29,7 +29,9 @@ public class FloatyPhysicsController : MonoBehaviour
             _playerController._acceleration = Mathf.Lerp(Config.FloatyPhysicsMinAccel, Config.GroundAccel, Mathf.Clamp01((currentGravity - minGravity) / (maxGravity - minGravity)));
         }
         else
+        {
             _playerController._acceleration = Config.GroundAccel;
+        }
     }
 
     private void OnDisable()

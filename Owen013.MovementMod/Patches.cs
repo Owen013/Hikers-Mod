@@ -24,7 +24,9 @@ public static class Patches
     private static void GhostConstants_GetMoveSpeed_GetMoveAcceleration_Postfix(GhostEnums.MoveType moveType, ref float __result)
     {
         if (Config.SpeedUpGhostsWhileSprinting && SprintingController.Instance.IsSprinting && moveType == GhostEnums.MoveType.CHASE)
+        {
             __result *= Config.SprintMultiplier;
+        }
     }
 
     [HarmonyPostfix]
@@ -33,7 +35,9 @@ public static class Patches
     private static void GhostConstants_GetTurnSpeed_GetTurnAcceleration_Postfix(GhostEnums.TurnSpeed turnSpeed, ref float __result)
     {
         if (Config.SpeedUpGhostsWhileSprinting && SprintingController.Instance.IsSprinting && turnSpeed == GhostEnums.TurnSpeed.FAST)
+        {
             __result *= Config.SprintMultiplier;
+        }
     }
 
     [HarmonyPostfix]
@@ -42,7 +46,9 @@ public static class Patches
     {
         // Prevent player from using vertical jetpack input while they are sprinting, as these actions both use the same key.
         if (__result.y != 0f && SprintingController.Instance.IsSprinting == true)
+        {
             __result.y = 0f;
+        }
     }
 
     [HarmonyPostfix]
@@ -72,8 +78,10 @@ public static class Patches
         if (!__instance._isAlignedToForce && !__instance._isZeroGMovementEnabled) return false;
 
         // Vanilla Update() function, but added isWearingSuit and IsSprinting to if statement. The rest of this method is unmodified.
-        if (!__instance._isWearingSuit || SprintingController.Instance.IsSprinting == true || OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f)
+        if (!__instance._isWearingSuit || SprintingController.Instance.IsSprinting || OWInput.GetValue(InputLibrary.thrustUp, InputMode.All) == 0f)
+        {
             __instance.UpdateJumpInput();
+        }
         else
         {
             __instance._jumpChargeTime = 0f;
@@ -82,7 +90,9 @@ public static class Patches
         }
 
         if (__instance._isZeroGMovementEnabled)
+        {
             __instance._pushPrompt.SetVisibility(OWInput.IsInputMode(InputMode.Character | InputMode.NomaiRemoteCam) && __instance._isPushable);
+        }
 
         return false;
     }
@@ -123,7 +133,9 @@ public static class Patches
             __instance._footstepAudio.pitch = Random.Range(0.9f, 1.1f);
             float audioVolume = 1.4f * Locator.GetPlayerController().GetRelativeGroundVelocity().magnitude / 6f;
             if (ModMain.SmolHatchlingAPI != null)
+            {
                 audioVolume /= ModMain.SmolHatchlingAPI.GetPlayerScale();
+            }
             __instance._footstepAudio.PlayOneShot(audioType, audioVolume);
         }
         return false;
@@ -134,6 +146,8 @@ public static class Patches
     private static void PlayerResources_IsBoosterAllowed_Postfix(ref bool __result)
     {
         if (SprintingController.Instance.IsSprinting == true)
+        {
             __result = false;
+        }
     }
 }

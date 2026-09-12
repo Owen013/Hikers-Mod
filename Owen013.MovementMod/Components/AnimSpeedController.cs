@@ -20,9 +20,13 @@ public class AnimSpeedController : MonoBehaviour
         Vector3 groundVel = _playerController.GetRelativeGroundVelocity();
         groundVel.y = 0f;
         if (Mathf.Abs(groundVel.x) < 0.05f)
+        {
             groundVel.x = 0f;
+        }
         if (Mathf.Abs(groundVel.z) < 0.05f)
+        {
             groundVel.z = 0f;
+        }
         float groundSpeed = groundVel.magnitude;
         groundSpeed *= ModMain.SmolHatchlingAPI?.GetPlayerAnimSpeed() ?? 1f;
         float animSpeedMultiplier = Mathf.Sqrt(groundSpeed / 6);

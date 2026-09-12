@@ -13,6 +13,8 @@ public class HikersModAPI
     public void UpdateConfig()
     {
         if (ModConfig != null)
+        {
             Config.Configure(ModConfig);
+        }
     }
 }

@@ -17,7 +17,9 @@ public class JetpackSprintEffectController : MonoBehaviour
     private static void SetThrusterScale(ThrusterFlameController thruster, float thrusterScale)
     {
         if (thruster._underwater)
+        {
             thrusterScale = 0f;
+        }
 
         // reset scale spring if it's rly small so it doesn't bounce back up
         if (thruster._currentScale <= 0.001f)
@@ -77,7 +79,10 @@ public class JetpackSprintEffectController : MonoBehaviour
         // update thruster visuals as long as their controllers are inactive
         for (int i = 0; i < _thrusterFlames.Length; i++)
         {
-            if (_thrusterFlames[i].isActiveAndEnabled) break;
+            if (_thrusterFlames[i].isActiveAndEnabled)
+            {
+                break;
+            }
 
             switch (_thrusterFlames[i]._thruster)
             {

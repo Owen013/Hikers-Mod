@@ -45,7 +45,9 @@ public class EmergencyBoostController : MonoBehaviour
 
         // Shake camera if enabled.
         if (Config.EmergencyBoostCameraShakeAmount > 0f)
+        {
             CameraShakerAPI?.ExplosionShake(strength: boostPower * Config.EmergencyBoostCameraShakeAmount);
+        }
 
         ModConsole?.WriteLine($"[{nameof(EmergencyBoostController)}] Super-Boosted", MessageType.Debug);
     }
@@ -97,15 +99,23 @@ public class EmergencyBoostController : MonoBehaviour
         bool hasDoubleTappedEmergencyBoost = isInputting && Time.time - _lastEmergencyBoostInputTime < Config.EmergencyBoostInputTime;
         float lastWallJumpTime = WallJumpController.Instance != null ? Time.time - WallJumpController.Instance.LastWallJumpTime : 0f;
         if (!canEmergencyBoost)
+        {
             EndEmergencyBoost();
+        }
         else if (hasDoubleTappedEmergencyBoost && lastWallJumpTime > 0.5f && _jetpackThruster._resources.GetFuel() > 0f && !_isEmergencyBoosting)
+        {
             ApplyEmergencyBoost();
+        }
 
         if (isInputting && canEmergencyBoost)
+        {
             _lastEmergencyBoostInputTime = Time.time;
+        }
 
         if (_isEmergencyBoosting)
+        {
             _jetpackThrusterModel._chargeSeconds = float.PositiveInfinity;
+        }
 
         float timeSinceBoost = Time.time - _lastEmergencyBoostTime;
         float thrusterCurve = -Mathf.Pow(5f * timeSinceBoost - 1f, 2f) + 1f;
