@@ -28,52 +28,45 @@ public class SprintingController : MonoBehaviour
     private void UpdateSprinting()
     {
         bool isOnValidGround = _playerController.IsGrounded() && !_playerController.IsSlidingOnIce();
-        bool isSprintKeyboardKeyPressed = Keyboard.current != null && Keyboard.current[Config.SprintKey].isPressed;
-        bool isSprintGamepadButtonPressed = Gamepad.current != null && Gamepad.current[Config.SprintGamepadButton].isPressed;
-        bool isSprintButtonPressed = isSprintKeyboardKeyPressed || isSprintGamepadButtonPressed;
         bool isTryingToMove = OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f;
-        bool canStartSprint = isOnValidGround && isTryingToMove && isSprintButtonPressed;
-        bool canMaintainSprint;
+        bool isSprintButtonHeld = Keyboard.current != null && Keyboard.current[Config.SprintKey].isPressed || Gamepad.current != null && Gamepad.current[Config.SprintGamepadButton].isPressed;
+        bool wasSprintButtonJustPressed = Keyboard.current != null && Keyboard.current[Config.SprintKey].wasPressedThisFrame || Gamepad.current != null && Gamepad.current[Config.SprintGamepadButton].wasPressedThisFrame;
+        bool isStartingVerticalThrust = OWInput.IsNewlyPressed(InputLibrary.thrustUp) || OWInput.IsNewlyPressed(InputLibrary.thrustDown);
+        bool wasHoldingVerticalThrust = !isStartingVerticalThrust && (OWInput.IsPressed(InputLibrary.thrustUp) || OWInput.IsPressed(InputLibrary.thrustDown));
+        bool isStartingBoost = OWInput.IsPressed(InputLibrary.thrustUp) && OWInput.IsNewlyPressed(InputLibrary.boost);
+
+        bool canStartSprint = isOnValidGround && isTryingToMove && wasSprintButtonJustPressed && !wasHoldingVerticalThrust;
+        bool canMaintainSprint = isTryingToMove && !isStartingVerticalThrust && (isOnValidGround || !isStartingBoost);
         if (Config.IsHoldToSprintEnabled)
         {
-            bool justPressedBoost = OWInput.IsNewlyPressed(InputLibrary.boost);
-            canMaintainSprint = isTryingToMove && isSprintButtonPressed && !justPressedBoost;
-        }
-        else
-        {
-            bool isStartingVerticalThrust = OWInput.IsNewlyPressed(InputLibrary.thrustUp) || OWInput.IsNewlyPressed(InputLibrary.thrustDown);
-            canMaintainSprint = isTryingToMove && (isOnValidGround || !isStartingVerticalThrust);
+            canMaintainSprint = isSprintButtonHeld && canMaintainSprint;
         }
 
         if (enabled && canStartSprint || (IsSprinting && canMaintainSprint))
         {
-            StartSprinting();
+            if (!IsSprinting)
+            {
+                StartSprinting();
+            }
         }
         else
         {
-            StopSprinting();
+            if (IsSprinting)
+            {
+                StopSprinting();
+            }
         }
     }
 
     private void OnConfigure()
     {
         enabled = Config.IsSprintingEnabled;
-
-        UpdateSprinting();
     }
 
     private void Awake()
     {
         Instance = this;
         _playerController = GetComponent<PlayerCharacterController>();
-
-        _playerController.OnBecomeGrounded += () =>
-        {
-            if (Config.ShouldSprintOnLanding)
-            {
-                UpdateSprinting();
-            }
-        };
 
         Config.OnConfigure += OnConfigure;
         OnConfigure();
