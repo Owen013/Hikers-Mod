@@ -9,7 +9,7 @@ public static class Patches
 {
     [HarmonyPrefix]
     [HarmonyPatch(typeof(DreamLanternItem), nameof(DreamLanternItem.OverrideMaxRunSpeed))]
-    static bool DreamLanternItem_OverrideMaxRunSpeed_Prefix(ref float maxSpeedX, ref float maxSpeedZ, DreamLanternItem __instance)
+    private static bool DreamLanternItem_OverrideMaxRunSpeed_Prefix(ref float maxSpeedX, ref float maxSpeedZ, DreamLanternItem __instance)
     {
         float lerpPosition = 1f - __instance._lanternController.GetFocus();
         lerpPosition *= lerpPosition;
@@ -21,7 +21,7 @@ public static class Patches
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetMoveSpeed))]
     [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetMoveAcceleration))]
-    static void GhostConstants_GetMoveSpeed_GetMoveAcceleration_Postfix(GhostEnums.MoveType moveType, ref float __result)
+    private static void GhostConstants_GetMoveSpeed_GetMoveAcceleration_Postfix(GhostEnums.MoveType moveType, ref float __result)
     {
         if (Config.SpeedUpGhostsWhileSprinting && SprintingController.Instance.IsSprinting && moveType == GhostEnums.MoveType.CHASE)
             __result *= Config.SprintMultiplier;
@@ -30,7 +30,7 @@ public static class Patches
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetTurnSpeed))]
     [HarmonyPatch(typeof(GhostConstants), nameof(GhostConstants.GetTurnAcceleration))]
-    static void GhostConstants_GetTurnSpeed_GetTurnAcceleration_Postfix(GhostEnums.TurnSpeed turnSpeed, ref float __result)
+    private static void GhostConstants_GetTurnSpeed_GetTurnAcceleration_Postfix(GhostEnums.TurnSpeed turnSpeed, ref float __result)
     {
         if (Config.SpeedUpGhostsWhileSprinting && SprintingController.Instance.IsSprinting && turnSpeed == GhostEnums.TurnSpeed.FAST)
             __result *= Config.SprintMultiplier;
@@ -38,7 +38,7 @@ public static class Patches
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
-    static void OnGetJetpackInput(ref Vector3 __result)
+    private static void OnGetJetpackInput(ref Vector3 __result)
     {
         // Prevent player from using vertical jetpack input while they are sprinting, as these actions both use the same key.
         if (__result.y != 0f && SprintingController.Instance.IsSprinting == true)
@@ -47,14 +47,14 @@ public static class Patches
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerAnimController), nameof(PlayerAnimController.Start))]
-    static void PlayerAnimController_Start_Postfix(PlayerAnimController __instance)
+    private static void PlayerAnimController_Start_Postfix(PlayerAnimController __instance)
     {
         __instance.gameObject.AddComponent<AnimSpeedController>();
     }
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Start))]
-    static void PlayerCharacterController_Start_Postfix(PlayerCharacterController __instance)
+    private static void PlayerCharacterController_Start_Postfix(PlayerCharacterController __instance)
     {
         __instance.gameObject.AddComponent<PlayerSettingsController>();
         __instance.gameObject.AddComponent<SprintingController>();
@@ -67,7 +67,7 @@ public static class Patches
     // allows the player to jump while sprinting
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Update))]
-    static bool PlayerCharacterController_Update_Prefix(PlayerCharacterController __instance)
+    private static bool PlayerCharacterController_Update_Prefix(PlayerCharacterController __instance)
     {
         if (!__instance._isAlignedToForce && !__instance._isZeroGMovementEnabled) return false;
 
@@ -89,7 +89,7 @@ public static class Patches
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.UpdateAirControl))]
-    static bool PlayerCharacterController_UpdateAirControl_Prefix(PlayerCharacterController __instance)
+    private static bool PlayerCharacterController_UpdateAirControl_Prefix(PlayerCharacterController __instance)
     {
         if (!Config.IsMidairTurningEnabled) return true;
 
@@ -114,7 +114,7 @@ public static class Patches
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerMovementAudio), nameof(PlayerMovementAudio.PlayFootstep))]
-    static bool PlayerMovementAudio_PlayFootstep_Prefix(PlayerMovementAudio __instance)
+    private static bool PlayerMovementAudio_PlayFootstep_Prefix(PlayerMovementAudio __instance)
     {
         bool isStandingInWater = !PlayerState.IsCameraUnderwater() && __instance._fluidDetector.InFluidType(FluidVolume.Type.WATER);
         AudioType audioType = isStandingInWater ? AudioType.MovementShallowWaterFootstep : PlayerMovementAudio.GetFootstepAudioType(__instance._playerController.GetGroundSurface());
@@ -131,7 +131,7 @@ public static class Patches
 
     [HarmonyPostfix]
     [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
-    static void PlayerResources_IsBoosterAllowed_Postfix(ref bool __result)
+    private static void PlayerResources_IsBoosterAllowed_Postfix(ref bool __result)
     {
         if (SprintingController.Instance.IsSprinting == true)
             __result = false;

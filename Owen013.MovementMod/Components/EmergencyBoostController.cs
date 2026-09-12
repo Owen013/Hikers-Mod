@@ -6,25 +6,25 @@ namespace HikersMod.Components;
 
 public class EmergencyBoostController : MonoBehaviour
 {
-    PlayerCharacterController _playerController;
+    private PlayerCharacterController _playerController;
 
-    JetpackThrusterController _jetpackThruster;
+    private JetpackThrusterController _jetpackThruster;
 
-    JetpackThrusterModel _jetpackThrusterModel;
+    private JetpackThrusterModel _jetpackThrusterModel;
 
-    OWAudioSource _emergencyBoostAudio;
+    private OWAudioSource _emergencyBoostAudio;
 
-    ThrusterFlameController _downwardThrusterFlame;
+    private ThrusterFlameController _downwardThrusterFlame;
 
-    HUDHelmetAnimator _helmetAnimator;
+    private HUDHelmetAnimator _helmetAnimator;
 
-    float _lastEmergencyBoostInputTime;
+    private float _lastEmergencyBoostInputTime;
 
-    float _lastEmergencyBoostTime;
+    private float _lastEmergencyBoostTime;
 
-    bool _isEmergencyBoosting;
+    private bool _isEmergencyBoosting;
 
-    void ApplyEmergencyBoost()
+    private void ApplyEmergencyBoost()
     {
         _isEmergencyBoosting = true;
         _lastEmergencyBoostTime = Time.time;
@@ -50,18 +50,18 @@ public class EmergencyBoostController : MonoBehaviour
         ModConsole?.WriteLine($"[{nameof(EmergencyBoostController)}] Super-Boosted", MessageType.Debug);
     }
 
-    void EndEmergencyBoost()
+    private void EndEmergencyBoost()
     {
         _isEmergencyBoosting = false;
         _jetpackThrusterModel._chargeSeconds = _playerController.IsGrounded() ? _jetpackThrusterModel._chargeSecondsGround : _jetpackThrusterModel._chargeSecondsAir;
     }
 
-    void OnConfigure()
+    private void OnConfigure()
     {
         enabled = Config.IsEmergencyBoostEnabled;
     }
 
-    void Awake()
+    private void Awake()
     {
         _playerController = GetComponent<PlayerCharacterController>();
         _jetpackThrusterModel = GetComponent<JetpackThrusterModel>();
@@ -90,7 +90,7 @@ public class EmergencyBoostController : MonoBehaviour
         OnConfigure();
     }
 
-    void LateUpdate()
+    private void LateUpdate()
     {
         bool isInputting = OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && !OWInput.IsPressed(InputLibrary.thrustUp, InputMode.Character);
         bool canEmergencyBoost = _playerController._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
@@ -116,12 +116,12 @@ public class EmergencyBoostController : MonoBehaviour
         _downwardThrusterFlame._light.enabled = thrusterScale > 0f;
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         EndEmergencyBoost();
     }
 
-    void OnDestroy()
+    private void OnDestroy()
     {
         Destroy(_emergencyBoostAudio);
         _playerController.OnBecomeGrounded -= EndEmergencyBoost;

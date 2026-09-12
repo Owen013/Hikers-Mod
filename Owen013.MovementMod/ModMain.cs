@@ -16,7 +16,7 @@ public class ModMain : ModBehaviour
 
     public static ICameraShaker CameraShakerAPI { get; private set; }
 
-    static ModMain s_instance;
+    private static ModMain s_instance;
 
     public override object GetApi()
     {
@@ -28,13 +28,13 @@ public class ModMain : ModBehaviour
         Config.Configure(config);
     }
 
-    void Awake()
+    private void Awake()
     {
         s_instance = this;
         new Harmony("Owen013.MovementMod").PatchAll(Assembly.GetExecutingAssembly());
     }
 
-    void Start()
+    private void Start()
     {
         SmolHatchlingAPI = ModHelper.Interaction.TryGetModApi<ISmolHatchling>("Owen013.TeenyHatchling");
         CameraShakerAPI = ModHelper.Interaction.TryGetModApi<ICameraShaker>("SBtT.CameraShake");

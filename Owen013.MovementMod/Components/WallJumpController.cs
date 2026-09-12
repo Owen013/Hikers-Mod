@@ -10,22 +10,22 @@ public class WallJumpController : MonoBehaviour
 
     public float LastWallJumpTime { get; private set; }
 
-    PlayerCharacterController _playerController;
+    private PlayerCharacterController _playerController;
 
-    PlayerAnimController _playerAnimController;
+    private PlayerAnimController _playerAnimController;
 
-    PlayerImpactAudio _playerImpactAudio;
+    private PlayerImpactAudio _playerImpactAudio;
 
-    int _wallJumpsLeft;
+    private int _wallJumpsLeft;
 
-    float _lastWallJumpRefill;
+    private float _lastWallJumpRefill;
 
-    void OnConfigure()
+    private void OnConfigure()
     {
         enabled = Config.IsWallJumpingEnabled;
     }
 
-    void Awake()
+    private void Awake()
     {
         Instance = this;
         _playerController = GetComponent<PlayerCharacterController>();
@@ -42,7 +42,7 @@ public class WallJumpController : MonoBehaviour
         OnConfigure();
     }
 
-    void Update()
+    private void Update()
     {
         _playerController.UpdatePushable();
         bool canWallJump = _wallJumpsLeft > 0 && _playerController._isPushable && !PlayerState.InZeroG() && !_playerController._isGrounded;
@@ -78,7 +78,7 @@ public class WallJumpController : MonoBehaviour
         _playerAnimController._animator.SetFloat($"FreefallSpeed", Mathf.Max(freeFallSpeed, climbFraction));
     }
 
-    void OnDestroy()
+    private void OnDestroy()
     {
         Config.OnConfigure -= OnConfigure;
     }

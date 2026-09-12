@@ -4,17 +4,17 @@ namespace HikersMod.Components;
 
 public class JetpackSprintEffectController : MonoBehaviour
 {
-    GameObject _playerSuit;
+    private GameObject _playerSuit;
 
-    GameObject _playerJetpack;
+    private GameObject _playerJetpack;
 
-    JetpackThrusterAudio _jetpackThrusterAudio;
+    private JetpackThrusterAudio _jetpackThrusterAudio;
 
-    ThrusterFlameController[] _thrusterFlames;
+    private ThrusterFlameController[] _thrusterFlames;
 
-    Vector2 _thrusterVector;
+    private Vector2 _thrusterVector;
 
-    static void SetThrusterScale(ThrusterFlameController thruster, float thrusterScale)
+    private static void SetThrusterScale(ThrusterFlameController thruster, float thrusterScale)
     {
         if (thruster._underwater)
             thrusterScale = 0f;
@@ -33,12 +33,12 @@ public class JetpackSprintEffectController : MonoBehaviour
         thruster._light.enabled = thruster._currentScale > 0f;
     }
 
-    void OnConfigure()
+    private void OnConfigure()
     {
         enabled = Config.IsSprintEffectEnabled;
     }
 
-    void Awake()
+    private void Awake()
     {
         _jetpackThrusterAudio = GetComponentInChildren<JetpackThrusterAudio>();
         _thrusterFlames = GetComponentsInChildren<ThrusterFlameController>(includeInactive: true);
@@ -50,7 +50,7 @@ public class JetpackSprintEffectController : MonoBehaviour
         OnConfigure();
     }
 
-    void LateUpdate()
+    private void LateUpdate()
     {
         bool jetpackVisible = _playerSuit.activeSelf && _playerJetpack.activeSelf;
 
@@ -103,12 +103,12 @@ public class JetpackSprintEffectController : MonoBehaviour
         }
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         _thrusterVector = Vector2.zero;
     }
 
-    void OnDestroy()
+    private void OnDestroy()
     {
         Config.OnConfigure -= OnConfigure;
     }

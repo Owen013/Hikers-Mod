@@ -4,14 +4,14 @@ namespace HikersMod.Components;
 
 public class FloatyPhysicsController : MonoBehaviour
 {
-    PlayerCharacterController _playerController;
+    private PlayerCharacterController _playerController;
 
-    void OnConfigure()
+    private void OnConfigure()
     {
         enabled = Config.IsFloatyPhysicsEnabled;
     }
 
-    void Awake()
+    private void Awake()
     {
         _playerController = GetComponent<PlayerCharacterController>();
 
@@ -19,7 +19,7 @@ public class FloatyPhysicsController : MonoBehaviour
         OnConfigure();
     }
 
-    void Update()
+    private void Update()
     {
         if (_playerController.IsGrounded() && !_playerController.IsSlidingOnIce())
         {
@@ -32,12 +32,12 @@ public class FloatyPhysicsController : MonoBehaviour
             _playerController._acceleration = Config.GroundAccel;
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         _playerController._acceleration = Config.GroundAccel;
     }
 
-    void OnDestroy()
+    private void OnDestroy()
     {
         Config.OnConfigure -= OnConfigure;
     }

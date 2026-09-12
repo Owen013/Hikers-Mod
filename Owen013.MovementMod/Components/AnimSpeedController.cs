@@ -4,17 +4,17 @@ namespace HikersMod.Components;
 
 public class AnimSpeedController : MonoBehaviour
 {
-    Animator _animator;
+    private Animator _animator;
 
-    PlayerCharacterController _playerController;
+    private PlayerCharacterController _playerController;
 
-    void Awake()
+    private void Awake()
     {
         _animator = GetComponent<Animator>();
         _playerController = Locator.GetPlayerController();
     }
 
-    void LateUpdate()
+    private void LateUpdate()
     {
         // change viewbob strength quickly if on ground
         Vector3 groundVel = _playerController.GetRelativeGroundVelocity();
