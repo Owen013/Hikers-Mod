@@ -36,13 +36,13 @@ public class SprintingController : MonoBehaviour
         bool canMaintainSprint;
         if (Config.IsHoldToSprintEnabled)
         {
-            bool isTryingToBoost = OWInput.IsPressed(InputLibrary.thrustUp) && OWInput.IsPressed(InputLibrary.boost);
-            canMaintainSprint = isTryingToMove && isSprintButtonPressed && !isTryingToBoost;
+            bool justPressedBoost = OWInput.IsNewlyPressed(InputLibrary.boost);
+            canMaintainSprint = isTryingToMove && isSprintButtonPressed && !justPressedBoost;
         }
         else
         {
-            bool isUsingVerticalThrust = OWInput.IsPressed(InputLibrary.thrustUp) || OWInput.IsPressed(InputLibrary.thrustDown);
-            canMaintainSprint = isTryingToMove && (isOnValidGround || !isUsingVerticalThrust);
+            bool isStartingVerticalThrust = OWInput.IsNewlyPressed(InputLibrary.thrustUp) || OWInput.IsNewlyPressed(InputLibrary.thrustDown);
+            canMaintainSprint = isTryingToMove && (isOnValidGround || !isStartingVerticalThrust);
         }
 
         if (enabled && canStartSprint || (IsSprinting && canMaintainSprint))
