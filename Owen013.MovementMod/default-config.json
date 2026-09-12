@@ -1,203 +1,207 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema",
   "enabled": true,
-  "settings": {
+    "settings": {
 
-    "Jumping": {
-      "type": "separator"
-    },
-    "Jump Style": {
-      "tooltip": "Charge: you have to hold space to charge a jump and release space to perform the jump. Instant: you will jump immediately upon pressing space.",
-      "type": "selector",
-      "value": "Instant",
-      "options": [ "Charge", "Instant" ]
-    },
-    "Enable Midair Turning": {
-      "tooltip": "Allows you to change direction and/or slow down in midair, even without your jetpack.",
-      "type": "toggle",
-      "value": true
-    },
+        "Jumping": {
+            "type": "separator"
+        },
+        "Jump Style": {
+            "tooltip": "Charge: you have to hold space to charge a jump and release space to perform the jump. Instant: you will jump immediately upon pressing space.",
+            "type": "selector",
+            "value": "Instant",
+            "options": [ "Charge", "Instant" ]
+        },
+        "Enable Midair Turning": {
+            "tooltip": "Allows you to change direction and/or slow down in midair, even without your jetpack.",
+            "type": "toggle",
+            "value": true
+        },
 
-    "Sprinting": {
-      "type": "separator"
-    },
-    "Enable Sprinting": {
-      "tooltip": "Allows you to sprint.",
-      "type": "toggle",
-      "value": true
-    },
-    "Sprint Button": {
-      "tooltip": "Whether sprinting is activated by holding the Up Thrust button (usually Shift) or the Down Thrust button (usually Ctrl).",
-      "type": "selector",
-      "value": "Up Thrust",
-      "options": [ "Up Thrust", "Down Thrust" ]
-    },
-    "SprintMultiplier": {
-      "title": "Sprint Speed Multiplier",
-      "tooltip": "How much your speed is multiplied while sprinting. Default: 1.75",
-      "type": "number",
-      "value": 1.5
-    },
-    "Start Sprinting On Landing": {
-      "tooltip": "If you're holding the sprint button and a directional input when you land on the ground, you will stop thrusting and start sprinting.",
-      "type": "toggle",
-      "value": true
-    },
-    "Show Thruster Effect while Sprinting": {
-      "tooltip": "Makes your jetpack thrusters fire as you sprint, as if they're boosting you. No gameplay effect.",
-      "type": "toggle",
-      "value": false
-    },
-    "Speed Up Ghosts while Sprinting": {
-      "tooltip": "Makes ghosts move faster while you're sprinting.",
-      "type": "toggle",
-      "value": true
-    },
+        "Sprinting": {
+            "type": "separator"
+        },
+        "Enable Sprinting": {
+            "tooltip": "Allows you to sprint.",
+            "type": "toggle",
+            "value": true
+        },
+        "Sprint Key (Keyboard)": {
+            "tooltip": "",
+            "type": "text",
+            "value": "LeftShift"
+        },
+        "Sprint Button (Gamepad)": {
+            "tooltip": "",
+            "type": "text",
+            "value": "RightTrigger"
+        },
+        "SprintMultiplier": {
+            "title": "Sprint Speed Multiplier",
+            "tooltip": "How much your speed is multiplied while sprinting. Default: 1.75",
+            "type": "number",
+            "value": 1.5
+        },
+        "Start Sprinting On Landing": {
+            "tooltip": "If you're holding the sprint button and a directional input when you land on the ground, you will stop thrusting and start sprinting.",
+            "type": "toggle",
+            "value": true
+        },
+        "Show Thruster Effect while Sprinting": {
+            "tooltip": "Makes your jetpack thrusters fire as you sprint, as if they're boosting you. No gameplay effect.",
+            "type": "toggle",
+            "value": false
+        },
+        "Speed Up Ghosts while Sprinting": {
+            "tooltip": "Makes ghosts move faster while you're sprinting.",
+            "type": "toggle",
+            "value": true
+        },
 
-    "Emergency Boost": {
-      "type": "separator"
-    },
-    "Enable Emergency Boost": {
-      "tooltip": "Allows you to shoot up into the air by pressing space twice.",
-      "type": "toggle",
-      "value": false
-    },
-    "Emergency Boost Power": {
-      "tooltip": "How powerful an emergency boost is. Default: 15",
-      "type": "number",
-      "value": 15
-    },
-    "Emergency Boost Cost": {
-      "tooltip": "The amount of fuel an emergency boost uses. Default: 30",
-      "type": "number",
-      "value": 30
-    },
-    "Emergency Boost Volume": {
-      "tooltip": "How loud the emergency boost sound is compared to the default volume. Default: 1",
-      "type": "number",
-      "value": 1
-    },
-    "Emergency Boost Input Time": {
-      "tooltip": "The maximum amount of time in seconds between jump inputs that will trigger an emergency boost. Default: 0.25",
-      "type": "number",
-      "value": 0.25
-    },
-    "Emergency Boost Camera Shake Amount": {
-      "tooltip": "How much the camera shakes when doing an emergency boost. Only works if Camera Shake mod is installed and enabled. Default: 1",
-      "type": "number",
-      "value": 1
-    },
+        "Emergency Boost": {
+            "type": "separator"
+        },
+        "Enable Emergency Boost": {
+            "tooltip": "Allows you to shoot up into the air by pressing space twice.",
+            "type": "toggle",
+            "value": false
+        },
+        "Emergency Boost Power": {
+            "tooltip": "How powerful an emergency boost is. Default: 15",
+            "type": "number",
+            "value": 15
+        },
+        "Emergency Boost Cost": {
+            "tooltip": "The amount of fuel an emergency boost uses. Default: 30",
+            "type": "number",
+            "value": 30
+        },
+        "Emergency Boost Volume": {
+            "tooltip": "How loud the emergency boost sound is compared to the default volume. Default: 1",
+            "type": "number",
+            "value": 1
+        },
+        "Emergency Boost Input Time": {
+            "tooltip": "The maximum amount of time in seconds between jump inputs that will trigger an emergency boost. Default: 0.25",
+            "type": "number",
+            "value": 0.25
+        },
+        "Emergency Boost Camera Shake Amount": {
+            "tooltip": "How much the camera shakes when doing an emergency boost. Only works if Camera Shake mod is installed and enabled. Default: 1",
+            "type": "number",
+            "value": 1
+        },
 
-    "Floaty Physics": {
-      "type": "separator"
-    },
-    "Enable Floaty Physics": {
-      "tooltip": "Lowers your acceleration in low gravity, making movement floatier.",
-      "type": "toggle",
-      "value": false
-    },
-    "Floaty Physics Power": {
-      "tooltip": "The higher this number is, the faster you'll notice your acceleration decreasing as gravity decreases. Default: 1",
-      "type": "number",
-      "value": 1
-    },
-    "Floaty Physics Minimum Acceleration": {
-      "tooltip": "The minimum acceleration that can take effect with floaty physics. Default: 0.25",
-      "type": "number",
-      "value": 0.25
-    },
-    "Floaty Physics Minimum Gravity": {
-      "tooltip": "The gravity below which floaty physics will start to take effect. Default: 1",
-      "type": "number",
-      "value": 1
-    },
-    "Minimum Gravity": {
-      "tooltip": "The gravity at which the minimum acceleration will take effect. Default: 0.5",
-      "type": "number",
-      "value": 0.5
-    },
+        "Floaty Physics": {
+            "type": "separator"
+        },
+        "Enable Floaty Physics": {
+            "tooltip": "Lowers your acceleration in low gravity, making movement floatier.",
+            "type": "toggle",
+            "value": false
+        },
+        "Floaty Physics Power": {
+            "tooltip": "The higher this number is, the faster you'll notice your acceleration decreasing as gravity decreases. Default: 1",
+            "type": "number",
+            "value": 1
+        },
+        "Floaty Physics Minimum Acceleration": {
+            "tooltip": "The minimum acceleration that can take effect with floaty physics. Default: 0.25",
+            "type": "number",
+            "value": 0.25
+        },
+        "Floaty Physics Minimum Gravity": {
+            "tooltip": "The gravity below which floaty physics will start to take effect. Default: 1",
+            "type": "number",
+            "value": 1
+        },
+        "Minimum Gravity": {
+            "tooltip": "The gravity at which the minimum acceleration will take effect. Default: 0.5",
+            "type": "number",
+            "value": 0.5
+        },
 
-    "Wall Jumping": {
-      "type": "separator"
-    },
-    "Enable Wall Jumping": {
-      "tooltip": "Allows you to climb up walls by jumping off of them.",
-      "type": "toggle",
-      "value": false
-    },
-    "Maximum Number of Wall Jumps": {
-      "tooltip": "The number of times you can Wall Jump without touching the ground. Default: 5",
-      "type": "number",
-      "value": 5
-    },
+        "Wall Jumping": {
+            "type": "separator"
+        },
+        "Enable Wall Jumping": {
+            "tooltip": "Allows you to climb up walls by jumping off of them.",
+            "type": "toggle",
+            "value": false
+        },
+        "Maximum Number of Wall Jumps": {
+            "tooltip": "The number of times you can Wall Jump without touching the ground. Default: 5",
+            "type": "number",
+            "value": 5
+        },
 
-    "Player Settings": {
-      "type": "separator"
-    },
-    "Normal Speed": {
-      "tooltip": "How quickly you move normally. Vanilla: 6",
-      "type": "number",
-      "value": 6
-    },
-    "Strafe Speed": {
-      "tooltip": "How quickly you move when walking backwards or to the side. Vanilla: 4",
-      "type": "number",
-      "value": 4
-    },
-    "Walk Speed": {
-      "tooltip": "How quickly you move when holding the walk (roll mode) button. Vanilla: 3",
-      "type": "number",
-      "value": 3
-    },
-    "Focused Lantern Speed": {
-      "tooltip": "How quickly you move while focusing a lantern. Vanilla: 2",
-      "type": "number",
-      "value": 2
-    },
-    "Ground Acceleration": {
-      "tooltip": "How quickly you reach your maximum speed. Vanilla: 0.5",
-      "type": "number",
-      "value": 0.5
-    },
-    "Minimum Jump Power": {
-      "tooltip": "The power of your jump when it isn't charged. Vanilla: 3",
-      "type": "number",
-      "value": 3
-    },
-    "Maximum Jump Power": {
-      "tooltip": "The power of your jump when it is fully charged. Vanilla: 7",
-      "type": "number",
-      "value": 7
-    },
-    "Air Speed": {
-      "tooltip": "How quickly you can move in midair. Vanilla: 3",
-      "type": "number",
-      "value": 3
-    },
-    "Air Acceleration": {
-      "tooltip": "How quickly you reach your maximum speed while in midair. Vanilla: 0.09",
-      "type": "number",
-      "value": 0.09
-    },
-    "Jetpack Acceleration": {
-      "tooltip": "How powerful your jetpack is. Vanilla: 6",
-      "type": "number",
-      "value": 6
-    },
-    "Jetpack Boost Acceleration": {
-      "tooltip": "How powerful your jetpack is while boosting. Vanilla: 23",
-      "type": "number",
-      "value": 23
-    },
-    "Max Jetpack Boost Time": {
-      "tooltip": "How long you can use your jetpack boost, in seconds. Vanilla: 1",
-      "type": "number",
-      "value": 1
-    },
-    "Max Jetpack Fuel Amount": {
-      "tooltip": "The amount of fuel your jetpack can hold at full capacity. Vanilla: 100",
-      "type": "number",
-      "value": 100
+        "Player Settings": {
+            "type": "separator"
+        },
+        "Normal Speed": {
+            "tooltip": "How quickly you move normally. Vanilla: 6",
+            "type": "number",
+            "value": 6
+        },
+        "Strafe Speed": {
+            "tooltip": "How quickly you move when walking backwards or to the side. Vanilla: 4",
+            "type": "number",
+            "value": 4
+        },
+        "Walk Speed": {
+            "tooltip": "How quickly you move when holding the walk (roll mode) button. Vanilla: 3",
+            "type": "number",
+            "value": 3
+        },
+        "Focused Lantern Speed": {
+            "tooltip": "How quickly you move while focusing a lantern. Vanilla: 2",
+            "type": "number",
+            "value": 2
+        },
+        "Ground Acceleration": {
+            "tooltip": "How quickly you reach your maximum speed. Vanilla: 0.5",
+            "type": "number",
+            "value": 0.5
+        },
+        "Minimum Jump Power": {
+            "tooltip": "The power of your jump when it isn't charged. Vanilla: 3",
+            "type": "number",
+            "value": 3
+        },
+        "Maximum Jump Power": {
+            "tooltip": "The power of your jump when it is fully charged. Vanilla: 7",
+            "type": "number",
+            "value": 7
+        },
+        "Air Speed": {
+            "tooltip": "How quickly you can move in midair. Vanilla: 3",
+            "type": "number",
+            "value": 3
+        },
+        "Air Acceleration": {
+            "tooltip": "How quickly you reach your maximum speed while in midair. Vanilla: 0.09",
+            "type": "number",
+            "value": 0.09
+        },
+        "Jetpack Acceleration": {
+            "tooltip": "How powerful your jetpack is. Vanilla: 6",
+            "type": "number",
+            "value": 6
+        },
+        "Jetpack Boost Acceleration": {
+            "tooltip": "How powerful your jetpack is while boosting. Vanilla: 23",
+            "type": "number",
+            "value": 23
+        },
+        "Max Jetpack Boost Time": {
+            "tooltip": "How long you can use your jetpack boost, in seconds. Vanilla: 1",
+            "type": "number",
+            "value": 1
+        },
+        "Max Jetpack Fuel Amount": {
+            "tooltip": "The amount of fuel your jetpack can hold at full capacity. Vanilla: 100",
+            "type": "number",
+            "value": 100
+        }
     }
-  }
 }

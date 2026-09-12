@@ -1,5 +1,7 @@
 ﻿using OWML.Common;
 using System;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
 
 namespace HikersMod;
 
@@ -11,7 +13,9 @@ public static class Config
 
     public static bool IsSprintingEnabled { get; private set; }
 
-    public static string SprintButton { get; private set; }
+    public static Key SprintKey { get; private set; }
+
+    public static GamepadButton SprintGamepadButton { get; private set; }
 
     public static float SprintMultiplier { get; private set; }
 
@@ -79,7 +83,30 @@ public static class Config
         IsMidairTurningEnabled = config.GetSettingsValue<bool>("Enable Midair Turning");
 
         IsSprintingEnabled = config.GetSettingsValue<bool>("Enable Sprinting");
-        SprintButton = config.GetSettingsValue<string>("Sprint Button");
+        string sprintKeyConfig = config.GetSettingsValue<string>("Sprint Key (Keyboard)");
+        if (Enum.TryParse(sprintKeyConfig, out Key sprintKey))
+        {
+            SprintKey = sprintKey;
+        }
+        else
+        {
+            ModMain.ModConsole.WriteLine($"\"{sprintKeyConfig}\" is not a valid key.", MessageType.Error);
+            config.SetSettingsValue("Sprint Key (Keyboard)", "LeftShift");
+            SprintKey = Key.LeftShift;
+        }
+
+        string sprintButtonConfig = config.GetSettingsValue<string>("Sprint Button (Gamepad)");
+        if (Enum.TryParse(sprintButtonConfig, out GamepadButton sprintButton))
+        {
+            SprintGamepadButton = sprintButton;
+        }
+        else
+        {
+            ModMain.ModConsole.WriteLine($"\"{sprintButtonConfig}\" is not a valid gamepad button.", MessageType.Error);
+            config.SetSettingsValue("Sprint Button (Gamepad)", "RightTrigger");
+            SprintGamepadButton = GamepadButton.RightTrigger;
+        }
+
         SprintMultiplier = config.GetSettingsValue<float>("SprintMultiplier");
         ShouldSprintOnLanding = config.GetSettingsValue<bool>("Start Sprinting On Landing");
         IsSprintEffectEnabled = config.GetSettingsValue<bool>("Show Thruster Effect while Sprinting");

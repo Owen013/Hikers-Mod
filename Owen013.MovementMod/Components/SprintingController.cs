@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace HikersMod.Components;
 
@@ -9,8 +10,6 @@ public class SprintingController : MonoBehaviour
     public bool IsSprinting { get; private set; }
 
     PlayerCharacterController _playerController;
-
-    IInputCommands _sprintButton;
 
     void StartSprinting()
     {
@@ -29,7 +28,9 @@ public class SprintingController : MonoBehaviour
     void UpdateSprinting()
     {
         bool isOnValidGround = _playerController.IsGrounded() && !_playerController.IsSlidingOnIce();
-        if (enabled && isOnValidGround && OWInput.IsPressed(_sprintButton) && (IsSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
+        bool sprintKeyPressed = Keyboard.current != null && Keyboard.current[Config.SprintKey].isPressed;
+        bool sprintButtonPressed = Gamepad.current != null && Gamepad.current[Config.SprintGamepadButton].isPressed;
+        if (enabled && isOnValidGround && (sprintKeyPressed || sprintButtonPressed) && (IsSprinting || OWInput.GetAxisValue(InputLibrary.moveXZ).magnitude > 0f))
             StartSprinting();
         else
             StopSprinting();
@@ -38,12 +39,6 @@ public class SprintingController : MonoBehaviour
     void OnConfigure()
     {
         enabled = Config.IsSprintingEnabled;
-
-        _sprintButton = Config.SprintButton switch
-        {
-            "Down Thrust" => InputLibrary.thrustDown,
-            _ => InputLibrary.thrustUp
-        };
 
         UpdateSprinting();
     }
@@ -65,8 +60,9 @@ public class SprintingController : MonoBehaviour
 
     void Update()
     {
-        // check both thrust buttons so that the player can thrust out of a sprint
-        if (OWInput.IsNewlyPressed(_sprintButton) || OWInput.IsNewlyReleased(_sprintButton) || (OWInput.IsNewlyPressed(InputLibrary.boost) && !_playerController.IsGrounded()))
+        bool sprintKeyChanged = Keyboard.current != null && (Keyboard.current[Config.SprintKey].wasPressedThisFrame || Keyboard.current[Config.SprintKey].wasReleasedThisFrame);
+        bool sprintButtonChanged = Gamepad.current != null && (Gamepad.current[Config.SprintGamepadButton].wasPressedThisFrame || Gamepad.current[Config.SprintGamepadButton].wasReleasedThisFrame);
+        if (sprintKeyChanged || sprintButtonChanged || (OWInput.IsNewlyPressed(InputLibrary.boost) && !_playerController.IsGrounded()))
             UpdateSprinting();
     }
 
