@@ -28,16 +28,13 @@ public class ModMain : ModBehaviour
         Config.Configure(config);
     }
 
-    private void Awake()
-    {
-        s_instance = this;
-        new Harmony("Owen013.MovementMod").PatchAll(Assembly.GetExecutingAssembly());
-    }
-
     private void Start()
     {
+        s_instance = this;
         SmolHatchlingAPI = ModHelper.Interaction.TryGetModApi<ISmolHatchling>("Owen013.TeenyHatchling");
         CameraShakerAPI = ModHelper.Interaction.TryGetModApi<ICameraShaker>("SBtT.CameraShake");
+
+        new Harmony("Owen013.MovementMod").PatchAll(Assembly.GetExecutingAssembly());
 
         ModConsole?.WriteLine($"Hiker's Mod is ready to go!", MessageType.Success);
     }
