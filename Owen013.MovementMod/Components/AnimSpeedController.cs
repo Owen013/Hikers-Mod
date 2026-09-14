@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using static HikersMod.ModMain;
 
 namespace HikersMod.Components;
 
@@ -6,18 +7,18 @@ public class AnimSpeedController : MonoBehaviour
 {
     private Animator _animator;
 
-    private PlayerCharacterController _playerController;
+    private PlayerCharacterController _playerCharacter;
 
     private void Awake()
     {
         _animator = GetComponent<Animator>();
-        _playerController = Locator.GetPlayerController();
+        _playerCharacter = Locator.GetPlayerController();
     }
 
     private void LateUpdate()
     {
         // change viewbob strength quickly if on ground
-        Vector3 groundVel = _playerController.GetRelativeGroundVelocity();
+        Vector3 groundVel = _playerCharacter.GetRelativeGroundVelocity();
         groundVel.y = 0f;
         if (Mathf.Abs(groundVel.x) < 0.05f)
         {
@@ -28,9 +29,9 @@ public class AnimSpeedController : MonoBehaviour
             groundVel.z = 0f;
         }
         float groundSpeed = groundVel.magnitude;
-        groundSpeed *= ModMain.SmolHatchlingAPI?.GetPlayerAnimSpeed() ?? 1f;
+        groundSpeed *= SmolHatchlingAPI?.GetPlayerAnimSpeed() ?? 1f;
         float animSpeedMultiplier = Mathf.Sqrt(groundSpeed / 6);
-        float floatyPhysicsMultiplier = Mathf.Sqrt(_playerController._acceleration / Config.GroundAccel);
+        float floatyPhysicsMultiplier = Mathf.Sqrt(_playerCharacter._acceleration / Config.GroundAccel);
 
         _animator.speed = Mathf.Max(animSpeedMultiplier * floatyPhysicsMultiplier, floatyPhysicsMultiplier);
     }

@@ -4,25 +4,25 @@ namespace HikersMod.Components;
 
 public class PlayerSettingsController : MonoBehaviour
 {
-    private PlayerCharacterController _playerController;
+    private PlayerCharacterController _playerCharacter;
 
     private JetpackThrusterModel _jetpackThrusterModel;
 
     private void SetPlayerSettings()
     {
-        // Change built-in character attributes
-        _playerController._useChargeJump = Config.UseChargeJump;
+        // Change built-in character attributes.
+        _playerCharacter._useChargeJump = Config.UseChargeJump;
         if (!Config.IsFloatyPhysicsEnabled)
         {
-            _playerController._acceleration = Config.GroundAccel;
+            _playerCharacter._acceleration = Config.GroundAccel;
         }
-        _playerController._runSpeed = Config.RunSpeed;
-        _playerController._strafeSpeed = Config.StrafeSpeed;
-        _playerController._walkSpeed = Config.WalkSpeed;
-        _playerController._airSpeed = Config.AirSpeed;
-        _playerController._airAcceleration = Config.AirAccel;
-        _playerController._minJumpSpeed = Config.MinJumpPower;
-        _playerController._maxJumpSpeed = Config.MaxJumpPower;
+        _playerCharacter._runSpeed = Config.RunSpeed;
+        _playerCharacter._strafeSpeed = Config.StrafeSpeed;
+        _playerCharacter._walkSpeed = Config.WalkSpeed;
+        _playerCharacter._airSpeed = Config.AirSpeed;
+        _playerCharacter._airAcceleration = Config.AirAccel;
+        _playerCharacter._minJumpSpeed = Config.MinJumpPower;
+        _playerCharacter._maxJumpSpeed = Config.MaxJumpPower;
         _jetpackThrusterModel._maxTranslationalThrust = Config.JetpackAccel;
         _jetpackThrusterModel._boostThrust = Config.JetpackBoostAccel;
         _jetpackThrusterModel._boostSeconds = Config.JetpackBoostTime;
@@ -31,7 +31,7 @@ public class PlayerSettingsController : MonoBehaviour
 
     private void Awake()
     {
-        _playerController = GetComponent<PlayerCharacterController>();
+        _playerCharacter = GetComponent<PlayerCharacterController>();
         _jetpackThrusterModel = FindObjectOfType<JetpackThrusterModel>();
 
         Config.OnConfigure += SetPlayerSettings;

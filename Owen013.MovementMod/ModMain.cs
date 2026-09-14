@@ -8,15 +8,15 @@ namespace HikersMod;
 
 public class ModMain : ModBehaviour
 {
-    public static IModConsole ModConsole => s_instance != null ? s_instance.ModHelper?.Console : null;
-
-    public static IModConfig ModConfig => s_instance != null ? s_instance.ModHelper?.Config : null;
+    private static ModMain s_instance;
 
     public static ISmolHatchling SmolHatchlingAPI { get; private set; }
 
     public static ICameraShaker CameraShakerAPI { get; private set; }
 
-    private static ModMain s_instance;
+    public static IModConsole ModConsole => s_instance.ModHelper.Console;
+
+    public static IModConfig ModConfig => s_instance.ModHelper.Config;
 
     public override object GetApi()
     {
