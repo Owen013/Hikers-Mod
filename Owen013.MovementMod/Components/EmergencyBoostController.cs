@@ -1,12 +1,11 @@
-﻿using OWML.Common;
-using UnityEngine;
+﻿using UnityEngine;
 using static HikersMod.ModMain;
 
 namespace HikersMod.Components;
 
 public class EmergencyBoostController : MonoBehaviour
 {
-    private PlayerCharacterController _playerController;
+    private PlayerCharacterController _playerCharacter;
 
     private JetpackThrusterController _jetpackThruster;
 
@@ -33,9 +32,9 @@ public class EmergencyBoostController : MonoBehaviour
         float boostPower = Config.EmergencyBoostPower;
         
         // Change player velocity.
-        Vector3 pointVelocity = _playerController._transform.InverseTransformDirection(_playerController._lastGroundBody.GetPointVelocity(_playerController._transform.position));
-        Vector3 localVelocity = _playerController._transform.InverseTransformDirection(_playerController._owRigidbody.GetVelocity()) - pointVelocity;
-        _playerController._owRigidbody.AddLocalVelocityChange(new Vector3(-localVelocity.x * 0.5f, boostPower - localVelocity.y * 0.5f, -localVelocity.z * 0.5f));
+        Vector3 pointVelocity = _playerCharacter._transform.InverseTransformDirection(_playerCharacter._lastGroundBody.GetPointVelocity(_playerCharacter._transform.position));
+        Vector3 localVelocity = _playerCharacter._transform.InverseTransformDirection(_playerCharacter._owRigidbody.GetVelocity()) - pointVelocity;
+        _playerCharacter._owRigidbody.AddLocalVelocityChange(new Vector3(-localVelocity.x * 0.5f, boostPower - localVelocity.y * 0.5f, -localVelocity.z * 0.5f));
 
         // Play audio effect and show notification.
         _emergencyBoostAudio.pitch = Random.Range(1.0f, 1.4f);
@@ -48,14 +47,12 @@ public class EmergencyBoostController : MonoBehaviour
         {
             CameraShakerAPI?.ExplosionShake(strength: boostPower * Config.EmergencyBoostCameraShakeAmount);
         }
-
-        ModConsole?.WriteLine($"[{nameof(EmergencyBoostController)}] Super-Boosted", MessageType.Debug);
     }
 
     private void EndEmergencyBoost()
     {
         _isEmergencyBoosting = false;
-        _jetpackThrusterModel._chargeSeconds = _playerController.IsGrounded() ? _jetpackThrusterModel._chargeSecondsGround : _jetpackThrusterModel._chargeSecondsAir;
+        _jetpackThrusterModel._chargeSeconds = _playerCharacter.IsGrounded() ? _jetpackThrusterModel._chargeSecondsGround : _jetpackThrusterModel._chargeSecondsAir;
     }
 
     private void OnConfigure()
@@ -65,18 +62,13 @@ public class EmergencyBoostController : MonoBehaviour
 
     private void Awake()
     {
-        _playerController = GetComponent<PlayerCharacterController>();
-        _jetpackThrusterModel = GetComponent<JetpackThrusterModel>();
+        _playerCharacter = GetComponent<PlayerCharacterController>();
         _jetpackThruster = GetComponent<JetpackThrusterController>();
+        _jetpackThrusterModel = GetComponent<JetpackThrusterModel>();
         _helmetAnimator = GetComponentInChildren<HUDHelmetAnimator>();
 
-        // Create audio source.
-        _emergencyBoostAudio = new GameObject("HikersMod_EmergencyBoostAudioSrc").AddComponent<OWAudioSource>();
-        _emergencyBoostAudio.transform.parent = GetComponentInChildren<PlayerAudioController>().transform;
-        _emergencyBoostAudio.transform.localPosition = new Vector3(0, -1f, 1f);
-
         // Grab player model's downward thruster flame effect.
-        var thrusters = _playerController.gameObject.GetComponentsInChildren<ThrusterFlameController>(true);
+        var thrusters = _playerCharacter.gameObject.GetComponentsInChildren<ThrusterFlameController>(true);
         foreach (ThrusterFlameController thruster in thrusters)
         {
             if (thruster._thruster == Thruster.Up_LeftThruster)
@@ -86,7 +78,12 @@ public class EmergencyBoostController : MonoBehaviour
             }
         }
 
-        _playerController.OnBecomeGrounded += EndEmergencyBoost;
+        // Create audio source.
+        _emergencyBoostAudio = new GameObject("HikersMod_EmergencyBoostAudioSrc").AddComponent<OWAudioSource>();
+        _emergencyBoostAudio.transform.parent = GetComponentInChildren<PlayerAudioController>().transform;
+        _emergencyBoostAudio.transform.localPosition = new Vector3(0, -1f, 1f);
+
+        _playerCharacter.OnBecomeGrounded += EndEmergencyBoost;
 
         Config.OnConfigure += OnConfigure;
         OnConfigure();
@@ -95,9 +92,9 @@ public class EmergencyBoostController : MonoBehaviour
     private void LateUpdate()
     {
         bool isInputting = OWInput.IsNewlyPressed(InputLibrary.jump, InputMode.Character) && !OWInput.IsPressed(InputLibrary.thrustUp, InputMode.Character);
-        bool canEmergencyBoost = _playerController._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
+        bool canEmergencyBoost = _playerCharacter._isWearingSuit && !PlayerState.InZeroG() && !PlayerState.IsInsideShip() && !PlayerState.IsCameraUnderwater();
         bool hasDoubleTappedEmergencyBoost = isInputting && Time.time - _lastEmergencyBoostInputTime < Config.EmergencyBoostInputTime;
-        float lastWallJumpTime = WallJumpController.Instance != null ? Time.time - WallJumpController.Instance.LastWallJumpTime : 0f;
+        float lastWallJumpTime = Time.time - WallJumpController.Instance.LastWallJumpTime;
         if (!canEmergencyBoost)
         {
             EndEmergencyBoost();
@@ -134,7 +131,7 @@ public class EmergencyBoostController : MonoBehaviour
     private void OnDestroy()
     {
         Destroy(_emergencyBoostAudio);
-        _playerController.OnBecomeGrounded -= EndEmergencyBoost;
+        _playerCharacter.OnBecomeGrounded -= EndEmergencyBoost;
         Config.OnConfigure -= OnConfigure;
     }
 }

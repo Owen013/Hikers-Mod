@@ -4,15 +4,15 @@ namespace HikersMod.Components;
 
 public class JetpackSprintEffectController : MonoBehaviour
 {
-    private GameObject _playerSuit;
+    private GameObject _playerSuitObject;
 
-    private GameObject _playerJetpack;
+    private GameObject _playerJetpackObject;
 
     private JetpackThrusterAudio _jetpackThrusterAudio;
 
     private ThrusterFlameController[] _thrusterFlames;
 
-    private Vector2 _thrusterVector;
+    private Vector2 _thrusterFlameVector;
 
     private static void SetThrusterScale(ThrusterFlameController thruster, float thrusterScale)
     {
@@ -43,10 +43,10 @@ public class JetpackSprintEffectController : MonoBehaviour
     private void Awake()
     {
         _jetpackThrusterAudio = GetComponentInChildren<JetpackThrusterAudio>();
-        _thrusterFlames = GetComponentsInChildren<ThrusterFlameController>(includeInactive: true);
-        _playerSuit = GetComponentInChildren<PlayerAnimController>().transform.Find("Traveller_Mesh_v01:Traveller_Geo").gameObject;
-        _playerJetpack = _playerSuit.transform.Find("Traveller_Mesh_v01:Props_HEA_Jetpack").gameObject;
-        _thrusterVector = Vector2.zero;
+        _thrusterFlames = GetComponentsInChildren<ThrusterFlameController>(true);
+        _playerSuitObject = GetComponentInChildren<PlayerAnimController>().transform.Find("Traveller_Mesh_v01:Traveller_Geo").gameObject;
+        _playerJetpackObject = _playerSuitObject.transform.Find("Traveller_Mesh_v01:Props_HEA_Jetpack").gameObject;
+        _thrusterFlameVector = Vector2.zero;
 
         Config.OnConfigure += OnConfigure;
         OnConfigure();
@@ -54,21 +54,18 @@ public class JetpackSprintEffectController : MonoBehaviour
 
     private void LateUpdate()
     {
-        bool jetpackVisible = _playerSuit.activeSelf && _playerJetpack.activeSelf;
+        bool isJetpackVisible = _playerJetpackObject.activeInHierarchy;
+        bool isSprinting = SprintingController.Instance.IsSprinting;
+        Vector2 targetFlameVector = isJetpackVisible && isSprinting ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero;
 
-        // get thruster vector IF the player is sprinting and the jetpack is visible. Otherwise, move towards zero
-        _thrusterVector = Vector2.MoveTowards(_thrusterVector, SprintingController.Instance.IsSprinting && jetpackVisible ? OWInput.GetAxisValue(InputLibrary.moveXZ) : Vector2.zero, Time.deltaTime * 5);
-        Vector2 flameVector = _thrusterVector;
-
-        // clamp the vector so it doesn't become too big
-        flameVector.x = Mathf.Clamp(flameVector.x, -20f, 20f);
-        flameVector.y = Mathf.Clamp(flameVector.y, -20f, 20f);
-
-        // update thruster sound, as long as it's not being set by the actual audio controller
-        if (_jetpackThrusterAudio.isActiveAndEnabled == false)
+        _thrusterFlameVector = Vector2.MoveTowards(_thrusterFlameVector, targetFlameVector, 5f * Time.deltaTime);
+        Vector2 effectiveFlameVector = _thrusterFlameVector;
+        effectiveFlameVector.x = Mathf.Clamp(effectiveFlameVector.x, -20f, 20f);
+        effectiveFlameVector.y = Mathf.Clamp(effectiveFlameVector.y, -20f, 20f);
+        if (!_jetpackThrusterAudio.isActiveAndEnabled)
         {
-            float soundVolume = flameVector.magnitude;
-            float soundPan = -flameVector.x * 0.4f;
+            float soundVolume = effectiveFlameVector.magnitude;
+            float soundPan = -effectiveFlameVector.x * 0.4f;
             bool hasFuel = _jetpackThrusterAudio._playerResources.GetFuel() > 0f;
             bool isUnderwater = _jetpackThrusterAudio._underwater;
             _jetpackThrusterAudio.UpdateTranslationalSource(_jetpackThrusterAudio._translationalSource, soundVolume, soundPan, !isUnderwater && hasFuel);
@@ -76,7 +73,6 @@ public class JetpackSprintEffectController : MonoBehaviour
             _jetpackThrusterAudio.UpdateTranslationalSource(_jetpackThrusterAudio._oxygenSource, soundVolume, soundPan, !isUnderwater && !hasFuel);
         }
 
-        // update thruster visuals as long as their controllers are inactive
         for (int i = 0; i < _thrusterFlames.Length; i++)
         {
             if (_thrusterFlames[i].isActiveAndEnabled)
@@ -87,22 +83,22 @@ public class JetpackSprintEffectController : MonoBehaviour
             switch (_thrusterFlames[i]._thruster)
             {
                 case Thruster.Forward_LeftThruster:
-                    SetThrusterScale(_thrusterFlames[i], flameVector.y);
+                    SetThrusterScale(_thrusterFlames[i], effectiveFlameVector.y);
                     break;
                 case Thruster.Forward_RightThruster:
-                    SetThrusterScale(_thrusterFlames[i], flameVector.y);
+                    SetThrusterScale(_thrusterFlames[i], effectiveFlameVector.y);
                     break;
                 case Thruster.Left_Thruster:
-                    SetThrusterScale(_thrusterFlames[i], -flameVector.x);
+                    SetThrusterScale(_thrusterFlames[i], -effectiveFlameVector.x);
                     break;
                 case Thruster.Right_Thruster:
-                    SetThrusterScale(_thrusterFlames[i], flameVector.x);
+                    SetThrusterScale(_thrusterFlames[i], effectiveFlameVector.x);
                     break;
                 case Thruster.Backward_LeftThruster:
-                    SetThrusterScale(_thrusterFlames[i], -flameVector.y);
+                    SetThrusterScale(_thrusterFlames[i], -effectiveFlameVector.y);
                     break;
                 case Thruster.Backward_RightThruster:
-                    SetThrusterScale(_thrusterFlames[i], -flameVector.y);
+                    SetThrusterScale(_thrusterFlames[i], -effectiveFlameVector.y);
                     break;
             }
         }
@@ -110,7 +106,7 @@ public class JetpackSprintEffectController : MonoBehaviour
 
     private void OnDisable()
     {
-        _thrusterVector = Vector2.zero;
+        _thrusterFlameVector = Vector2.zero;
     }
 
     private void OnDestroy()
