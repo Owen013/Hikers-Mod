@@ -44,8 +44,7 @@ public static class Patches
     [HarmonyPatch(typeof(JetpackThrusterController), nameof(JetpackThrusterController.GetRawInput))]
     private static void OnGetJetpackInput(ref Vector3 __result)
     {
-        // Prevent player from using vertical jetpack input while they are sprinting, as these actions both use the same key.
-        if (__result.y != 0f && SprintingController.Instance.IsSprinting == true)
+        if (__result.y != 0f && SprintingController.Instance.IsSprinting == true && !Config.AllowVerticalThrustWhileSprinting)
         {
             __result.y = 0f;
         }
@@ -145,7 +144,7 @@ public static class Patches
     [HarmonyPatch(typeof(PlayerResources), nameof(PlayerResources.IsBoosterAllowed))]
     private static void PlayerResources_IsBoosterAllowed_Postfix(ref bool __result)
     {
-        if (SprintingController.Instance.IsSprinting == true)
+        if (SprintingController.Instance.IsSprinting == true && !Config.AllowVerticalThrustWhileSprinting)
         {
             __result = false;
         }
