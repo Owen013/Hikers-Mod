@@ -27,23 +27,23 @@
             "value": true
         },
         "Sprint Key (Keyboard)": {
-            "tooltip": "",
+            "tooltip": "The key on your keyboard that will make you sprint.",
             "type": "text",
             "value": "LeftShift"
         },
         "Sprint Button (Gamepad)": {
-            "tooltip": "",
+            "tooltip": "The button on your gamepad that will make you sprint.",
             "type": "selector",
             "value": "RightTrigger",
             "options": [ "DpadUp", "DpadDown", "DpadLeft", "DpadRight", "North", "East", "South", "West", "LeftStick", "RightStick", "LeftShoulder", "RightShoulder", "Start", "Select", "LeftTrigger", "RightTrigger" ]
         },
         "Hold to Sprint": {
-            "tooltip": "",
+            "tooltip": "Whether or not the sprint button must be held to continue sprinting.",
             "type": "toggle",
             "value": true
         },
         "Allow Vertical Thrust while Sprinting": {
-            "tooltip": "",
+            "tooltip": "Whether or not vertical thrust and sprinting can be used at the same time. Not recommended if sprint shares a button with vertical thrusters.",
             "type": "toggle",
             "value": false
         },
