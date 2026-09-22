@@ -19,9 +19,9 @@ public static class Config
 
     public static bool IsHoldToSprintEnabled { get; private set; }
 
-    public static float SprintMultiplier { get; private set; }
+    public static bool AllowVerticalThrustWhileSprinting { get; private set; }
 
-    public static bool ShouldSprintOnLanding { get; private set; }
+    public static float SprintMultiplier { get; private set; }
 
     public static bool IsSprintEffectEnabled { get; private set; }
 
@@ -110,8 +110,8 @@ public static class Config
         }
 
         IsHoldToSprintEnabled = config.GetSettingsValue<bool>("Hold to Sprint");
+        AllowVerticalThrustWhileSprinting = config.GetSettingsValue<bool>("Allow Vertical Thrust while Sprinting");
         SprintMultiplier = config.GetSettingsValue<float>("SprintMultiplier");
-        ShouldSprintOnLanding = config.GetSettingsValue<bool>("Start Sprinting On Landing");
         IsSprintEffectEnabled = config.GetSettingsValue<bool>("Show Thruster Effect while Sprinting");
         SpeedUpGhostsWhileSprinting = config.GetSettingsValue<bool>("Speed Up Ghosts while Sprinting");
 

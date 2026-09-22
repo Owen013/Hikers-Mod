@@ -27,31 +27,31 @@
             "value": true
         },
         "Sprint Key (Keyboard)": {
-            "tooltip": "",
+            "tooltip": "The key on your keyboard that will make you sprint.",
             "type": "text",
             "value": "LeftShift"
         },
         "Sprint Button (Gamepad)": {
-            "tooltip": "",
+            "tooltip": "The button on your gamepad that will make you sprint.",
             "type": "selector",
             "value": "RightTrigger",
             "options": [ "DpadUp", "DpadDown", "DpadLeft", "DpadRight", "North", "East", "South", "West", "LeftStick", "RightStick", "LeftShoulder", "RightShoulder", "Start", "Select", "LeftTrigger", "RightTrigger" ]
         },
         "Hold to Sprint": {
-            "tooltip": "",
+            "tooltip": "Whether or not the sprint button must be held to continue sprinting.",
             "type": "toggle",
             "value": true
+        },
+        "Allow Vertical Thrust while Sprinting": {
+            "tooltip": "Whether or not vertical thrust and sprinting can be used at the same time. Not recommended if sprint shares a button with vertical thrusters.",
+            "type": "toggle",
+            "value": false
         },
         "SprintMultiplier": {
             "title": "Sprint Speed Multiplier",
             "tooltip": "How much your speed is multiplied while sprinting. Default: 2",
             "type": "number",
             "value": 2
-        },
-        "Start Sprinting On Landing": {
-            "tooltip": "If you're holding the sprint button and a directional input when you land on the ground, you will stop thrusting and start sprinting.",
-            "type": "toggle",
-            "value": true
         },
         "Show Thruster Effect while Sprinting": {
             "tooltip": "Makes your jetpack thrusters fire as you sprint, as if they're boosting you. No gameplay effect.",

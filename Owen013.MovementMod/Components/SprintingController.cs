@@ -34,18 +34,12 @@ public class SprintingController : MonoBehaviour
         bool isSprintGamepadButtonHeld = Gamepad.current != null && Gamepad.current[Config.SprintGamepadButton].isPressed;
         bool isSprintButtonHeld = isSprintKeyboardKeyHeld || isSprintGamepadButtonHeld;
 
-        bool wasSprintKeyboardKeyPressed = Keyboard.current != null && Keyboard.current[Config.SprintKey].wasPressedThisFrame;
-        bool wasSprintGamepadButtonPressed = Gamepad.current != null && Gamepad.current[Config.SprintGamepadButton].wasPressedThisFrame;
-        bool wasSprintButtonPressed = wasSprintKeyboardKeyPressed || wasSprintGamepadButtonPressed;
-
-        bool isStartingVerticalThrust = OWInput.IsNewlyPressed(InputLibrary.thrustUp) || OWInput.IsNewlyPressed(InputLibrary.thrustDown);
-        bool wasHoldingVerticalThrust = !isStartingVerticalThrust && (OWInput.IsPressed(InputLibrary.thrustUp) || OWInput.IsPressed(InputLibrary.thrustDown));
-
         bool canBoost = PlayerState.IsWearingSuit() && !Locator.GetPlayerSuit().IsTrainingSuit();
         bool isStartingBoost = canBoost && OWInput.IsPressed(InputLibrary.thrustUp) && OWInput.IsNewlyPressed(InputLibrary.boost);
+        bool isBoostEndingSprint = !isOnValidGround && isStartingBoost && !Config.AllowVerticalThrustWhileSprinting;
 
-        bool canStartSprint = isOnValidGround && isTryingToMove && wasSprintButtonPressed && !wasHoldingVerticalThrust;
-        bool canMaintainSprint = isTryingToMove && !isStartingVerticalThrust && (isOnValidGround || !isStartingBoost);
+        bool canStartSprint = isOnValidGround && isTryingToMove && isSprintButtonHeld;
+        bool canMaintainSprint = isTryingToMove && !isBoostEndingSprint;
         if (Config.IsHoldToSprintEnabled)
         {
             canMaintainSprint = isSprintButtonHeld && canMaintainSprint;
