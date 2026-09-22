@@ -1,5 +1,8 @@
 ﻿using HarmonyLib;
 using HikersMod.Components;
+using OWML.Common;
+using System.Collections.Generic;
+using System.Reflection.Emit;
 using UnityEngine;
 
 namespace HikersMod;
@@ -7,15 +10,39 @@ namespace HikersMod;
 [HarmonyPatch]
 public static class Patches
 {
-    [HarmonyPrefix]
+    [HarmonyTranspiler]
     [HarmonyPatch(typeof(DreamLanternItem), nameof(DreamLanternItem.OverrideMaxRunSpeed))]
-    private static bool DreamLanternItem_OverrideMaxRunSpeed_Prefix(ref float maxSpeedX, ref float maxSpeedZ, DreamLanternItem __instance)
+    public static IEnumerable<CodeInstruction> DreamLanternItem_OverrideMaxRunSpeed_Transpiler(IEnumerable<CodeInstruction> instructions)
     {
-        float lerpPosition = 1f - __instance._lanternController.GetFocus();
-        lerpPosition *= lerpPosition;
-        maxSpeedX = Mathf.Lerp(Config.DreamLanternSpeed, maxSpeedX, lerpPosition);
-        maxSpeedZ = Mathf.Lerp(Config.DreamLanternSpeed, maxSpeedZ, lerpPosition);
-        return false;
+        var patchedInstructions = new List<CodeInstruction>(instructions);
+
+        // Find insertion index of patch instructions.
+        int insertionIndex = -1;
+        for (int i = 0; i < patchedInstructions.Count; i++)
+        {
+            if (patchedInstructions[i].opcode == OpCodes.Ldc_R4 && patchedInstructions[i].operand is float number && number == 2f)
+            {
+                insertionIndex = i + 1;
+                break;
+            }
+        }
+
+        if (insertionIndex == -1)
+        {
+            ModMain.ModConsole.WriteLine($"Failed to find insertion index for DreamLanternItem.OverrideMaxRunSpeed transpiler.", MessageType.Error);
+            return instructions;
+        }
+
+        patchedInstructions.InsertRange(insertionIndex,
+        [
+            // Multiplies value on stack by 0.5f, then multiplies value on stack by HikersMod.Config.DreamLanternSpeed.
+            new(OpCodes.Ldc_R4, 0.5f),
+            new(OpCodes.Mul),
+            new(OpCodes.Call, AccessTools.PropertyGetter(typeof(Config), nameof(Config.DreamLanternSpeed))),
+            new(OpCodes.Mul)
+        ]);
+
+        return patchedInstructions;
     }
 
     [HarmonyPostfix]
@@ -70,7 +97,6 @@ public static class Patches
         __instance.gameObject.AddComponent<JetpackSprintEffectController>();
     }
 
-    // allows the player to jump while sprinting
     [HarmonyPrefix]
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.Update))]
     private static bool PlayerCharacterController_Update_Prefix(PlayerCharacterController __instance)
@@ -101,7 +127,10 @@ public static class Patches
     [HarmonyPatch(typeof(PlayerCharacterController), nameof(PlayerCharacterController.UpdateAirControl))]
     private static bool PlayerCharacterController_UpdateAirControl_Prefix(PlayerCharacterController __instance)
     {
-        if (!Config.IsMidairTurningEnabled) return true;
+        if (!Config.IsMidairTurningEnabled)
+        {
+            return true;
+        }
 
         if (__instance._lastGroundBody != null)
         {
@@ -119,6 +148,7 @@ public static class Patches
 
             __instance._owRigidbody.AddLocalVelocityChange(newLocalVelocity - localVelocity);
         }
+
         return false;
     }
 
@@ -136,8 +166,10 @@ public static class Patches
             {
                 audioVolume /= ModMain.SmolHatchlingAPI.GetPlayerScale();
             }
+
             __instance._footstepAudio.PlayOneShot(audioType, audioVolume);
         }
+
         return false;
     }
 
